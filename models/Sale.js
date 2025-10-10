@@ -2,7 +2,7 @@ import mongoose, { Schema, models, model } from "mongoose";
 
 const saleSchema = new Schema({
 	productId: {
-		type: Schema.mongoose.ObjectId, // ✅ correct way
+		type: mongoose.Schema.Types.ObjectId, // ✅ correct way
 		ref: "Product",
 		required: true,
 	},
