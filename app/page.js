@@ -1,103 +1,102 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import React, { useEffect, useState } from "react";
+import StatCard from "@/components/StatCard";
+import ProductTable from "@/components/ProductTable";
+import SalesChart from "@/components/SalesChart";
+import { useSelector } from "react-redux";
+import { getTopProducts, getStockOutProducts } from "@/lib/dashboardUtils";
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+export default function DashboardPage() {
+	const products = useSelector((state) => state.products.items);
+	const [dailySell, setDailySell] = useState(0);
+	const [monthlySell, setMonthlySell] = useState(0);
+	const [dailyProfit, setDailyProfit] = useState(0);
+	const [monthlyProfit, setMonthlyProfit] = useState(0);
+	const [topProducts, setTopProducts] = useState([]);
+	const [stockOut, setStockOut] = useState([]);
+
+	// Dummy sales data (you can replace with API data)
+	const [salesData, setSalesData] = useState([
+		{ date: "2025-10-01", sales: 300, profit: 100 },
+		{ date: "2025-10-02", sales: 450, profit: 150 },
+		{ date: "2025-10-03", sales: 500, profit: 200 },
+		{ date: "2025-10-04", sales: 200, profit: 80 },
+	]);
+
+	useEffect(() => {
+		// Calculate total sales and profit
+		const totalSell = salesData.reduce((sum, s) => sum + s.sales, 0);
+		const totalProfit = salesData.reduce((sum, s) => sum + s.profit, 0);
+
+		setDailySell(salesData[salesData.length - 1].sales);
+		setDailyProfit(salesData[salesData.length - 1].profit);
+		setMonthlySell(totalSell);
+		setMonthlyProfit(totalProfit);
+
+		// Top and stock-out products
+		setTopProducts(getTopProducts(products));
+		setStockOut(getStockOutProducts(products));
+	}, [salesData, products]);
+
+	return (
+		<div className="p-6 space-y-6">
+			{/* Header */}
+			<h1 className="text-3xl font-bold">📊 Dashboard Overview</h1>
+
+			{/* Stat Cards */}
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+				<StatCard
+					title="Daily Sell"
+					value={`৳${dailySell}`}
+					color="blue"
+				/>
+				<StatCard
+					title="Daily Profit"
+					value={`৳${dailyProfit}`}
+					color="green"
+				/>
+				<StatCard
+					title="Monthly Sell"
+					value={`৳${monthlySell}`}
+					color="purple"
+				/>
+				<StatCard
+					title="Monthly Profit"
+					value={`৳${monthlyProfit}`}
+					color="orange"
+				/>
+			</div>
+
+			{/* Chart Section */}
+			<div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-6">
+				<h2 className="text-xl font-semibold mb-4">
+					Sales & Profit Chart
+				</h2>
+				<SalesChart data={salesData} />
+			</div>
+
+			{/* Top Products */}
+			<div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-6">
+				<h2 className="text-xl font-semibold mb-4">🏆 Top Products</h2>
+				{topProducts.length ? (
+					<ProductTable products={topProducts} showActions={false} />
+				) : (
+					<p className="text-gray-500">No top products found.</p>
+				)}
+			</div>
+
+			{/* Stock Out Notice */}
+			<div className="bg-red-50 dark:bg-red-900 rounded-2xl shadow p-6">
+				<h2 className="text-xl font-semibold mb-4 text-red-600">
+					⚠️ Stock Out Products
+				</h2>
+				{stockOut.length ? (
+					<ProductTable products={stockOut} showActions={false} />
+				) : (
+					<p className="text-gray-500">No stock-out products 🎉</p>
+				)}
+			</div>
+		</div>
+	);
 }
