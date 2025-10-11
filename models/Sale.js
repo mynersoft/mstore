@@ -4,7 +4,6 @@ const saleSchema = new Schema({
 	productId: {
 		type: mongoose.Schema.Types.ObjectId, // ✅ correct way
 		ref: "Product",
-		required: true,
 	},
 	qty: Number,
 	price: Number,
