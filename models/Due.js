@@ -1,15 +1,16 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose from "mongoose";
 
-const DueSchema = new Schema(
+const CustomerDueSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    phone: { type: String },
+    phone: { type: String, required: true },
     amount: { type: Number, required: true },
-    note: { type: String },
     date: { type: Date, default: Date.now },
     status: { type: String, enum: ["due", "paid"], default: "due" },
+    note: { type: String },
   },
   { timestamps: true }
 );
 
-export default mongoose.models.Due || mongoose.model("Due", DueSchema);
+export default mongoose.models.CustomerDue ||
+  mongoose.model("CustomerDue", CustomerDueSchema);
