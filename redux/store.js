@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
 import productReducer from "./productSlice";
-import duesReducer from "./duesSlice"
+import dueReducer from "./dueSlice"
 
 export const store = configureStore({
 	reducer: { products: productReducer,
-dues:duesReducer },
+dues:dueReducer },
 });
