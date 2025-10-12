@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/dbConnect";
-import CustomerDue from "@/models/CustomerDue";
+import CustomerDue from "@/models/Due";
 import { NextResponse } from "next/server";
 
 // ✅ Get All Customers
