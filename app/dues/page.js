@@ -18,28 +18,41 @@ export default function DuesPage() {
     dispatch(fetchDues());
   }, [dispatch]);
 
-  const handleAdd = (e) => {
+  const handleAdd = async (e) => {
     e.preventDefault();
-    dispatch(addDue(form));
-    setForm({ customerName: "", phone: "", dueAmount: "" });
-  };
+    if (!form.customerName || !form.phone || !form.dueAmount) return;
 
-  const handlePay = (id) => {
-    const amount = prompt("Enter payment amount:", "0");
-    if (amount && !isNaN(amount)) {
-      dispatch(payDue({ id, amount: Number(amount) }));
+    // Dispatch addDue and wait
+    const result = await dispatch(addDue({
+      customerName: form.customerName,
+      phone: form.phone,
+      dueAmount: Number(form.dueAmount)
+    }));
+
+    // Check if succeeded
+    if (addDue.fulfilled.match(result)) {
+      setForm({ customerName: "", phone: "", dueAmount: "" });
+    } else {
+      alert("Failed to add due. Try again.");
     }
   };
 
-  const handleDelete = (id) => {
-    if (confirm("Delete this due record?")) dispatch(deleteDue(id));
+  const handlePay = async (id) => {
+    const amount = prompt("Enter payment amount:", "0");
+    if (amount && !isNaN(amount)) {
+      await dispatch(payDue({ id, amount: Number(amount) }));
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (confirm("Delete this due record?")) await dispatch(deleteDue(id));
   };
 
   const totalDue = dues.reduce((sum, d) => sum + d.dueAmount, 0);
-  const totalPaid = dues.reduce((sum, d) => sum + d.paid, 0);
+  const totalPaid = dues.reduce((sum, d) => sum + (d.paid || 0), 0);
 
   return (
-    <div className="p-6">
+    <div className="p-6 text-gray-600 dark:text-gray-300">
       <h1 className="text-3xl font-bold mb-4">💰 Customer Due Management</h1>
 
       {/* Total Overview */}
@@ -107,7 +120,7 @@ export default function DuesPage() {
                   <td className="p-3">{d.customerName}</td>
                   <td className="p-3">{d.phone}</td>
                   <td className="p-3 text-yellow-400">৳{d.dueAmount}</td>
-                  <td className="p-3 text-green-400">৳{d.paid}</td>
+                  <td className="p-3 text-green-400">৳{d.paid || 0}</td>
                   <td className="p-3">
                     {d.lastPaymentDate
                       ? new Date(d.lastPaymentDate).toLocaleDateString()
