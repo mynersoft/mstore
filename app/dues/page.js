@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchDues, addDue, payDue, deleteDue } from "@/redux/features/dueSlice";
+import { fetchDues, addDue, payDue, deleteDue } from "@/redux/dueSlice";
 
 export default function DuesPage() {
   const dispatch = useDispatch();
