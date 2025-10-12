@@ -1,18 +1,21 @@
-import { connectDB } from "@/lib/dbConnect";
-import CustomerDue from "@/models/Due";
-import { NextResponse } from "next/server";
+let dues = []; // in-memory storage (replace with MongoDB in real app)
 
-// ✅ Get All Customers
-export async function GET() {
-  await connectDB();
-  const dues = await CustomerDue.find().sort({ createdAt: -1 });
-  return NextResponse.json(dues);
-}
+export default function handler(req, res) {
+  if (req.method === "GET") return res.status(200).json(dues);
 
-// ✅ Add New Customer Due
-export async function POST(req) {
-  await connectDB();
-  const data = await req.json();
-  const newDue = await CustomerDue.create(data);
-  return NextResponse.json(newDue);
+  if (req.method === "POST") {
+    const { customerName, phone, dueAmount } = req.body;
+    const newDue = {
+      _id: Date.now().toString(),
+      customerName,
+      phone,
+      dueAmount,
+      paid: 0,
+      lastPaymentDate: null
+    };
+    dues.push(newDue);
+    return res.status(201).json(newDue);
+  }
+
+  res.status(405).end();
 }
