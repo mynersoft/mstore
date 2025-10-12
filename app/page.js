@@ -15,6 +15,7 @@ export default function DashboardPage() {
 	const [monthlyProfit, setMonthlyProfit] = useState(0);
 	const [topProducts, setTopProducts] = useState([]);
 	const [stockOut, setStockOut] = useState([]);
+	const [totalDue, setTotalDue] = useState(0);
 
 	// Dummy sales data (you can replace with API data)
 	const [salesData, setSalesData] = useState([
@@ -37,6 +38,13 @@ export default function DashboardPage() {
 		// Top and stock-out products
 		setTopProducts(getTopProducts(products));
 		setStockOut(getStockOutProducts(products));
+
+		// ✅ Calculate total due amount
+		const totalDueAmount = products.reduce(
+			(sum, p) => sum + (p.due || 0),
+			0
+		);
+		setTotalDue(totalDueAmount);
 	}, [salesData, products]);
 
 	return (
@@ -45,27 +53,13 @@ export default function DashboardPage() {
 			<h1 className="text-3xl font-bold">📊 Dashboard Overview</h1>
 
 			{/* Stat Cards */}
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-				<StatCard
-					title="Daily Sell"
-					value={`৳${dailySell}`}
-					color="blue"
-				/>
-				<StatCard
-					title="Daily Profit"
-					value={`৳${dailyProfit}`}
-					color="green"
-				/>
-				<StatCard
-					title="Monthly Sell"
-					value={`৳${monthlySell}`}
-					color="purple"
-				/>
-				<StatCard
-					title="Monthly Profit"
-					value={`৳${monthlyProfit}`}
-					color="orange"
-				/>
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+				<StatCard title="Daily Sell" value={`৳${dailySell}`} color="blue" />
+				<StatCard title="Daily Profit" value={`৳${dailyProfit}`} color="green" />
+				<StatCard title="Monthly Sell" value={`৳${monthlySell}`} color="purple" />
+				<StatCard title="Monthly Profit" value={`৳${monthlyProfit}`} color="orange" />
+				{/* ✅ New Due Card */}
+				<StatCard title="Total Due" value={`৳${totalDue}`} color="red" />
 			</div>
 
 			{/* Chart Section */}
