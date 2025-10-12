@@ -1,139 +1,148 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-export default function DuePage() {
+export default function DuesPage() {
   const [dues, setDues] = useState([]);
   const [form, setForm] = useState({
-    name: "",
+    customerName: "",
     phone: "",
-    amount: "",
-    note: "",
-    status: "due",
+    dueAmount: "",
   });
 
   // Fetch dues
+  const fetchDues = async () => {
+    const res = await fetch("/api/dues");
+    const data = await res.json();
+    setDues(data);
+  };
+
   useEffect(() => {
-    fetch("/api/dues")
-      .then((res) => res.json())
-      .then(setDues);
+    fetchDues();
   }, []);
 
   // Add new due
-  const addDue = async (e) => {
+  const handleAdd = async (e) => {
     e.preventDefault();
-    const res = await fetch("/api/dues", {
+    await fetch("/api/dues", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
-    const newDue = await res.json();
-    setDues([newDue, ...dues]);
-    setForm({ name: "", phone: "", amount: "", note: "", status: "due" });
+    setForm({ customerName: "", phone: "", dueAmount: "" });
+    fetchDues();
   };
 
-  // Delete
-  const deleteDue = async (id) => {
-    await fetch(`/api/dues/${id}`, { method: "DELETE" });
-    setDues(dues.filter((d) => d._id !== id));
+  // Mark as paid (partial or full)
+  const handlePay = async (id, amount) => {
+    await fetch("/api/dues", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, amount }),
+    });
+    fetchDues();
+  };
+
+  // Delete record
+  const handleDelete = async (id) => {
+    await fetch(`/api/dues?id=${id}`, { method: "DELETE" });
+    fetchDues();
   };
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">📘 বাকি হিসাব</h1>
+      <h1 className="text-3xl font-bold mb-4">💰 Customer Due Management</h1>
 
-      {/* Add Form */}
+      {/* Add Due Form */}
       <form
-        onSubmit={addDue}
-        className="bg-white shadow p-4 rounded-lg mb-6 space-y-3"
+        onSubmit={handleAdd}
+        className="flex flex-col md:flex-row gap-3 bg-gray-800 p-4 rounded-lg mb-6"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <input
-            type="text"
-            placeholder="নাম"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="border p-2 rounded w-full"
-            required
-          />
-          <input
-            type="text"
-            placeholder="মোবাইল"
-            value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            className="border p-2 rounded w-full"
-          />
-          <input
-            type="number"
-            placeholder="বাকির টাকা"
-            value={form.amount}
-            onChange={(e) => setForm({ ...form, amount: e.target.value })}
-            className="border p-2 rounded w-full"
-            required
-          />
-          <select
-            value={form.status}
-            onChange={(e) => setForm({ ...form, status: e.target.value })}
-            className="border p-2 rounded w-full"
-          >
-            <option value="due">বাকি</option>
-            <option value="paid">পরিশোধ</option>
-          </select>
-        </div>
-        <textarea
-          placeholder="নোট"
-          value={form.note}
-          onChange={(e) => setForm({ ...form, note: e.target.value })}
-          className="border p-2 rounded w-full"
+        <input
+          type="text"
+          placeholder="Customer Name"
+          value={form.customerName}
+          onChange={(e) => setForm({ ...form, customerName: e.target.value })}
+          className="p-2 rounded bg-gray-700 text-white flex-1"
+          required
+        />
+        <input
+          type="text"
+          placeholder="Phone"
+          value={form.phone}
+          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          className="p-2 rounded bg-gray-700 text-white flex-1"
+          required
+        />
+        <input
+          type="number"
+          placeholder="Due Amount"
+          value={form.dueAmount}
+          onChange={(e) => setForm({ ...form, dueAmount: e.target.value })}
+          className="p-2 rounded bg-gray-700 text-white flex-1"
+          required
         />
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="bg-green-600 hover:bg-green-500 px-4 py-2 rounded text-white"
         >
-          যোগ করুন
+          ➕ Add
         </button>
       </form>
 
-      {/* Due List */}
-      <div className="bg-white shadow rounded-lg p-4">
-        <h2 className="text-lg font-semibold mb-3">সকল বাকি হিসাব</h2>
-        <table className="w-full border-collapse">
+      {/* Dues Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-gray-900 text-white rounded-lg">
           <thead>
-            <tr className="bg-gray-100 text-left">
-              <th className="p-2 border">নাম</th>
-              <th className="p-2 border">ফোন</th>
-              <th className="p-2 border">টাকা</th>
-              <th className="p-2 border">স্ট্যাটাস</th>
-              <th className="p-2 border">তারিখ</th>
-              <th className="p-2 border">একশন</th>
+            <tr className="bg-gray-800">
+              <th className="p-3 text-left">Customer</th>
+              <th className="p-3 text-left">Phone</th>
+              <th className="p-3 text-left">Due</th>
+              <th className="p-3 text-left">Paid</th>
+              <th className="p-3 text-left">Last Payment</th>
+              <th className="p-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {dues.map((d) => (
-              <tr key={d._id} className="border-b hover:bg-gray-50">
-                <td className="p-2 border">{d.name}</td>
-                <td className="p-2 border">{d.phone}</td>
-                <td className="p-2 border">৳{d.amount}</td>
-                <td
-                  className={`p-2 border font-semibold ${
-                    d.status === "paid" ? "text-green-600" : "text-red-600"
-                  }`}
-                >
-                  {d.status === "paid" ? "পরিশোধ" : "বাকি"}
+              <tr
+                key={d._id}
+                className="border-b border-gray-700 hover:bg-gray-800"
+              >
+                <td className="p-3">{d.customerName}</td>
+                <td className="p-3">{d.phone}</td>
+                <td className="p-3 text-yellow-400">৳{d.dueAmount}</td>
+                <td className="p-3 text-green-400">৳{d.paid}</td>
+                <td className="p-3">
+                  {d.lastPaymentDate
+                    ? new Date(d.lastPaymentDate).toLocaleDateString()
+                    : "—"}
                 </td>
-                <td className="p-2 border">
-                  {new Date(d.date).toLocaleDateString("bn-BD")}
-                </td>
-                <td className="p-2 border">
+                <td className="p-3 flex gap-2 justify-center">
                   <button
-                    onClick={() => deleteDue(d._id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded"
+                    onClick={() =>
+                      handlePay(d._id, prompt("Enter payment amount:", "0"))
+                    }
+                    className="bg-blue-600 px-3 py-1 rounded hover:bg-blue-500"
                   >
-                    মুছুন
+                    💸 Pay
+                  </button>
+                  <button
+                    onClick={() => handleDelete(d._id)}
+                    className="bg-red-600 px-3 py-1 rounded hover:bg-red-500"
+                  >
+                    ❌ Delete
                   </button>
                 </td>
               </tr>
             ))}
+            {!dues.length && (
+              <tr>
+                <td colSpan="6" className="text-center p-4 text-gray-400">
+                  No due records found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
