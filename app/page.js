@@ -9,6 +9,8 @@ import { getTopProducts, getStockOutProducts } from "@/lib/dashboardUtils";
 
 export default function DashboardPage() {
 	const products = useSelector((state) => state.products.items);
+	const dues = useSelector((state) => state.dues.items || []); // 🧾 Dues slice থেকে সব due ডেটা
+
 	const [dailySell, setDailySell] = useState(0);
 	const [monthlySell, setMonthlySell] = useState(0);
 	const [dailyProfit, setDailyProfit] = useState(0);
@@ -39,13 +41,10 @@ export default function DashboardPage() {
 		setTopProducts(getTopProducts(products));
 		setStockOut(getStockOutProducts(products));
 
-		// ✅ Calculate total due amount
-		const totalDueAmount = products.reduce(
-			(sum, p) => sum + (p.due || 0),
-			0
-		);
-		setTotalDue(totalDueAmount);
-	}, [salesData, products]);
+		// Total due calculation from Redux store
+		const dueSum = dues.reduce((sum, d) => sum + Number(d.amount || 0), 0);
+		setTotalDue(dueSum);
+	}, [salesData, products, dues]);
 
 	return (
 		<div className="p-6 space-y-6">
@@ -58,15 +57,12 @@ export default function DashboardPage() {
 				<StatCard title="Daily Profit" value={`৳${dailyProfit}`} color="green" />
 				<StatCard title="Monthly Sell" value={`৳${monthlySell}`} color="purple" />
 				<StatCard title="Monthly Profit" value={`৳${monthlyProfit}`} color="orange" />
-				{/* ✅ New Due Card */}
 				<StatCard title="Total Due" value={`৳${totalDue}`} color="red" />
 			</div>
 
 			{/* Chart Section */}
 			<div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-6">
-				<h2 className="text-xl font-semibold mb-4">
-					Sales & Profit Chart
-				</h2>
+				<h2 className="text-xl font-semibold mb-4">Sales & Profit Chart</h2>
 				<SalesChart data={salesData} />
 			</div>
 
