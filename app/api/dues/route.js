@@ -1,18 +1,18 @@
 import { connectDB } from "@/lib/dbConnect";
-import Due from "@/models/Due";
+import CustomerDue from "@/models/CustomerDue";
 import { NextResponse } from "next/server";
 
-// GET all dues
+// ✅ Get All Customers
 export async function GET() {
   await connectDB();
-  const dues = await Due.find().sort({ date: -1 });
+  const dues = await CustomerDue.find().sort({ createdAt: -1 });
   return NextResponse.json(dues);
 }
 
-// POST new due
+// ✅ Add New Customer Due
 export async function POST(req) {
   await connectDB();
-  const body = await req.json();
-  const due = await Due.create(body);
-  return NextResponse.json(due);
+  const data = await req.json();
+  const newDue = await CustomerDue.create(data);
+  return NextResponse.json(newDue);
 }
