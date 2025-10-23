@@ -1,18 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-
-
-/**
- * Service Records Page
- * - List all records
- * - Add new record (modal)
- * - Edit record (modal)
- * - Delete record
- */
 
 function Modal({ open, onClose, children }) {
   if (!open) return null;
@@ -34,30 +24,8 @@ function Modal({ open, onClose, children }) {
 }
 
 export default function ServicePage() {
-
-// ✅ PDF ডাউনলোড ফাংশন
-const downloadPDF = () => {
-  const doc = new jsPDF();
-  doc.text("Service Report", 14, 15);
-  doc.autoTable({
-    head: [["Invoice", "Name", "Phone", "Device", "Bill", "Guarantee"]],
-    body: services.map((s) => [
-      s.invoice,
-      s.name,
-      s.phone,
-      s.device,
-      s.bill,
-      s.guarantee,
-    ]),
-    startY: 25,
-  });
-  doc.save("service_report.pdf");
-};
-
-
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
 
@@ -71,6 +39,26 @@ const downloadPDF = () => {
     receivedAt: "",
     status: "received",
   });
+
+  // ✅ PDF ডাউনলোড ফাংশন
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Service Report", 14, 15);
+    doc.autoTable({
+      head: [["Invoice", "Name", "Phone", "Device", "Bill", "Warranty", "Status"]],
+      body: records.map((r, i) => [
+        String(i + 1).padStart(4, "0"), // Invoice number like 0001, 0002
+        r.customerName,
+        r.phone,
+        r.deviceName,
+        "৳" + r.billAmount,
+        r.warranty?.hasWarranty ? `${r.warranty.warrantyMonths} mo` : "No",
+        r.status,
+      ]),
+      startY: 25,
+    });
+    doc.save("service_report.pdf");
+  };
 
   // fetch all records
   const fetchRecords = async () => {
@@ -114,7 +102,9 @@ const downloadPDF = () => {
       billAmount: rec.billAmount || 0,
       warranty: rec.warranty || { hasWarranty: false, warrantyMonths: 0 },
       notes: rec.notes || "",
-      receivedAt: rec.receivedAt ? new Date(rec.receivedAt).toISOString().slice(0,10) : "",
+      receivedAt: rec.receivedAt
+        ? new Date(rec.receivedAt).toISOString().slice(0, 10)
+        : "",
       status: rec.status || "received",
     });
     setIsModalOpen(true);
@@ -122,7 +112,7 @@ const downloadPDF = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // basic validation
+
     if (!form.customerName || !form.phone || !form.deviceName) {
       alert("Customer name, phone and device name are required");
       return;
@@ -187,16 +177,16 @@ const downloadPDF = () => {
     <div className="p-6 text-gray-700 dark:text-gray-300">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">📱 Service Records</h1>
-        <div>
-<button
-  onClick={downloadPDF}
-  className="bg-blue-600 text-white px-4 py-2 rounded mt-4"
->
-  📄 Download PDF
-</button>
+        <div className="flex gap-3">
+          <button
+            onClick={downloadPDF}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500"
+          >
+            📄 Download PDF
+          </button>
           <button
             onClick={openAdd}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500"
           >
             + Add Record
           </button>
@@ -211,7 +201,7 @@ const downloadPDF = () => {
             <table className="min-w-full text-sm">
               <thead className="text-left border-b">
                 <tr>
-                  <th className="p-2">#</th>
+                  <th className="p-2">Invoice</th>
                   <th className="p-2">Customer</th>
                   <th className="p-2">Phone</th>
                   <th className="p-2">Device</th>
@@ -224,20 +214,27 @@ const downloadPDF = () => {
               </thead>
               <tbody>
                 {records.map((r, i) => (
-                  <tr key={r._id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td className="p-2 align-top">{i + 1}</td>
-                    <td className="p-2 align-top">{r.customerName}</td>
-                    <td className="p-2 align-top">{r.phone}</td>
-                    <td className="p-2 align-top">{r.deviceName}</td>
-                    <td className="p-2 align-top">৳{r.billAmount}</td>
-                    <td className="p-2 align-top">
-                      {r.warranty?.hasWarranty ? `${r.warranty?.warrantyMonths} mo` : "No"}
+                  <tr
+                    key={r._id}
+                    className="border-b hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    <td className="p-2">{String(i + 1).padStart(4, "0")}</td>
+                    <td className="p-2">{r.customerName}</td>
+                    <td className="p-2">{r.phone}</td>
+                    <td className="p-2">{r.deviceName}</td>
+                    <td className="p-2">৳{r.billAmount}</td>
+                    <td className="p-2">
+                      {r.warranty?.hasWarranty
+                        ? `${r.warranty.warrantyMonths} mo`
+                        : "No"}
                     </td>
-                    <td className="p-2 align-top">
-                      {r.receivedAt ? new Date(r.receivedAt).toLocaleDateString() : "-"}
+                    <td className="p-2">
+                      {r.receivedAt
+                        ? new Date(r.receivedAt).toLocaleDateString()
+                        : "-"}
                     </td>
-                    <td className="p-2 align-top">{r.status}</td>
-                    <td className="p-2 align-top text-center space-x-2">
+                    <td className="p-2">{r.status}</td>
+                    <td className="p-2 text-center space-x-2">
                       <button
                         onClick={() => openEdit(r)}
                         className="px-2 py-1 bg-yellow-500 text-white rounded"
@@ -268,7 +265,9 @@ const downloadPDF = () => {
 
       {/* Modal for Add/Edit */}
       <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <h2 className="text-lg font-semibold mb-4">{editing ? "Edit Record" : "Add New Record"}</h2>
+        <h2 className="text-lg font-semibold mb-4">
+          {editing ? "Edit Record" : "Add New Record"}
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -276,7 +275,9 @@ const downloadPDF = () => {
               type="text"
               placeholder="Customer Name"
               value={form.customerName}
-              onChange={(e) => setForm({ ...form, customerName: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, customerName: e.target.value })
+              }
               className="w-full p-2 rounded bg-gray-100 dark:bg-gray-800"
               required
             />
@@ -292,7 +293,9 @@ const downloadPDF = () => {
               type="text"
               placeholder="Device Name / Model"
               value={form.deviceName}
-              onChange={(e) => setForm({ ...form, deviceName: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, deviceName: e.target.value })
+              }
               className="w-full p-2 rounded bg-gray-100 dark:bg-gray-800"
               required
             />
@@ -309,7 +312,13 @@ const downloadPDF = () => {
                   type="checkbox"
                   checked={!!form.warranty.hasWarranty}
                   onChange={(e) =>
-                    setForm({ ...form, warranty: { ...form.warranty, hasWarranty: e.target.checked } })
+                    setForm({
+                      ...form,
+                      warranty: {
+                        ...form.warranty,
+                        hasWarranty: e.target.checked,
+                      },
+                    })
                   }
                 />
                 Warranty
@@ -320,7 +329,13 @@ const downloadPDF = () => {
                 placeholder="Warranty months"
                 value={form.warranty.warrantyMonths}
                 onChange={(e) =>
-                  setForm({ ...form, warranty: { ...form.warranty, warrantyMonths: e.target.value } })
+                  setForm({
+                    ...form,
+                    warranty: {
+                      ...form.warranty,
+                      warrantyMonths: e.target.value,
+                    },
+                  })
                 }
                 className="p-2 rounded bg-gray-100 dark:bg-gray-800"
                 style={{ width: 140 }}
@@ -363,7 +378,10 @@ const downloadPDF = () => {
             </button>
             <button
               type="button"
-              onClick={() => { setIsModalOpen(false); setEditing(null); }}
+              onClick={() => {
+                setIsModalOpen(false);
+                setEditing(null);
+              }}
               className="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded"
             >
               Cancel
