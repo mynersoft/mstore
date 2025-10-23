@@ -28,7 +28,6 @@ export default function ServicePage() {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-
   const [form, setForm] = useState({
     customerName: "",
     phone: "",
@@ -40,27 +39,7 @@ export default function ServicePage() {
     status: "received",
   });
 
-  // ✅ PDF ডাউনলোড ফাংশন
-  const downloadPDF = () => {
-    const doc = new jsPDF();
-    doc.text("Service Report", 14, 15);
-    doc.autoTable({
-      head: [["Invoice", "Name", "Phone", "Device", "Bill", "Warranty", "Status"]],
-      body: records.map((r, i) => [
-        String(i + 1).padStart(4, "0"), // Invoice number like 0001, 0002
-        r.customerName,
-        r.phone,
-        r.deviceName,
-        "৳" + r.billAmount,
-        r.warranty?.hasWarranty ? `${r.warranty.warrantyMonths} mo` : "No",
-        r.status,
-      ]),
-      startY: 25,
-    });
-    doc.save("service_report.pdf");
-  };
-
-  // fetch all records
+  // ✅ Fetch all records
   const fetchRecords = async () => {
     setLoading(true);
     try {
@@ -78,6 +57,37 @@ export default function ServicePage() {
     fetchRecords();
   }, []);
 
+  // ✅ Calculations
+  const totalBill = records.reduce((sum, r) => sum + Number(r.billAmount || 0), 0);
+  const totalServices = records.length;
+  const inProgress = records.filter((r) => r.status === "in_progress").length;
+  const delivered = records.filter((r) => r.status === "delivered").length;
+
+  // ✅ PDF Download
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Service Report", 14, 15);
+    doc.autoTable({
+      head: [["#", "Name", "Phone", "Device", "Bill", "Warranty", "Status"]],
+      body: records.map((s, i) => [
+        i + 1,
+        s.customerName,
+        s.phone,
+        s.deviceName,
+        `৳${s.billAmount}`,
+        s.warranty?.hasWarranty ? `${s.warranty?.warrantyMonths} mo` : "No",
+        s.status,
+      ]),
+      startY: 25,
+    });
+    doc.text(`Total Services: ${totalServices}`, 14, doc.lastAutoTable.finalY + 10);
+    doc.text(`Delivered: ${delivered}`, 14, doc.lastAutoTable.finalY + 20);
+    doc.text(`In Progress: ${inProgress}`, 14, doc.lastAutoTable.finalY + 30);
+    doc.text(`Total Service Bill: ৳${totalBill}`, 14, doc.lastAutoTable.finalY + 40);
+    doc.save("service_report.pdf");
+  };
+
+  // ✅ Add & Edit functions
   const openAdd = () => {
     setEditing(null);
     setForm({
@@ -112,7 +122,6 @@ export default function ServicePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!form.customerName || !form.phone || !form.deviceName) {
       alert("Customer name, phone and device name are required");
       return;
@@ -176,20 +185,45 @@ export default function ServicePage() {
   return (
     <div className="p-6 text-gray-700 dark:text-gray-300">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">📱 Service Records</h1>
-        <div className="flex gap-3">
+        <h1 className="text-2xl font-bold">📱 Service Dashboard</h1>
+        <div className="space-x-2">
           <button
             onClick={downloadPDF}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500"
+            className="bg-green-600 text-white px-4 py-2 rounded"
           >
             📄 Download PDF
           </button>
           <button
             onClick={openAdd}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
           >
             + Add Record
           </button>
+        </div>
+      </div>
+
+      {/* ✅ Dashboard Summary */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-blue-100 dark:bg-blue-900 p-4 rounded-lg text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-300">Total Services</p>
+          <p className="text-2xl font-bold text-blue-800 dark:text-blue-100">{totalServices}</p>
+        </div>
+
+        <div className="bg-yellow-100 dark:bg-yellow-900 p-4 rounded-lg text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-300">In Progress</p>
+          <p className="text-2xl font-bold text-yellow-800 dark:text-yellow-100">{inProgress}</p>
+        </div>
+
+        <div className="bg-green-100 dark:bg-green-900 p-4 rounded-lg text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-300">Delivered</p>
+          <p className="text-2xl font-bold text-green-800 dark:text-green-100">{delivered}</p>
+        </div>
+
+        <div className="bg-purple-100 dark:bg-purple-900 p-4 rounded-lg text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-300">Total Bill</p>
+          <p className="text-2xl font-bold text-purple-800 dark:text-purple-100">
+            ৳{totalBill.toLocaleString()}
+          </p>
         </div>
       </div>
 
@@ -201,7 +235,7 @@ export default function ServicePage() {
             <table className="min-w-full text-sm">
               <thead className="text-left border-b">
                 <tr>
-                  <th className="p-2">Invoice</th>
+                  <th className="p-2">#</th>
                   <th className="p-2">Customer</th>
                   <th className="p-2">Phone</th>
                   <th className="p-2">Device</th>
@@ -218,14 +252,14 @@ export default function ServicePage() {
                     key={r._id}
                     className="border-b hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
-                    <td className="p-2">{String(i + 1).padStart(4, "0")}</td>
+                    <td className="p-2">{i + 1}</td>
                     <td className="p-2">{r.customerName}</td>
                     <td className="p-2">{r.phone}</td>
                     <td className="p-2">{r.deviceName}</td>
                     <td className="p-2">৳{r.billAmount}</td>
                     <td className="p-2">
                       {r.warranty?.hasWarranty
-                        ? `${r.warranty.warrantyMonths} mo`
+                        ? `${r.warranty?.warrantyMonths} mo`
                         : "No"}
                     </td>
                     <td className="p-2">
@@ -262,133 +296,6 @@ export default function ServicePage() {
           </div>
         )}
       </div>
-
-      {/* Modal for Add/Edit */}
-      <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <h2 className="text-lg font-semibold mb-4">
-          {editing ? "Edit Record" : "Add New Record"}
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input
-              type="text"
-              placeholder="Customer Name"
-              value={form.customerName}
-              onChange={(e) =>
-                setForm({ ...form, customerName: e.target.value })
-              }
-              className="w-full p-2 rounded bg-gray-100 dark:bg-gray-800"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Phone"
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="w-full p-2 rounded bg-gray-100 dark:bg-gray-800"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Device Name / Model"
-              value={form.deviceName}
-              onChange={(e) =>
-                setForm({ ...form, deviceName: e.target.value })
-              }
-              className="w-full p-2 rounded bg-gray-100 dark:bg-gray-800"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Bill Amount"
-              value={form.billAmount}
-              onChange={(e) => setForm({ ...form, billAmount: e.target.value })}
-              className="w-full p-2 rounded bg-gray-100 dark:bg-gray-800"
-            />
-            <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={!!form.warranty.hasWarranty}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      warranty: {
-                        ...form.warranty,
-                        hasWarranty: e.target.checked,
-                      },
-                    })
-                  }
-                />
-                Warranty
-              </label>
-              <input
-                type="number"
-                min="0"
-                placeholder="Warranty months"
-                value={form.warranty.warrantyMonths}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    warranty: {
-                      ...form.warranty,
-                      warrantyMonths: e.target.value,
-                    },
-                  })
-                }
-                className="p-2 rounded bg-gray-100 dark:bg-gray-800"
-                style={{ width: 140 }}
-                disabled={!form.warranty.hasWarranty}
-              />
-            </div>
-
-            <select
-              value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className="p-2 rounded bg-gray-100 dark:bg-gray-800"
-            >
-              <option value="received">Received</option>
-              <option value="in_progress">In Progress</option>
-              <option value="done">Done</option>
-              <option value="delivered">Delivered</option>
-            </select>
-
-            <input
-              type="date"
-              value={form.receivedAt}
-              onChange={(e) => setForm({ ...form, receivedAt: e.target.value })}
-              className="p-2 rounded bg-gray-100 dark:bg-gray-800"
-            />
-          </div>
-
-          <textarea
-            placeholder="Notes (optional)"
-            value={form.notes}
-            onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            className="w-full p-2 rounded bg-gray-100 dark:bg-gray-800"
-          />
-
-          <div className="flex justify-end gap-3">
-            <button
-              type="submit"
-              className="px-4 py-2 bg-green-600 text-white rounded"
-            >
-              {editing ? "Update" : "Add"}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setIsModalOpen(false);
-                setEditing(null);
-              }}
-              className="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </Modal>
     </div>
   );
 }
