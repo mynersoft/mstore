@@ -186,21 +186,22 @@ export default function ServicePage() {
     <div className="p-6 text-gray-700 dark:text-gray-300">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">📱 Service Dashboard</h1>
-        <div className="space-x-2">
-          <button
-            onClick={downloadPDF}
-            className="bg-green-600 text-white px-4 py-2 rounded"
-          >
-            📄 Download PDF
-          </button>
-          <button
-            onClick={openAdd}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
-          >
-            + Add Record
-          </button>
-        </div>
-      </div>
+
+
+      <div className="flex items-center justify-between mb-6 space-x-2">
+  <button
+    onClick={downloadPDF}
+    className="bg-green-600 text-white px-4 py-2 rounded"
+  >
+    📄 Download PDF
+  </button>
+  <button
+    onClick={openAdd}
+    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 z-50"
+  >
+    + Add Record
+  </button>
+</div>
 
       {/* ✅ Dashboard Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
