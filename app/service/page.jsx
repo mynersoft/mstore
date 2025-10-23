@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+
+
 /**
  * Service Records Page
  * - List all records
@@ -30,6 +34,27 @@ function Modal({ open, onClose, children }) {
 }
 
 export default function ServicePage() {
+
+// ✅ PDF ডাউনলোড ফাংশন
+const downloadPDF = () => {
+  const doc = new jsPDF();
+  doc.text("Service Report", 14, 15);
+  doc.autoTable({
+    head: [["Invoice", "Name", "Phone", "Device", "Bill", "Guarantee"]],
+    body: services.map((s) => [
+      s.invoice,
+      s.name,
+      s.phone,
+      s.device,
+      s.bill,
+      s.guarantee,
+    ]),
+    startY: 25,
+  });
+  doc.save("service_report.pdf");
+};
+
+
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -163,6 +188,12 @@ export default function ServicePage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">📱 Service Records</h1>
         <div>
+<button
+  onClick={downloadPDF}
+  className="bg-blue-600 text-white px-4 py-2 rounded mt-4"
+>
+  📄 Download PDF
+</button>
           <button
             onClick={openAdd}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
