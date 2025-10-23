@@ -4,7 +4,6 @@ import mongoose from "mongoose";
 const ServiceRecordSchema = new mongoose.Schema(
   {
     customerName: { type: String, required: true, trim: true },
-invoiceNo: { type: String, required: true, unique: true },
     phone: { type: String, required: true, trim: true },
     deviceName: { type: String, required: true, trim: true },
     billAmount: { type: Number, default: 0 },
