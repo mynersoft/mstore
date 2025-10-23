@@ -7,7 +7,7 @@ import "jspdf-autotable";
 function Modal({ open, onClose, children }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-999 flex items-center justify-center bg-black/50 p-4">
       <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg w-full max-w-2xl p-6">
         {children}
         <div className="mt-4 flex justify-end">
