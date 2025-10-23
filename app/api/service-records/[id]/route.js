@@ -1,7 +1,7 @@
 // app/api/service-records/[id]/route.js
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/dbConnect";
-import ServiceRecord from "@/models/ServiceRecord";
+import ServiceRecord from "@/models/ServiceRecords";
 
 export async function GET(request, { params }) {
   try {
