@@ -62,13 +62,7 @@ export default function DashboardPage() {
 
 			{/* Chart Section */}
 			<div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-6">
-<<<<<<< HEAD
-				<h2 className="text-xl font-semibold mb-4">
-					Sales & Profit
-				</h2>
-=======
 				<h2 className="text-xl font-semibold mb-4">Sales & Profit Chart</h2>
->>>>>>> bda3c51b90d3304c042f7b7fc54cb640cf6a6715
 				<SalesChart data={salesData} />
 			</div>
 
