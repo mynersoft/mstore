@@ -1,13 +1,15 @@
-const SaleSchema = new mongoose.Schema({
+import mongoose, { Schema, models, model } from "mongoose";
+
+const saleSchema = new Schema({
 	productId: {
-		type: mongoose.Schema.Types.ObjectId,
+		type: mongoose.Schema.Types.ObjectId, // ✅ correct way
 		ref: "Product",
-		required: true,
 	},
-	qty: { type: Number, required: true },
-	price: { type: Number, required: true }, // unit price at time of sale
-	total: { type: Number, required: true },
+	qty: Number,
+	price: Number,
+	total: Number,
 	date: { type: Date, default: Date.now },
 });
 
-export default mongoose.models.Sale || mongoose.model("Sale", SaleSchema);
+const Sale = models.Sale || model("Sale", saleSchema);
+export default Sale;

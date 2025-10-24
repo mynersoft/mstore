@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import mongoose, { Schema } from "mongoose";
+=======
+import mongoose, { Schema, models, model } from "mongoose";
+>>>>>>> bda3c51b90d3304c042f7b7fc54cb640cf6a6715
 
 const productSchema = new Schema(
 	{

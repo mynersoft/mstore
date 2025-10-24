@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+import "./globals.css";
+import ReduxProvider from "@/app/providers/ReduxProvider";
+import Header from "@/components/Header"
+>>>>>>> bda3c51b90d3304c042f7b7fc54cb640cf6a6715
 
 
 import "./globals.css";
@@ -10,6 +16,7 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+<<<<<<< HEAD
   return (
     <html lang="en">
       <body className="flex bg-gray-50 dark:bg-gray-900">
@@ -23,4 +30,14 @@ export default function RootLayout({ children }) {
       </body>
     </html>
   );
+=======
+	return (
+		<html lang="en">
+<Header/>
+			<body>
+				<ReduxProvider>{children}</ReduxProvider>
+			</body>
+		</html>
+	);
+>>>>>>> bda3c51b90d3304c042f7b7fc54cb640cf6a6715
 }
