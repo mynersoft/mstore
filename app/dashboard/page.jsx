@@ -42,7 +42,7 @@ export default function DashboardPage() {
 	return (
 		<div className="p-6 space-y-6">
 			{/* Header */}
-			<h1 className="text-3xl font-bold">Dashboard</h1>
+			<h1 className="text-3xl font-bold">📊 Dashboard Overview</h1>
 
 			{/* Stat Cards */}
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -71,7 +71,7 @@ export default function DashboardPage() {
 			{/* Chart Section */}
 			<div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-6">
 				<h2 className="text-xl font-semibold mb-4">
-					Sales & Profit
+					Sales & Profit Chart
 				</h2>
 				<SalesChart data={salesData} />
 			</div>

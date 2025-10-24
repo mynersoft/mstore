@@ -12,14 +12,16 @@ export async function GET(request, { params }) {
 export async function PUT(request, { params }) {
 	const body = await request.json();
 	await connectDB();
+
 	const updated = await Product.findByIdAndUpdate(params.id, body, {
 		new: true,
 	});
+
 	return NextResponse.json(updated);
 }
 
 export async function DELETE(request, { params }) {
 	await connectDB();
 	await Product.findByIdAndDelete(params.id);
-	return NextResponse.json({ ok: true });
+	return NextResponse.json({ message: "Product deleted" });
 }
