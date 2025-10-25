@@ -1,16 +1,40 @@
+import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/dbConnect";
 import Product from "@/models/Product";
-import { NextResponse } from "next/server";
 
-export async function GET() {
-	await connectDB();
-	const products = await Product.find().sort({ name: 1 });
-	return NextResponse.json(products);
+export async function GET(request) {
+  await connectDB();
+  const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get("page")) || 1;
+  const limit = 10;
+
+  const total = await Product.countDocuments();
+  const products = await Product.find()
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit);
+
+  return NextResponse.json({ products, total });
 }
 
 export async function POST(request) {
-	const body = await request.json();
-	await connectDB();
-	const p = await Product.create(body);
-	return NextResponse.json(p);
+  await connectDB();
+  const body = await request.json();
+  const product = await Product.create(body);
+  return NextResponse.json(product);
+}
+
+export async function PUT(request) {
+  await connectDB();
+  const body = await request.json();
+  const updated = await Product.findByIdAndUpdate(body._id, body, { new: true });
+  return NextResponse.json(updated);
+}
+
+export async function DELETE(request) {
+  await connectDB();
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+  await Product.findByIdAndDelete(id);
+  return NextResponse.json({ success: true });
 }
