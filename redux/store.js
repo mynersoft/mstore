@@ -5,6 +5,7 @@ import serviceReducer from "./serviceSlice";
 import categoryReducer from "./categorySlice";
 import brandReducer from "./brandSlice";
 import subCategoryReducer from "./subCategorySlice";
+import topicReducer from "./topicSlice";
 
 
 export const store = configureStore({
@@ -15,6 +16,7 @@ export const store = configureStore({
 service: serviceReducer,
 		dues:dueReducer,
     subCategories: subCategoryReducer,
+topics:topicReducer
   },
 });
 
