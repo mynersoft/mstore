@@ -1,12 +1,12 @@
+// components/PdfViewer.jsx
 "use client";
 export default function PdfViewer({ pdfUrl }) {
-  if (!pdfUrl)
-    return <p className="text-center mt-10">Select a topic to view PDF</p>;
-
+  if (!pdfUrl) return <div className="p-6 text-center text-gray-500">Select a topic to view PDF</div>;
+  // Using Google Docs viewer for cross-browser embed (works if URL accessible)
+  const embedUrl = `https://docs.google.com/gview?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
   return (
-    <iframe
-      src={`https://docs.google.com/gview?url=${pdfUrl}&embedded=true`}
-      className="w-full h-screen"
-    />
+    <div className="p-4">
+      <iframe src={embedUrl} className="w-full h-[80vh] border" title="PDF Viewer" />
+    </div>
   );
 }
