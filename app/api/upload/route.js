@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import cloudinary from "@/lib/cloudinary";
+import cloudinary, { uploadToCloudinary } from "@/lib/cloudinary";
 
 export async function POST(request) {
 	const data = await request.formData();
@@ -16,7 +16,7 @@ export async function POST(request) {
 	const buffer = Buffer.from(bytes);
 
 	const upload = await new Promise((resolve, reject) => {
-		const stream = cloudinary.uploader.upload_stream(
+		const stream = uploadToCloudinary.uploader.upload_stream(
 			{ folder: "products" },
 			(error, result) => {
 				if (error) reject(error);
