@@ -2,20 +2,34 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/dbConnect";
 import Product from "@/models/Product";
 
-export async function GET(request) {
-  await connectDB();
-  const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get("page")) || 1;
-  const limit = 10;
+// export async function GET(request) {
+//   await connectDB();
+//   const { searchParams } = new URL(request.url);
+//   const page = parseInt(searchParams.get("page")) || 1;
+//   const limit = 10;
 
-  const total = await Product.countDocuments();
-  const products = await Product.find()
-    .sort({ createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit);
+//   const total = await Product.countDocuments();
+//   const products = await Product.find()
+//     .sort({ createdAt: -1 })
+//     .skip((page - 1) * limit)
+//     .limit(limit);
 
-  return NextResponse.json({ products, total });
+//   return NextResponse.json({ products, total });
+// }
+
+
+export async function GET(req) {
+	const { searchParams } = new URL(req.url);
+	const page = searchParams.get("page") || 1;
+	const limit = searchParams.get("limit") || 10;
+
+	return Response.json({
+		ok: true,
+		page,
+		limit,
+	});
 }
+
 
 export async function POST(request) {
   await connectDB();

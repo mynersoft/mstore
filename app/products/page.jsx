@@ -21,7 +21,7 @@ export default function ProductsPage() {
     if (!confirm("Delete product?")) return;
     await dispatch(deleteProduct(id)).unwrap();
     // refresh current page
-    dispatch(fetchProducts({ page: pageLocal, limit }));
+   dispatch(fetchProducts({ page: pageLocal, limit }));
   };
 
   const totalPages = Math.max(1, Math.ceil((total || 0) / limit));

@@ -3,8 +3,8 @@ import productReducer from "./productSlice";
 import dueReducer from "./dueSlice";
 import serviceReducer from "./serviceSlice";
 import categoryReducer from "./categorySlice";
-import brandReducer from "./brandSlice";
-import subCategoryReducer from "./subCategorySlice";
+import brandReducer from "./brandsSlice";
+import subCategoryReducer from "./subCategoriesSlice";
 
 
 export const store = configureStore({

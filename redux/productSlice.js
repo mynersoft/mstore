@@ -1,10 +1,16 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-export const fetchProducts = createAsyncThunk("products/fetch", async (page = 1) => {
-  const res = await axios.get(`/api/products?page=${page}`);
-  return res.data;
-});
+export const fetchProducts = createAsyncThunk(
+	"products/fetch",
+	async ({ page = 1, limit = 10 }) => {
+		const res = await axios.get(
+			`/api/products?page=${page}&limit=${limit}`
+		);
+		return res.data;
+	}
+);
+
 
 export const addProduct = createAsyncThunk("products/add", async (product) => {
   const res = await axios.post("/api/products", product);
