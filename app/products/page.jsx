@@ -34,7 +34,7 @@ export default function ProductsPage() {
 	const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
 
 	return (
-		<div className="p-6 bg-gray-950 min-h-screen text-gray-300">
+		<div className="p-6 min-h-screen  bg-gray-950 text-gray-300">
 			<div className="flex justify-between items-center mb-6">
 				<h1 className="text-2xl font-semibold">Products</h1>
 				<div className="flex items-center gap-2">

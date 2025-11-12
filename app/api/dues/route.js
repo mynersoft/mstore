@@ -1,21 +1,26 @@
-let dues = []; // in-memory storage (replace with MongoDB in real app)
 
-export default function handler(req, res) {
-  if (req.method === "GET") return res.status(200).json(dues);
+import { NextResponse } from "next/server";
+import mongoose from "mongoose";
+import { connectDB } from "@/lib/dbConnect";
+import Due from "@/models/Due";
 
-  if (req.method === "POST") {
-    const { customerName, phone, dueAmount } = req.body;
-    const newDue = {
-      _id: Date.now().toString(),
-      customerName,
-      phone,
-      dueAmount,
-      paid: 0,
-      lastPaymentDate: null
-    };
-    dues.push(newDue);
-    return res.status(201).json(newDue);
+export async function GET() {
+  try {
+    if (!mongoose.connection.readyState) {
+      await connectDB();
+    }
+
+    const due = await Due.find().lean();
+    return NextResponse.json(due);
+  } catch (err) {
+    console.error("Error fetching due:", err);
+    return NextResponse.json({ error: "Failed to fetch due" }, { status: 500 });
   }
+}
 
-  res.status(405).end();
+export async function POST(request) {
+  await connectDB();
+  const body = await request.json();
+  const due = await Due.create(body);
+  return NextResponse.json(due);
 }
