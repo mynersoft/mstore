@@ -47,9 +47,9 @@ export default function ProductFormModal({
 				category: "",
 				subCategory: "",
 				brand: "",
-				stock: 0,
-				regularPrice: '',
-				sellPrice: '',
+				stock: "",
+				regularPrice: "",
+				sellPrice: "",
 				warranty: "",
 				image: "",
 			});
@@ -214,8 +214,6 @@ export default function ProductFormModal({
 						}
 						className="p-2 rounded bg-gray-800"
 					/>
-
-				
 
 					{/* Image Upload */}
 					<div className="flex items-center gap-3">
