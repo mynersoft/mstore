@@ -1,4 +1,5 @@
-import { connectDB } from "@/lib/mongodb";
+
+import { connectDB } from "@/lib/dbConnect";
 import SubCategory from "@/models/SubCategory";
 
 export async function GET() {

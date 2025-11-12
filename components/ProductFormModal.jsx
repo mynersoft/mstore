@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addProduct, updateProduct, fetchProducts } from "@/redux/productSlice";
 import { fetchCategories } from "@/redux/categorySlice";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import AddCategoryModal from "./AddCategoryModal";
 
 export default function ProductFormModal({
 	editingProduct,
@@ -126,9 +127,12 @@ export default function ProductFormModal({
 								<option>Loading...</option>
 							) : (
 								categories.map((cat) => (
-									<option key={cat.name} value={cat.name}>
-										{cat.name}
-									</option>
+									<>
+								
+										<option key={cat.name} value={cat.name}>
+											{cat.name}
+										</option>
+									</>
 								))
 							)}
 						</select>

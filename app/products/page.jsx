@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts, deleteProduct, setPage } from "@/redux/productSlice";
 import ProductFormModal from "@/components/ProductFormModal";
+import AddCategoryModal from "@/components/AddCategoryModal";
 
 export default function ProductsPage() {
 	const dispatch = useDispatch();
@@ -16,6 +17,7 @@ export default function ProductsPage() {
 	} = useSelector((s) => s.products);
 	const [pageLocal, setPageLocal] = useState(reduxPage || 1);
 	const [showModal, setShowModal] = useState(false);
+	const [showCatModal, setShowCatModal] = useState(false);
 	const [editingProduct, setEditingProduct] = useState(null);
 
 	useEffect(() => {
@@ -44,6 +46,13 @@ export default function ProductsPage() {
 						className="bg-green-600 px-4 py-2 rounded">
 						+ Add Product
 					</button>
+					<button
+						onClick={() => {
+							setShowCatModal(true);
+						}}
+						className="bg-green-600 px-4 py-2 rounded">
+						+ Add Category
+					</button>
 				</div>
 			</div>
 
@@ -56,8 +65,8 @@ export default function ProductsPage() {
 							<th className="p-3 text-left">Category</th>
 							<th className="p-3 text-left">Brand</th>
 							<th className="p-3 text-left">Stock</th>
+							<th className="p-3 text-left">Regular Price</th>
 							<th className="p-3 text-left">Sell Price</th>
-							<th className="p-3 text-left">Dealer</th>
 							<th className="p-3 text-center">Actions</th>
 						</tr>
 					</thead>
@@ -84,8 +93,8 @@ export default function ProductsPage() {
 									<td className="p-3">{p.category}</td>
 									<td className="p-3">{p.brand}</td>
 									<td className="p-3">{p.stock}</td>
+									<td className="p-3">{p.regularPrice}</td>
 									<td className="p-3">৳{p.sellPrice}</td>
-									<td className="p-3">{p.dealerName}</td>
 									<td className="p-3 text-center flex gap-2 justify-center">
 										<button
 											onClick={() => {
@@ -143,6 +152,17 @@ export default function ProductsPage() {
 						setShowModal(false);
 						setEditingProduct(null);
 						dispatch(fetchProducts({ page: pageLocal, limit }));
+					}}
+					currentPage={pageLocal}
+				/>
+			)}
+			{showCatModal && (
+				<AddCategoryModal
+					editingProduct={editingProduct}
+					onClose={() => {
+						setShowCatModal(false);
+						setEditingProduct(null);
+						// dispatch(fetchProducts({ page: pageLocal, limit }));
 					}}
 					currentPage={pageLocal}
 				/>

@@ -8,6 +8,7 @@ import {
 	updateCategory,
 	deleteCategory,
 } from "@/redux/categorySlice";
+import CategoryForm from "@/components/CategoryForm";
 
 export default function CategoriesPage() {
 	const dispatch = useDispatch();
@@ -15,90 +16,53 @@ export default function CategoriesPage() {
 		(state) => state.categories
 	);
 
-	const [name, setName] = useState("");
-	const [subCategories, setSubCategories] = useState("");
 	const [editingCategory, setEditingCategory] = useState(null);
+	const [showModal, setShowModal] = useState(false);
 
-	// Fetch categories on mount
 	useEffect(() => {
 		dispatch(fetchCategories());
 	}, [dispatch]);
 
-	// Add or Update category
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-
-		const payload = {
-			name,
-			subCategories: subCategories
-				.split(",")
-				.map((s) => s.trim())
-				.filter(Boolean),
-		};
-
+	const handleSubmit = (payload) => {
 		if (editingCategory) {
 			dispatch(updateCategory({ id: editingCategory._id, ...payload }));
 		} else {
 			dispatch(addCategory(payload));
 		}
-
-		setName("");
-		setSubCategories("");
 		setEditingCategory(null);
+		setShowModal(false);
 	};
 
-	// Delete category
-	const handleDelete = async (id) => {
+	const handleDelete = (id) => {
 		if (!confirm("Are you sure you want to delete this category?")) return;
 		dispatch(deleteCategory(id));
 	};
 
-	// Edit category
 	const handleEdit = (cat) => {
 		setEditingCategory(cat);
-		setName(cat.name);
-		setSubCategories((cat.subCategories || []).join(", "));
+		setShowModal(true);
+	};
+
+	const handleAddCategory = () => {
+		setEditingCategory(null);
+		setShowModal(true);
+	};
+
+	const handleCancel = () => {
+		setEditingCategory(null);
+		setShowModal(false);
 	};
 
 	return (
 		<div className="p-6 space-y-6">
-			<h1 className="text-2xl font-bold">📦 Manage Categories</h1>
-
-			{/* Add/Edit Form */}
-			<form
-				onSubmit={handleSubmit}
-				className="bg-white dark:bg-gray-900 rounded-2xl shadow p-6 space-y-4">
-				<div>
-					<label className="block font-medium">Category Name</label>
-					<input
-						type="text"
-						value={name}
-						onChange={(e) => setName(e.target.value)}
-						className="border rounded-md w-full p-2 mt-1"
-						placeholder="Enter category name"
-						required
-					/>
-				</div>
-
-				<div>
-					<label className="block font-medium">
-						Subcategories (comma-separated)
-					</label>
-					<input
-						type="text"
-						value={subCategories}
-						onChange={(e) => setSubCategories(e.target.value)}
-						className="border rounded-md w-full p-2 mt-1"
-						placeholder="e.g. সকেট, সুইচ, বাতি"
-					/>
-				</div>
-
+			<h1 className="text-2xl font-bold flex justify-between items-center">
+				📦 Manage Categories
 				<button
-					type="submit"
-					className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-					{editingCategory ? "Update Category" : "Add Category"}
+					onClick={handleAddCategory}
+					className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+					Add Category
 				</button>
-			</form>
+			</h1>
 
 			{/* Category List */}
 			<div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-6">
@@ -146,6 +110,23 @@ export default function CategoriesPage() {
 					</table>
 				)}
 			</div>
+
+			{/* Modal */}
+			{showModal && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+					<div className="bg-gray-900 text-gray-100 rounded-lg w-full max-w-lg p-6">
+						<h3 className="text-lg mb-3 font-semibold">
+							{editingCategory ? "Edit Category" : "Add Category"}
+						</h3>
+
+						<CategoryForm
+							onSubmit={handleSubmit}
+							editingCategory={editingCategory}
+							onCancel={handleCancel}
+						/>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
