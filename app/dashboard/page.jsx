@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 import { getTopProducts, getStockOutProducts } from "@/lib/dashboardUtils";
 
 export default function DashboardPage() {
-	const products = useSelector((state) => state.products.items);
+	const products = useSelector((state) => state?.products?.items);
 	const [dailySell, setDailySell] = useState(0);
 	const [monthlySell, setMonthlySell] = useState(0);
 	const [dailyProfit, setDailyProfit] = useState(0);
