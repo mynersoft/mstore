@@ -5,14 +5,18 @@ import StatCard from "@/components/StatCard";
 import ProductTable from "@/components/ProductTable";
 import Link from "next/link";
 import SalesChart from "@/components/SalesChart";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getTopProducts, getStockOutProducts } from "@/lib/dashboardUtils";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { fetchDues } from "@/redux/duesSlice";
+import { fetchProducts } from "@/redux/productSlice";
 
 export default function DashboardPage() {
 	const products = useSelector((state) => state?.products?.items || []);
 	const dues = useSelector((state) => state?.dues?.items || []);
+
+	const dispatch = useDispatch();
 
 	const [dailySell, setDailySell] = useState(0);
 	const [monthlySell, setMonthlySell] = useState(0);
@@ -44,6 +48,10 @@ export default function DashboardPage() {
 		const dueSum = dues.reduce((sum, d) => sum + Number(d.amount || 0), 0);
 		setTotalDue(dueSum);
 	}, [salesData, products, dues]);
+	useEffect(() => {
+		dispatch(fetchDues());
+		dispatch(fetchProducts());
+	}, [dispatch]);
 
 	return (
 		<div className="p-6 space-y-6">
