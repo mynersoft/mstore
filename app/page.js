@@ -10,8 +10,9 @@ import { getTopProducts, getStockOutProducts } from "@/lib/dashboardUtils";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 export default function DashboardPage() {
-	const products = useSelector((state) => state.products.items);
-	const dues = useSelector((state) => state.dues.items || []); // 🧾 Dues slice থেকে সব due ডেটা
+const products = useSelector((state) => state.products?.items || []);
+const dues = useSelector((state) => state.dues?.items || []);
+
 
 	const [dailySell, setDailySell] = useState(0);
 	const [monthlySell, setMonthlySell] = useState(0);
