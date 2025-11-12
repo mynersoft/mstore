@@ -1,85 +1,106 @@
-// components/ProductFormModal.jsx
 "use client";
 
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addProduct, updateProduct, fetchProducts } from "@/redux/productSlice";
+import { fetchCategories } from "@/redux/categorySlice";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
-export default function ProductFormModal({ editingProduct, onClose, currentPage = 1 }) {
-  const dispatch = useDispatch();
-  const [form, setForm] = useState({
-    name: "",
-    category: "",
-    subCategory: "",
-    brand: "",
-    stock: 0,
-    regularPrice: 0,
-    sellPrice: 0,
-    warranty: "",
-    dealerName: "",
-    image: "",
-  });
-  const [file, setFile] = useState(null);
-  const [saving, setSaving] = useState(false);
+export default function ProductFormModal({
+	editingProduct,
+	onClose,
+	currentPage = 1,
+}) {
+	const dispatch = useDispatch();
+	const { list: categories, loading: catLoading } = useSelector(
+		(state) => state.categories
+	);
 
-  useEffect(() => {
-    if (editingProduct) setForm(editingProduct);
-    else
-      setForm({
-        name: "",
-        category: "",
-        subCategory: "",
-        brand: "",
-        stock: 0,
-        regularPrice: 0,
-        sellPrice: 0,
-        warranty: "",
-        dealerName: "",
-        image: "",
-      });
-  }, [editingProduct]);
+	const [form, setForm] = useState({
+		name: "",
+		category: "",
+		subCategory: "",
+		brand: "",
+		stock: 0,
+		regularPrice: 0,
+		sellPrice: 0,
+		warranty: "",
+		dealerName: "",
+		image: "",
+	});
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      setSaving(true);
-      let imageUrl = form.image;
+	const [file, setFile] = useState(null);
+	const [saving, setSaving] = useState(false);
 
-      if (file) {
-        imageUrl = await uploadToCloudinary(file);
-      }
+	// Fetch categories from API
+	useEffect(() => {
+		dispatch(fetchCategories());
+	}, [dispatch]);
 
-      const payload = { ...form, image: imageUrl };
+	// Set form values when editing
+	useEffect(() => {
+		if (editingProduct) {
+			setForm(editingProduct);
+		} else {
+			setForm({
+				name: "",
+				category: "",
+				subCategory: "",
+				brand: "",
+				stock: 0,
+				regularPrice: '',
+				sellPrice: '',
+				warranty: "",
+				image: "",
+			});
+		}
+	}, [editingProduct]);
 
-      if (editingProduct) {
-        await dispatch(updateProduct(payload)).unwrap();
-      } else {
-        await dispatch(addProduct(payload)).unwrap();
-      }
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		try {
+			setSaving(true);
 
-      // refresh current page
-      dispatch(fetchProducts({ page: currentPage }));
-      onClose();
-    } catch (err) {
-      alert("Save failed: " + (err.message || err));
-      console.error(err);
-    } finally {
-      setSaving(false);
-    }
-  };
+			let imageUrl = form.image;
+			if (file) {
+				imageUrl = await uploadToCloudinary(file);
+			}
 
-  return (
+			const payload = { ...form, image: imageUrl };
+
+			if (editingProduct) {
+				await dispatch(updateProduct(payload)).unwrap();
+			} else {
+				await dispatch(addProduct(payload)).unwrap();
+			}
+
+			// refresh current page
+			dispatch(fetchProducts({ page: currentPage }));
+			onClose();
+		} catch (err) {
+			alert("Save failed: " + (err.message || err));
+			console.error(err);
+		} finally {
+			setSaving(false);
+		}
+	};
+
+	// Find selected category for showing subcategories
+	const selectedCategory =
+		categories.find((cat) => cat.name === form.category) || {};
+
+	return (
 		<div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
 			<div className="bg-gray-900 text-gray-100 rounded-lg w-full max-w-2xl p-6">
-				<h3 className="text-lg mb-3">
+				<h3 className="text-lg mb-3 font-semibold">
 					{editingProduct ? "Edit Product" : "Add Product"}
 				</h3>
 
-				<form onSubmit={handleSubmit} className="grid gap-2">
+				<form onSubmit={handleSubmit} className="grid gap-3">
+					{/* Product Name */}
 					<input
 						required
-						placeholder="Name"
+						placeholder="Product Name"
 						value={form.name}
 						onChange={(e) =>
 							setForm({ ...form, name: e.target.value })
@@ -87,18 +108,31 @@ export default function ProductFormModal({ editingProduct, onClose, currentPage 
 						className="p-2 rounded bg-gray-800"
 					/>
 
+					{/* Category & Subcategory */}
 					<div className="flex gap-2">
 						<select
 							required
 							value={form.category}
 							onChange={(e) =>
-								setForm({ ...form, category: e.target.value })
+								setForm({
+									...form,
+									category: e.target.value,
+									subCategory: "",
+								})
 							}
 							className="p-2 rounded bg-gray-800 flex-1">
 							<option value="">Select category</option>
-							<option value="Mobile">Mobile</option>
-							<option value="Electrical">Electrical</option>
+							{catLoading ? (
+								<option>Loading...</option>
+							) : (
+								categories.map((cat) => (
+									<option key={cat.name} value={cat.name}>
+										{cat.name}
+									</option>
+								))
+							)}
 						</select>
+
 						<select
 							required
 							value={form.subCategory}
@@ -108,17 +142,19 @@ export default function ProductFormModal({ editingProduct, onClose, currentPage 
 									subCategory: e.target.value,
 								})
 							}
-							className="p-2 rounded bg-gray-800 flex-1">
-							<option value="">Select sub category</option>
-							<option value="Mobile">গরিলা</option>
-							<option value="Electrical">ব্যাক কভার</option>
-							<option value="Mobile">তার</option>
-							<option value="Electrical">সকেট</option>
-							<option value="Electrical">সুইচ</option>
+							className="p-2 rounded bg-gray-800 flex-1"
+							disabled={!selectedCategory.subCategories}>
+							<option value="">Select subcategory</option>
+							{selectedCategory.subCategories?.map((sub) => (
+								<option key={sub} value={sub}>
+									{sub}
+								</option>
+							))}
 						</select>
 					</div>
 
-					<div className="flex gap-2">
+					{/* Brand & Stock */}
+					<div className="flex gap-2 items-center">
 						<input
 							placeholder="Brand"
 							value={form.brand}
@@ -127,7 +163,6 @@ export default function ProductFormModal({ editingProduct, onClose, currentPage 
 							}
 							className="p-2 rounded bg-gray-800 flex-1"
 						/>
-						<label htmlFor="">Stock</label>
 						<input
 							type="number"
 							placeholder="Stock"
@@ -142,8 +177,8 @@ export default function ProductFormModal({ editingProduct, onClose, currentPage 
 						/>
 					</div>
 
-					<div className="flex gap-2">
-						<label htmlFor="">Regular Price</label>
+					{/* Regular & Sell Price */}
+					<div className="flex gap-2 items-center">
 						<input
 							type="number"
 							placeholder="Regular Price"
@@ -156,7 +191,6 @@ export default function ProductFormModal({ editingProduct, onClose, currentPage 
 							}
 							className="p-2 rounded bg-gray-800 flex-1"
 						/>
-						<label htmlFor="">Sell Price</label>
 						<input
 							type="number"
 							placeholder="Sell Price"
@@ -171,6 +205,7 @@ export default function ProductFormModal({ editingProduct, onClose, currentPage 
 						/>
 					</div>
 
+					{/* Warranty */}
 					<input
 						placeholder="Warranty (e.g., 6 months)"
 						value={form.warranty}
@@ -179,15 +214,10 @@ export default function ProductFormModal({ editingProduct, onClose, currentPage 
 						}
 						className="p-2 rounded bg-gray-800"
 					/>
-					<input
-						placeholder="Dealer Name"
-						value={form.dealerName}
-						onChange={(e) =>
-							setForm({ ...form, dealerName: e.target.value })
-						}
-						className="p-2 rounded bg-gray-800"
-					/>
 
+				
+
+					{/* Image Upload */}
 					<div className="flex items-center gap-3">
 						<input
 							id="img"
@@ -211,6 +241,7 @@ export default function ProductFormModal({ editingProduct, onClose, currentPage 
 						)}
 					</div>
 
+					{/* Action Buttons */}
 					<div className="flex justify-end gap-2 mt-3">
 						<button
 							type="button"
@@ -232,5 +263,5 @@ export default function ProductFormModal({ editingProduct, onClose, currentPage 
 				</form>
 			</div>
 		</div>
-  );
+	);
 }
