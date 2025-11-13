@@ -25,7 +25,6 @@ export default function ProductFormModal({
     regularPrice: 0,
     sellPrice: 0,
     warranty: "",
-    dealerName: "",
     image: "",
   });
 
@@ -99,117 +98,173 @@ export default function ProductFormModal({
 
         <form onSubmit={handleSubmit} className="grid gap-4">
           {/* Product Name */}
-          <input
-            required
-            placeholder="Product Name"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="p-3 rounded bg-gray-800 w-full"
-          />
+          <div className="flex flex-col">
+            <label htmlFor="name" className="mb-1 text-gray-200">
+              Product Name
+            </label>
+            <input
+              id="name"
+              required
+              placeholder="Enter product name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="p-3 rounded bg-gray-800 w-full placeholder-gray-400"
+            />
+          </div>
 
           {/* Category & Subcategory */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <select
-              required
-              value={form.category}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  category: e.target.value,
-                  subCategory: "",
-                })
-              }
-              className="p-3 rounded bg-gray-800 w-full"
-            >
-              <option value="">Select category</option>
-              {catLoading ? (
-                <option>Loading...</option>
-              ) : (
-                categories.map((cat) => (
-                  <option key={cat.name} value={cat.name}>
-                    {cat.name}
-                  </option>
-                ))
-              )}
-            </select>
+            <div className="flex flex-col">
+              <label htmlFor="category" className="mb-1 text-gray-200">
+                Category
+              </label>
+              <select
+                id="category"
+                required
+                value={form.category}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    category: e.target.value,
+                    subCategory: "",
+                  })
+                }
+                className="p-3 rounded bg-gray-800 w-full text-gray-200 placeholder-gray-400"
+              >
+                <option value="">Select category</option>
+                {catLoading ? (
+                  <option>Loading...</option>
+                ) : (
+                  categories.map((cat) => (
+                    <option key={cat.name} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
 
-            <select
-              required
-              value={form.subCategory}
-              onChange={(e) =>
-                setForm({ ...form, subCategory: e.target.value })
-              }
-              className="p-3 rounded bg-gray-800 w-full"
-              disabled={!selectedCategory.subCategories}
-            >
-              <option value="">Select subcategory</option>
-              {selectedCategory.subCategories?.map((sub) => (
-                <option key={sub} value={sub}>
-                  {sub}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-col">
+              <label htmlFor="subCategory" className="mb-1 text-gray-200">
+                Subcategory
+              </label>
+              <select
+                id="subCategory"
+                required
+                value={form.subCategory}
+                onChange={(e) =>
+                  setForm({ ...form, subCategory: e.target.value })
+                }
+                className="p-3 rounded bg-gray-800 w-full text-gray-200 placeholder-gray-400"
+                disabled={!selectedCategory.subCategories}
+              >
+                <option value="">Select subcategory</option>
+                {selectedCategory.subCategories?.map((sub) => (
+                  <option key={sub} value={sub}>
+                    {sub}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Brand & Stock */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input
-              placeholder="Brand"
-              value={form.brand}
-              onChange={(e) => setForm({ ...form, brand: e.target.value })}
-              className="p-3 rounded bg-gray-800 w-full"
-            />
-            <input
-              type="number"
-              placeholder="Stock"
-              value={form.stock}
-              onChange={(e) =>
-                setForm({ ...form, stock: Number(e.target.value) })
-              }
-              className="p-3 rounded bg-gray-800 w-full"
-            />
+            <div className="flex flex-col">
+              <label htmlFor="brand" className="mb-1 text-gray-200">
+                Brand
+              </label>
+              <input
+                id="brand"
+                placeholder="Enter brand"
+                value={form.brand}
+                onChange={(e) => setForm({ ...form, brand: e.target.value })}
+                className="p-3 rounded bg-gray-800 w-full placeholder-gray-400"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label htmlFor="stock" className="mb-1 text-gray-200">
+                Stock
+              </label>
+              <input
+                id="stock"
+                type="number"
+                placeholder="Enter stock"
+                value={form.stock}
+                onChange={(e) =>
+                  setForm({ ...form, stock: Number(e.target.value) })
+                }
+                className="p-3 rounded bg-gray-800 w-full placeholder-gray-400"
+              />
+            </div>
           </div>
 
           {/* Prices */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input
-              type="number"
-              placeholder="Regular Price"
-              value={form.regularPrice}
-              onChange={(e) =>
-                setForm({ ...form, regularPrice: Number(e.target.value) })
-              }
-              className="p-3 rounded bg-gray-800 w-full"
-            />
-            <input
-              type="number"
-              placeholder="Sell Price"
-              value={form.sellPrice}
-              onChange={(e) =>
-                setForm({ ...form, sellPrice: Number(e.target.value) })
-              }
-              className="p-3 rounded bg-gray-800 w-full"
-            />
+            <div className="flex flex-col">
+              <label htmlFor="regularPrice" className="mb-1 text-gray-200">
+                Regular Price
+              </label>
+              <input
+                id="regularPrice"
+                type="number"
+                placeholder="Enter regular price"
+                value={form.regularPrice}
+                onChange={(e) =>
+                  setForm({ ...form, regularPrice: Number(e.target.value) })
+                }
+                className="p-3 rounded bg-gray-800 w-full placeholder-gray-400"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label htmlFor="sellPrice" className="mb-1 text-gray-200">
+                Sell Price
+              </label>
+              <input
+                id="sellPrice"
+                type="number"
+                placeholder="Enter sell price"
+                value={form.sellPrice}
+                onChange={(e) =>
+                  setForm({ ...form, sellPrice: Number(e.target.value) })
+                }
+                className="p-3 rounded bg-gray-800 w-full placeholder-gray-400"
+              />
+            </div>
           </div>
 
           {/* Warranty */}
-          <input
-            placeholder="Warranty (e.g., 6 months)"
-            value={form.warranty}
-            onChange={(e) => setForm({ ...form, warranty: e.target.value })}
-            className="p-3 rounded bg-gray-800 w-full"
-          />
+          <div className="flex flex-col">
+            <label htmlFor="warranty" className="mb-1 text-gray-200">
+              Warranty
+            </label>
+            <input
+              id="warranty"
+              placeholder="6 months, 1 year etc."
+              value={form.warranty}
+              onChange={(e) => setForm({ ...form, warranty: e.target.value })}
+              className="p-3 rounded bg-gray-800 w-full placeholder-gray-400"
+            />
+          </div>
 
           {/* Image Upload */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <input
-              id="img"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setFile(e.target.files[0])}
-              className="text-sm"
-            />
-            <div className="flex gap-2">
+            <div className="flex flex-col">
+              <label htmlFor="img" className="mb-1 text-gray-200">
+                Product Image
+              </label>
+              <input
+                id="img"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setFile(e.target.files[0])}
+                className="text-sm text-gray-200"
+              />
+            </div>
+
+            <div className="flex gap-2 mt-2 sm:mt-0">
               {form.image && !file && (
                 <img
                   src={form.image}
