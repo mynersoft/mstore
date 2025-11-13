@@ -69,7 +69,7 @@ const dueSum = Array.isArray(dues)
 			</div>
 
 			{/* Stat Cards */}
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 text-gray-200">
 				<StatCard
 					title="Daily Sell"
 					value={`${dailySell} tk`}
