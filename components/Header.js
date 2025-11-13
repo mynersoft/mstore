@@ -12,6 +12,7 @@ export default function Header() {
 	const navItems = [
 		{ name: "Dashboard", path: "/" },
 		{ name: "Products", path: "/products" },
+		{ name: "Sale", path: "/sale" },
 		{ name: "Service", path: "/service" },
 		{ name: "Dues", path: "/dues" },
 	];

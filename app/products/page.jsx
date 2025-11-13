@@ -94,7 +94,7 @@ export default function ProductsPage() {
 									<td className="p-3">{p.brand}</td>
 									<td className="p-3">{p.stock}</td>
 									<td className="p-3">{p.regularPrice}</td>
-									<td className="p-3">৳{p.sellPrice}</td>
+									<td className="p-3">{p.sellPrice}</td>
 									<td className="p-3 text-center flex gap-2 justify-center">
 										<button
 											onClick={() => {

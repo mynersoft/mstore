@@ -36,7 +36,10 @@ export const deleteDue = createAsyncThunk("dues/delete", async (id) => {
 
 const dueSlice = createSlice({
 	name: "dues",
-	initialState: { items: [], loading: false },
+	initialState: {
+		items: [],
+		loading: false
+	},
 	extraReducers: (builder) => {
 		builder
 			.addCase(fetchDues.pending, (state) => {

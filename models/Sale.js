@@ -1,15 +1,24 @@
-import mongoose, { Schema, models, model } from "mongoose";
+import mongoose from "mongoose";
 
-const saleSchema = new Schema({
-	productId: {
-		type: mongoose.Schema.Types.ObjectId, // ✅ correct way
-		ref: "Product",
-	},
-	qty: Number,
-	price: Number,
-	total: Number,
-	date: { type: Date, default: Date.now },
+const ItemSchema = new mongoose.Schema({
+	name: { type: String, required: true },
+	qty: { type: Number, default: 1 },
+	price: { type: Number, default: 0 },
+	total: { type: Number, default: 0 },
 });
 
-const Sale = models.Sale || model("Sale", saleSchema);
-export default Sale;
+const SaleSchema = new mongoose.Schema({
+	customer: {
+		name: { type: String, default: "Walk-in Customer" },
+		phone: { type: String, default: "" },
+	},
+	items: [ItemSchema], // <-- array of subdocuments
+	discount: { type: Number, default: 0 },
+	subtotal: { type: Number, default: 0 },
+	total: { type: Number, default: 0 },
+	invoice: { type: String, required: true },
+	date: { type: Date, default: Date.now },
+	createdAt: { type: Date, default: Date.now },
+});
+
+export default mongoose.models.Sale || mongoose.model("Sale", SaleSchema);

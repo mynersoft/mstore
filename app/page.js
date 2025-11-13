@@ -15,8 +15,7 @@ import { fetchProducts } from "@/redux/productSlice";
 export default function DashboardPage() {
 	const products = useSelector((state) => state?.products?.items || []);
 	const dues = useSelector((state) => state?.dues?.items || []);
-
-	const dispatch = useDispatch();
+	const { totalAmount } = useSelector((state) => state.products);
 
 	const [dailySell, setDailySell] = useState(0);
 	const [monthlySell, setMonthlySell] = useState(0);
@@ -25,6 +24,7 @@ export default function DashboardPage() {
 	const [topProducts, setTopProducts] = useState([]);
 	const [stockOut, setStockOut] = useState([]);
 	const [totalDue, setTotalDue] = useState(0);
+	const [totalAmountProducts, setTotalAmountProducts] = useState(0);
 
 	const [salesData] = useState([
 		{ date: "2025-10-01", sales: 300, profit: 100 },
@@ -45,13 +45,15 @@ export default function DashboardPage() {
 		setTopProducts(getTopProducts(products));
 		setStockOut(getStockOutProducts(products));
 
-		const dueSum = dues.reduce((sum, d) => sum + Number(d.amount || 0), 0);
+const dueSum = Array.isArray(dues)
+	? dues.reduce((sum, d) => sum + Number(d.amount || 0), 0)
+	: 0;
+
 		setTotalDue(dueSum);
+		setTotalAmountProducts(totalAmount);
 	}, [salesData, products, dues]);
-	useEffect(() => {
-		dispatch(fetchDues());
-		dispatch(fetchProducts());
-	}, [dispatch]);
+	
+	
 
 	return (
 		<div className="p-6 space-y-6">
@@ -70,28 +72,33 @@ export default function DashboardPage() {
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
 				<StatCard
 					title="Daily Sell"
-					value={`৳${dailySell}`}
+					value={`${dailySell} tk`}
 					color="blue"
 				/>
 				<StatCard
 					title="Daily Profit"
-					value={`৳${dailyProfit}`}
+					value={`${dailyProfit} tk`}
 					color="green"
 				/>
 				<StatCard
 					title="Monthly Sell"
-					value={`৳${monthlySell}`}
+					value={`${monthlySell} tk`}
 					color="purple"
 				/>
 				<StatCard
 					title="Monthly Profit"
-					value={`৳${monthlyProfit}`}
+					value={`${monthlyProfit} tk`}
 					color="orange"
 				/>
 				<StatCard
 					title="Total Due"
-					value={`৳${totalDue}`}
+					value={`${totalDue} tk`}
 					color="red"
+				/>
+				<StatCard
+					title="Total Amount of Products"
+					value={`${totalAmountProducts} tk`}
+					color="green"
 				/>
 			</div>
 

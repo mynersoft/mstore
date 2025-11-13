@@ -1,4 +1,3 @@
-// redux/productSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
@@ -6,10 +5,7 @@ import axios from "axios";
 export const fetchProducts = createAsyncThunk(
 	"products/fetchProducts",
 	async ({ page = 1, limit = 10 } = {}) => {
-		const res = await axios.get(
-			`/api/products`
-		);
-		// If your API returns { products: [...] }, extract it
+		const res = await axios.get(`/api/products`);
 		return Array.isArray(res.data) ? res.data : res.data.products || [];
 	}
 );
@@ -44,9 +40,10 @@ export const deleteProduct = createAsyncThunk(
 const productSlice = createSlice({
 	name: "products",
 	initialState: {
-		items: [], // make sure this is an array
+		items: [],
 		loading: false,
 		error: null,
+		totalAmount: 0,
 	},
 	reducers: {},
 	extraReducers: (builder) => {
@@ -60,6 +57,12 @@ const productSlice = createSlice({
 					? action.payload
 					: [];
 				state.loading = false;
+
+				// ✅ Calculate total amount
+				state.totalAmount = state.items.reduce(
+					(sum, p) => sum + (p.stock || 0) * (p.regularPrice || 0),
+					0
+				);
 			})
 			.addCase(fetchProducts.rejected, (state, action) => {
 				state.loading = false;
@@ -69,7 +72,12 @@ const productSlice = createSlice({
 			// Add Product
 			.addCase(addProduct.fulfilled, (state, action) => {
 				if (!Array.isArray(state.items)) state.items = [];
-				state.items.unshift(action.payload); // add to beginning
+				state.items.unshift(action.payload);
+
+				// ✅ Update total
+				state.totalAmount +=
+					(action.payload.stock || 0) *
+					(action.payload.regularPrice || 0);
 			})
 			.addCase(addProduct.rejected, (state, action) => {
 				state.error = action.error.message;
@@ -78,8 +86,15 @@ const productSlice = createSlice({
 			// Update Product
 			.addCase(updateProduct.fulfilled, (state, action) => {
 				if (!Array.isArray(state.items)) state.items = [];
+
 				state.items = state.items.map((item) =>
 					item._id === action.payload._id ? action.payload : item
+				);
+
+				// ✅ Recalculate total after update
+				state.totalAmount = state.items.reduce(
+					(sum, p) => sum + (p.stock || 0) * (p.regularPrice || 0),
+					0
 				);
 			})
 			.addCase(updateProduct.rejected, (state, action) => {
@@ -89,8 +104,15 @@ const productSlice = createSlice({
 			// Delete Product
 			.addCase(deleteProduct.fulfilled, (state, action) => {
 				if (!Array.isArray(state.items)) state.items = [];
+
 				state.items = state.items.filter(
 					(item) => item._id !== action.payload
+				);
+
+				// ✅ Recalculate total after delete
+				state.totalAmount = state.items.reduce(
+					(sum, p) => sum + (p.stock || 0) * (p.regularPrice || 0),
+					0
 				);
 			})
 			.addCase(deleteProduct.rejected, (state, action) => {
