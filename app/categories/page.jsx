@@ -74,7 +74,7 @@ export default function CategoriesPage() {
 					<p className="text-gray-500">No categories found.</p>
 				) : (
 					<div className="overflow-x-auto">
-						<table className="w-full min-w-[500px] border-collapse">
+						<table className="w-full min-w-[500px] border-collapse text-gray-200">
 							<thead>
 								<tr className="border-b">
 									<th className="p-2 text-left">Name</th>
