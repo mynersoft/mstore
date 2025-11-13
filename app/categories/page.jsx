@@ -54,7 +54,7 @@ export default function CategoriesPage() {
 	};
 
 	return (
-		<div className="p-6 space-y-6">
+		<div className="p-4 sm:p-6 space-y-6">
 			<h1 className="text-2xl font-bold flex justify-between items-center">
 				📦 Manage Categories
 				<button
@@ -65,7 +65,7 @@ export default function CategoriesPage() {
 			</h1>
 
 			{/* Category List */}
-			<div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-6">
+			<div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-4 sm:p-6">
 				<h2 className="text-xl font-semibold mb-4">All Categories</h2>
 
 				{loading ? (
@@ -73,41 +73,43 @@ export default function CategoriesPage() {
 				) : categories.length === 0 ? (
 					<p className="text-gray-500">No categories found.</p>
 				) : (
-					<table className="w-full border-collapse">
-						<thead>
-							<tr className="border-b">
-								<th className="p-2 text-left">Name</th>
-								<th className="p-2 text-left">Subcategories</th>
-								<th className="p-2 text-left">Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{categories.map((cat, index) => (
-								<tr
-									key={cat._id || index}
-									className="border-b hover:bg-gray-50">
-									<td className="p-2">{cat.name}</td>
-									<td className="p-2">
-										{(cat.subCategories || []).join(", ")}
-									</td>
-									<td className="p-2 flex gap-2">
-										<button
-											onClick={() => handleEdit(cat)}
-											className="px-3 py-1 bg-yellow-500 text-white rounded-md">
-											Edit
-										</button>
-										<button
-											onClick={() =>
-												handleDelete(cat._id)
-											}
-											className="px-3 py-1 bg-red-600 text-white rounded-md">
-											Delete
-										</button>
-									</td>
+					<div className="overflow-x-auto">
+						<table className="w-full min-w-[500px] border-collapse">
+							<thead>
+								<tr className="border-b">
+									<th className="p-2 text-left">Name</th>
+									<th className="p-2 text-left">Subcategories</th>
+									<th className="p-2 text-left">Actions</th>
 								</tr>
-							))}
-						</tbody>
-					</table>
+							</thead>
+							<tbody>
+								{categories.map((cat, index) => (
+									<tr
+										key={cat._id || index}
+										className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
+										<td className="p-2">{cat.name}</td>
+										<td className="p-2">
+											{(cat.subCategories || []).join(", ")}
+										</td>
+										<td className="p-2 flex gap-2 flex-wrap">
+											<button
+												onClick={() => handleEdit(cat)}
+												className="px-3 py-1 bg-yellow-500 text-white rounded-md">
+												Edit
+											</button>
+											<button
+												onClick={() =>
+													handleDelete(cat._id)
+												}
+												className="px-3 py-1 bg-red-600 text-white rounded-md">
+												Delete
+											</button>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
 				)}
 			</div>
 
