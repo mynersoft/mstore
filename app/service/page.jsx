@@ -17,7 +17,6 @@ export default function ServiceListPage() {
 	const { list, loading, total, stats } = useSelector((s) => s.service);
 
 	useEffect(() => {
-		dispatch(fetchServices());
 		dispatch(fetchServiceStats({ type: "daily" })); // initial stats
 	}, [dispatch]);
 
