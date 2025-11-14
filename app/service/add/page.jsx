@@ -57,7 +57,7 @@ export default function AddServicePage() {
 			<h2 className="text-xl font-bold mb-4">Add Service Record</h2>
 			<form
 				onSubmit={handleSubmit}
-				className="space-y-3 bg-gray-900 p-4 rounded">
+				className="space-y-3 text-gray-200 bg-gray-900 p-4 rounded">
 				<input
 					name="customerName"
 					value={form.customerName}
