@@ -19,7 +19,7 @@ export default function ProductsPage() {
 	const [showModal, setShowModal] = useState(false);
 	const [showCatModal, setShowCatModal] = useState(false);
 	const [editingProduct, setEditingProduct] = useState(null);
-
+	const [open, setOpen] = useState(false);
 	const handleCancel = () => {
 		setShowCatModal(false);
 	};
@@ -45,7 +45,7 @@ export default function ProductsPage() {
 					<button
 						onClick={() => {
 							setEditingProduct(null);
-							setShowModal(true);
+							setOpen(true);
 						}}
 						className="bg-green-600 px-4 py-2 rounded">
 						+ Add Product
@@ -149,16 +149,19 @@ export default function ProductsPage() {
 			</div>
 
 			{/* modal */}
-			{showModal && (
-				<ProductFormModal
-					editingProduct={editingProduct}
-					onClose={() => {
-						setShowModal(false);
-						setEditingProduct(null);
-						dispatch(fetchProducts({ page: pageLocal, limit }));
-					}}
-					currentPage={pageLocal}
-				/>
+			{open && (
+				// <ProductFormModal
+				// 	open={open}
+				// 	editingProduct={editingProduct}
+				// 	onClose={() => {
+				// 		setOpen(false);
+				// 		setEditingProduct(null);
+				// 		dispatch(fetchProducts({ page: pageLocal, limit }));
+				// 	}}
+				// 	currentPage={pageLocal}
+				// />
+
+				<ProductFormModal open={open} onClose={() => setOpen(false)} />
 			)}
 			{showCatModal && (
 				<CategoryForm

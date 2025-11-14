@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { addService } from "@/redux/serviceSlice";
-import { showAddConfirm } from "@/components/AddConfirm";
 import { useRouter } from "next/navigation";
+import { showAddConfirm } from "@/components/sweetalert/AddConfirm";
 
 export default function AddServicePage() {
 	const dispatch = useDispatch();
