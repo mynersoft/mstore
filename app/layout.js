@@ -1,3 +1,7 @@
+"use-client";
+
+
+
 import "./globals.css";
 import ReduxProvider from "@/app/providers/ReduxProvider";
 import { GlobalInitializer } from "@/components/fetch/GlobalInitializer";
