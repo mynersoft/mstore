@@ -16,6 +16,13 @@ export default function ServiceListPage() {
 	const router = useRouter();
 	const { list, loading, total, stats } = useSelector((s) => s.service);
 
+
+alert(list);
+
+
+
+
+
 	useEffect(() => {
 		dispatch(fetchServiceStats({ type: "daily" })); // initial stats
 	}, [dispatch]);
