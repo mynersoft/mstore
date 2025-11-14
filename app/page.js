@@ -81,13 +81,15 @@ export default function DashboardPage() {
 				/>
 			</div>
 
-			{/* Chart */}
+			{/* Chart 
 			<div className="bg-gray-900 rounded-2xl shadow p-6">
 				<h2 className="text-xl font-semibold mb-4">
 					Sales & Profit Chart
 				</h2>
 				<SalesChart data={salesData} />
 			</div>
+
+*/}
 
 			{/* Top Products */}
 			<div className="bg-gray-900 rounded-2xl shadow p-6">
