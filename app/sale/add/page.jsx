@@ -63,15 +63,7 @@ export default function SellPage() {
 	const handleRemoveItem = (idx) =>
 		setItemsMemo(itemMemo.filter((_, i) => i !== idx));
 
-	// handle save
-
-// Update total when items or discount change
-useEffect(() => {
-	const subtotal = itemMemo.reduce((sum, it) => sum + it.qty * it.price, 0);
-	const totalAmount = subtotal - discount;
-	setTotal(totalAmount);
-}, [itemMemo, discount]);
-
+	// handle save ====================
 	const handleSave = async () => {
 		const subtotal = itemMemo.reduce(
 			(sum, it) => sum + it.qty * it.price,
@@ -88,7 +80,7 @@ useEffect(() => {
 		};
 
 		try {
-			await dispatch(addSale(saleData)); // or use .unwrap() if supported
+			dispatch(addSale(saleData));
 			alert("✅ Sale saved successfully!");
 			setCustomer({ name: "", phone: "" });
 			setItemsMemo([{ name: "", qty: 1, price: 0, total: 0 }]);
@@ -103,6 +95,16 @@ useEffect(() => {
 	useEffect(() => {
 		setInvoiceNo(generateInvoiceNumber());
 	});
+
+	// Update total when items or discount change
+	useEffect(() => {
+		const subtotal = itemMemo.reduce(
+			(sum, it) => sum + it.qty * it.price,
+			0
+		);
+		const totalAmount = subtotal - discount;
+		setTotal(totalAmount);
+	}, [itemMemo, discount]);
 
 	const handlePrint = () => {
 		const content = document.getElementById("memo").innerHTML;

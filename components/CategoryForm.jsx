@@ -32,7 +32,7 @@ export default function CategoryForm({ onSubmit, editingCategory, onCancel }) {
 	return (
 		<form
 			onSubmit={handleSubmit}
-			className="bg-white dark:bg-gray-900 rounded-2xl shadow p-6 space-y-4">
+			className="bg-gray-900 rounded-2xl shadow p-6 space-y-4">
 			<div>
 				<label className="block font-medium">Category Name</label>
 				<input
@@ -64,14 +64,14 @@ export default function CategoryForm({ onSubmit, editingCategory, onCancel }) {
 					className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
 					{editingCategory ? "Update Category" : "Add Category"}
 				</button>
-				{editingCategory && onCancel && (
+				
 					<button
 						type="button"
 						onClick={onCancel}
 						className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
 						Cancel
 					</button>
-				)}
+			
 			</div>
 		</form>
 	);

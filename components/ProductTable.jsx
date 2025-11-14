@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Plus } from "lucide-react";
+import { useSelector } from "react-redux";
 
 // ✅ Simple Modal Component
 function Modal({ isOpen, onClose, children }) {
@@ -22,7 +23,7 @@ function Modal({ isOpen, onClose, children }) {
 }
 
 export default function ProductTable() {
-	const [products, setProducts] = useState([]);
+	const { items } = useSelector((s) => s.products);
 	const [search, setSearch] = useState("");
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [editingProduct, setEditingProduct] = useState(null);
@@ -31,20 +32,9 @@ export default function ProductTable() {
 		price: "",
 		stock: "",
 		image: "",
-		brand: ""
+		brand: "",
 	});
 	const [imagePreview, setImagePreview] = useState("");
-
-	// ✅ Fetch Products
-	useEffect(() => {
-		fetchProducts();
-	}, []);
-
-	async function fetchProducts() {
-		const res = await fetch("/api/products");
-		const data = await res.json();
-		setProducts(data);
-	}
 
 	// ✅ Upload image to Cloudinary
 	const handleImageUpload = async (file) => {
@@ -139,7 +129,7 @@ export default function ProductTable() {
 		}
 	};
 
-	const filtered = products.filter((p) =>
+	const filtered = items?.filter((p) =>
 		p.name.toLowerCase().includes(search.toLowerCase())
 	);
 

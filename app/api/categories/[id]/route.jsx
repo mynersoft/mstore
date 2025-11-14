@@ -9,19 +9,22 @@ export async function GET(request, { params }) {
 	return NextResponse.json(p);
 }
 
-export async function PUT(request, { params }) {
-	const body = await request.json();
+
+
+
+export async function PUT(req, { params }) {
 	await connectDB();
+	const { id } = params;
+	const body = await req.json();
 
-	const updated = await Category.findByIdAndUpdate(params.id, body, {
-		new: true,
-	});
-
+	const updated = await Category.findByIdAndUpdate(id, body, { new: true });
 	return NextResponse.json(updated);
 }
 
-export async function DELETE(request, { params }) {
+export async function DELETE(req, { params }) {
 	await connectDB();
-	await Category.findByIdAndDelete(params.id);
-	return NextResponse.json({ message: "Category deleted" });
+	const { id } = params;
+
+	await Category.findByIdAndDelete(id);
+	return NextResponse.json({ success: true });
 }

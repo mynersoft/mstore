@@ -12,7 +12,7 @@ const SaleSchema = new mongoose.Schema({
 		name: { type: String, default: "Walk-in Customer" },
 		phone: { type: String, default: "" },
 	},
-	items: [ItemSchema], // <-- array of subdocuments
+	items: [ItemSchema], 
 	discount: { type: Number, default: 0 },
 	subtotal: { type: Number, default: 0 },
 	total: { type: Number, default: 0 },

@@ -23,15 +23,9 @@ export const addCategory = createAsyncThunk(
 
 // Update category
 export const updateCategory = createAsyncThunk(
-	"categories/updateCategory",
-	async ({ id, ...payload }) => {
-		const res = await axios.put(
-			"/api/categories",
-			{ id, ...payload },
-			{
-				headers: { "Content-Type": "application/json" },
-			}
-		);
+	"categories/update",
+	async ({ id, ...data }) => {
+		const res = await axios.put(`/api/categories/${id}`, data);
 		return res.data;
 	}
 );
@@ -40,13 +34,11 @@ export const updateCategory = createAsyncThunk(
 export const deleteCategory = createAsyncThunk(
 	"categories/deleteCategory",
 	async (id) => {
-		await axios.delete("/api/categories", {
-			data: { id },
-			headers: { "Content-Type": "application/json" },
-		});
-		return id;
+		const res = await axios.delete(`/api/categories/${id}`);
+		return id; // deleted item id return
 	}
 );
+
 
 const categorySlice = createSlice({
 	name: "categories",

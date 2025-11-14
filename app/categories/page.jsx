@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
 	fetchCategories,
@@ -18,10 +18,6 @@ export default function CategoriesPage() {
 
 	const [editingCategory, setEditingCategory] = useState(null);
 	const [showModal, setShowModal] = useState(false);
-
-	useEffect(() => {
-		dispatch(fetchCategories());
-	}, [dispatch]);
 
 	const handleSubmit = (payload) => {
 		if (editingCategory) {
@@ -54,67 +50,74 @@ export default function CategoriesPage() {
 	};
 
 	return (
-		<div className="p-6 space-y-6">
-			<h1 className="text-2xl font-bold flex justify-between items-center">
+		<div className="p-4 md:p-6 space-y-6">
+			{/* HEADER */}
+			<h1 className="text-xl md:text-2xl font-bold flex flex-col md:flex-row justify-between gap-3 md:items-center">
 				📦 Manage Categories
 				<button
 					onClick={handleAddCategory}
-					className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+					className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 w-full md:w-auto">
 					Add Category
 				</button>
 			</h1>
 
 			{/* Category List */}
-			<div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-6">
-				<h2 className="text-xl font-semibold mb-4">All Categories</h2>
+			<div className="bg-gray-900 rounded-2xl shadow p-4 md:p-6">
+				<h2 className="text-lg md:text-xl font-semibold mb-4">
+					All Categories
+				</h2>
 
 				{loading ? (
 					<p>Loading...</p>
 				) : categories.length === 0 ? (
 					<p className="text-gray-500">No categories found.</p>
 				) : (
-					<table className="w-full border-collapse">
-						<thead>
-							<tr className="border-b">
-								<th className="p-2 text-left">Name</th>
-								<th className="p-2 text-left">Subcategories</th>
-								<th className="p-2 text-left">Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{categories.map((cat, index) => (
-								<tr
-									key={cat._id || index}
-									className="border-b hover:bg-gray-50">
-									<td className="p-2">{cat.name}</td>
-									<td className="p-2">
-										{(cat.subCategories || []).join(", ")}
-									</td>
-									<td className="p-2 flex gap-2">
-										<button
-											onClick={() => handleEdit(cat)}
-											className="px-3 py-1 bg-yellow-500 text-white rounded-md">
-											Edit
-										</button>
-										<button
-											onClick={() =>
-												handleDelete(cat._id)
-											}
-											className="px-3 py-1 bg-red-600 text-white rounded-md">
-											Delete
-										</button>
-									</td>
+					<div className="overflow-x-auto">
+						<table className="w-full border-collapse text-gray-200 ">
+							<thead>
+								<tr className="border-b border-gray-700 text-left">
+									<th className="p-2">Name</th>
+									<th className="p-2">Subcategories</th>
+									<th className="p-2">Actions</th>
 								</tr>
-							))}
-						</tbody>
-					</table>
+							</thead>
+							<tbody>
+								{categories.map((cat, index) => (
+									<tr
+										key={cat._id || index}
+										className="border-b border-gray-800 hover:bg-gray-800">
+										<td className="p-2">{cat.name}</td>
+										<td className="p-2">
+											{(cat.subCategories || []).join(
+												", "
+											)}
+										</td>
+										<td className="p-2 flex flex-col md:flex-row gap-2">
+											<button
+												onClick={() => handleEdit(cat)}
+												className="px-3 py-1 bg-yellow-500 text-white rounded-md w-full md:w-auto">
+												Edit
+											</button>
+											<button
+												onClick={() =>
+													handleDelete(cat._id)
+												}
+												className="px-3 py-1 bg-red-600 text-white rounded-md w-full md:w-auto">
+												Delete
+											</button>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
 				)}
 			</div>
 
 			{/* Modal */}
 			{showModal && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-					<div className="bg-gray-900 text-gray-100 rounded-lg w-full max-w-lg p-6">
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+					<div className="bg-gray-900 text-gray-100 rounded-lg w-full max-w-lg p-4 md:p-6">
 						<h3 className="text-lg mb-3 font-semibold">
 							{editingCategory ? "Edit Category" : "Add Category"}
 						</h3>

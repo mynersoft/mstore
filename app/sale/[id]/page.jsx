@@ -1,20 +1,21 @@
 "use client";
+import { useEffect } from "react";
+import { fetchSingleSale } from "@/redux/saleSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "next/navigation";
 
-import { useEffect, useState } from "react";
-
-export default function SaleInvoice({ params }) {
-	const [sale, setSale] = useState(null);
+export default function SaleInvoice() {
+	const dispatch = useDispatch();
+	const { id } = useParams();
+	const { singleSale, loading } = useSelector((state) => state.sales);
 
 	useEffect(() => {
-		async function fetchSale() {
-			const res = await fetch(`/api/sale/${params.id}`);
-			const data = await res.json();
-			setSale(data);
-		}
-		fetchSale();
-	}, [params.id]);
+		dispatch(fetchSingleSale(id));
+	}, [id]);
+	
 
-	if (!sale) return <div className="p-5 text-center">Loading...</div>;
+	if (loading || !singleSale)
+		return <div className="p-5 text-center">Loading...</div>;
 
 	return (
 		<div className="max-w-4xl mx-auto bg-gray-950 text-gray-100 p-10 rounded-lg mt-10 shadow-lg">
@@ -30,7 +31,8 @@ export default function SaleInvoice({ params }) {
 					</p>
 					<p className="text-sm text-gray-300">Mobile: 01868944080</p>
 					<p className="text-sm text-gray-300">
-						Date: {new Date(sale.date).toLocaleDateString("en-US")}
+						Date:{" "}
+						{new Date(singleSale.date).toLocaleDateString("en-US")}
 					</p>
 				</div>
 
@@ -39,17 +41,17 @@ export default function SaleInvoice({ params }) {
 					<p>
 						<span className="text-gray-400">Customer:</span>{" "}
 						<span className="font-semibold">
-							{sale.customerName || "N/A"}
+							{singleSale.customer?.name || "N/A"}
 						</span>
 					</p>
 					<p>
 						<span className="text-gray-400">Phone:</span>{" "}
-						{sale.phone || "N/A"}
+						{singleSale.customer?.phone || "N/A"}
 					</p>
 					<p>
 						<span className="text-gray-400">Invoice:</span>{" "}
 						<span className="font-mono text-gray-100">
-							{sale.invoice}
+							{singleSale.invoice}
 						</span>
 					</p>
 				</div>
@@ -66,7 +68,7 @@ export default function SaleInvoice({ params }) {
 					</tr>
 				</thead>
 				<tbody>
-					{sale.items.map((item, idx) => (
+					{singleSale.items?.map((item, idx) => (
 						<tr
 							key={idx}
 							className="hover:bg-gray-900 transition-colors">
@@ -89,10 +91,10 @@ export default function SaleInvoice({ params }) {
 
 			{/* Totals */}
 			<div className="text-right text-sm space-y-1">
-				<p>Subtotal: {sale.subtotal} Tk</p>
-				<p>Discount: {sale.discount} Tk</p>
+				<p>Subtotal: {singleSale.subtotal} Tk</p>
+				<p>Discount: {singleSale.discount} Tk</p>
 				<p className="text-lg font-semibold text-white">
-					Total: {sale.total} Tk
+					Total: {singleSale.total} Tk
 				</p>
 			</div>
 

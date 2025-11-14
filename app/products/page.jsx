@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts, deleteProduct, setPage } from "@/redux/productSlice";
 import ProductFormModal from "@/components/ProductFormModal";
-import AddCategoryModal from "@/components/AddCategoryModal";
+import CategoryForm from "@/components/CategoryForm";
 
 export default function ProductsPage() {
 	const dispatch = useDispatch();
@@ -19,6 +19,10 @@ export default function ProductsPage() {
 	const [showModal, setShowModal] = useState(false);
 	const [showCatModal, setShowCatModal] = useState(false);
 	const [editingProduct, setEditingProduct] = useState(null);
+
+	const handleCancel = () => {
+		setShowCatModal(false);
+	};
 
 	useEffect(() => {
 		dispatch(fetchProducts({ page: pageLocal, limit }));
@@ -157,12 +161,12 @@ export default function ProductsPage() {
 				/>
 			)}
 			{showCatModal && (
-				<AddCategoryModal
+				<CategoryForm
 					editingProduct={editingProduct}
+					onCancel={handleCancel}
 					onClose={() => {
 						setShowCatModal(false);
 						setEditingProduct(null);
-						// dispatch(fetchProducts({ page: pageLocal, limit }));
 					}}
 					currentPage={pageLocal}
 				/>

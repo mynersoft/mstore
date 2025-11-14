@@ -2,18 +2,38 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/dbConnect";
 import Product from "@/models/Product";
 
-
 export async function GET(req) {
-	await connectDB();
-	const { searchParams } = new URL(req.url);
-	const page = parseInt(searchParams.get("page")) || 1;
-	const limit = parseInt(searchParams.get("limit")) || 10;
+	try {
+		await connectDB();
 
-	const products = await Product.find()
-		.skip((page - 1) * limit)
-		.limit(limit);
+		const { searchParams } = new URL(req.url);
+		const page = Number(searchParams.get("page")) || 1;
+		const limit = Number(searchParams.get("limit")) || 10;
 
-	return NextResponse.json(products); // <-- return array directly
+		const skip = (page - 1) * limit;
+
+		const products = await Product.find()
+			.skip(skip)
+			.limit(limit)
+			.sort({ createdAt: -1 });
+
+		return NextResponse.json(
+			{
+				success: true,
+				products,
+			},
+			{ status: 200 }
+		);
+	} catch (error) {
+		console.error("GET products error:", error);
+		return NextResponse.json(
+			{
+				success: false,
+				message: "Server Error",
+			},
+			{ status: 500 }
+		);
+	}
 }
 
 

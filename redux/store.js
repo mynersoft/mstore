@@ -5,7 +5,7 @@ import saleReducer from "./saleSlice";
 import serviceReducer from "./serviceSlice";
 import categoryReducer from "./categorySlice";
 import brandReducer from "./brandsSlice";
-import subCategoryReducer from "./subCategoriesSlice";
+import saleprofitReducer from "./saleprofitSlice";
 
 export const store = configureStore({
 	reducer: {
@@ -15,6 +15,6 @@ export const store = configureStore({
 		service: serviceReducer,
 		dues: dueReducer,
 		sales: saleReducer,
-		subCategories: subCategoryReducer,
+		saleprofit: saleprofitReducer,
 	},
 });

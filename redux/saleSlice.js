@@ -12,10 +12,37 @@ export const addSale = createAsyncThunk("sale/add", async (payload) => {
 	return res.data;
 });
 
+export const fetchSingleSale = createAsyncThunk(
+	"sale/fetchSingle",
+	async (id) => {
+		const res = await axios.get(`/api/sale/${id}`);
+		return res.data;
+	}
+);
+
+
+export const deleteSale = createAsyncThunk(
+	"sale/deleteSale",
+	async (id, { rejectWithValue }) => {
+		try {
+			const res = await axios.delete(`/api/sale/${id}`);
+			return { id, ...res.data };
+		} catch (err) {
+			return rejectWithValue(err.response.data);
+		}
+	}
+);
+
+
+
+
+
+
 const saleSlice = createSlice({
 	name: "sale",
 	initialState: {
 		items: [],
+		singleSale: null,
 		loading: false,
 		error: null,
 	},
@@ -27,9 +54,7 @@ const saleSlice = createSlice({
 			})
 			.addCase(fetchSale.fulfilled, (state, action) => {
 				state.loading = false;
-				state.items = Array.isArray(action.payload)
-					? action.payload
-					: [];
+				state.items = action.payload.sales;
 			})
 			.addCase(fetchSale.rejected, (state, action) => {
 				state.loading = false;
@@ -41,6 +66,30 @@ const saleSlice = createSlice({
 			})
 			.addCase(addSale.rejected, (state, action) => {
 				state.error = action.error?.message || "Save failed";
+			})
+			.addCase(fetchSingleSale.pending, (state) => {
+				state.loading = true;
+			})
+			.addCase(fetchSingleSale.fulfilled, (state, action) => {
+				state.loading = false;
+				state.singleSale = action.payload;
+			})
+			.addCase(fetchSingleSale.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.error.message;
+			})
+			.addCase(deleteSale.pending, (state) => {
+				state.loading = true;
+			})
+			.addCase(deleteSale.fulfilled, (state, action) => {
+				state.items = state.items.filter(
+					(sale) => sale._id !== action.payload.id
+				);
+				state.loading = false;
+			})
+			.addCase(deleteSale.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload?.message;
 			});
 	},
 });
