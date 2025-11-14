@@ -3,6 +3,7 @@ import ReduxProvider from "@/app/providers/ReduxProvider";
 import { GlobalInitializer } from "@/components/fetch/GlobalInitializer";
 import Header from "@/components/Header";
 
+import { useEffect, useState } from "react";
 
 import Loader from "@/components/Loader";
 
