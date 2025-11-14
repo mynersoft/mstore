@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
     // সব কন্টেন্ট লোড হলে loader remove হবে
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 800); // smooth delay
+    }, 1200); // smooth delay
 
     return () => clearTimeout(timer);
   }, []);
