@@ -73,7 +73,7 @@ export async function POST(req) {
 			);
 		}
 
-		const rec = await ServiceRecord.create({
+		const rec = await ServiceRecords.create({
 			customerName,
 			phone,
 			servicingeDevice,
