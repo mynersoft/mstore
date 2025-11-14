@@ -50,9 +50,14 @@ export default function CategoriesPage() {
 	};
 
 	return (
+<<<<<<< HEAD
 		<div className="p-4 md:p-6 space-y-6">
 			{/* HEADER */}
 			<h1 className="text-xl md:text-2xl font-bold flex flex-col md:flex-row justify-between gap-3 md:items-center">
+=======
+		<div className="p-4 sm:p-6 space-y-6">
+			<h1 className="text-2xl font-bold flex justify-between items-center">
+>>>>>>> 14e95ea2ea62819a05608e462f5f50ab091a4698
 				📦 Manage Categories
 				<button
 					onClick={handleAddCategory}
@@ -62,10 +67,15 @@ export default function CategoriesPage() {
 			</h1>
 
 			{/* Category List */}
+<<<<<<< HEAD
 			<div className="bg-gray-900 rounded-2xl shadow p-4 md:p-6">
 				<h2 className="text-lg md:text-xl font-semibold mb-4">
 					All Categories
 				</h2>
+=======
+			<div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-4 sm:p-6">
+				<h2 className="text-xl font-semibold mb-4">All Categories</h2>
+>>>>>>> 14e95ea2ea62819a05608e462f5f50ab091a4698
 
 				{loading ? (
 					<p>Loading...</p>
@@ -73,18 +83,28 @@ export default function CategoriesPage() {
 					<p className="text-gray-500">No categories found.</p>
 				) : (
 					<div className="overflow-x-auto">
+<<<<<<< HEAD
 						<table className="w-full border-collapse text-gray-200 ">
 							<thead>
 								<tr className="border-b border-gray-700 text-left">
 									<th className="p-2">Name</th>
 									<th className="p-2">Subcategories</th>
 									<th className="p-2">Actions</th>
+=======
+						<table className="w-full min-w-[500px] border-collapse text-gray-200">
+							<thead>
+								<tr className="border-b">
+									<th className="p-2 text-left">Name</th>
+									<th className="p-2 text-left">Subcategories</th>
+									<th className="p-2 text-left">Actions</th>
+>>>>>>> 14e95ea2ea62819a05608e462f5f50ab091a4698
 								</tr>
 							</thead>
 							<tbody>
 								{categories.map((cat, index) => (
 									<tr
 										key={cat._id || index}
+<<<<<<< HEAD
 										className="border-b border-gray-800 hover:bg-gray-800">
 										<td className="p-2">{cat.name}</td>
 										<td className="p-2">
@@ -96,13 +116,28 @@ export default function CategoriesPage() {
 											<button
 												onClick={() => handleEdit(cat)}
 												className="px-3 py-1 bg-yellow-500 text-white rounded-md w-full md:w-auto">
+=======
+										className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
+										<td className="p-2">{cat.name}</td>
+										<td className="p-2">
+											{(cat.subCategories || []).join(", ")}
+										</td>
+										<td className="p-2 flex gap-2 flex-wrap">
+											<button
+												onClick={() => handleEdit(cat)}
+												className="px-3 py-1 bg-yellow-500 text-white rounded-md">
+>>>>>>> 14e95ea2ea62819a05608e462f5f50ab091a4698
 												Edit
 											</button>
 											<button
 												onClick={() =>
 													handleDelete(cat._id)
 												}
+<<<<<<< HEAD
 												className="px-3 py-1 bg-red-600 text-white rounded-md w-full md:w-auto">
+=======
+												className="px-3 py-1 bg-red-600 text-white rounded-md">
+>>>>>>> 14e95ea2ea62819a05608e462f5f50ab091a4698
 												Delete
 											</button>
 										</td>
