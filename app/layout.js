@@ -9,10 +9,10 @@ import { useEffect, useState } from "react";
 
 import Loader from "@/components/Loader";
 
-export const metadata = {
+{*/ export const metadata = {
   title: "Bismillah Telecom & Servicing",
   description: "Admin dashboard for managing products and sales",
-};
+}; */}
 
 export default function RootLayout({ children }) {
   const [loading, setLoading] = useState(true);
