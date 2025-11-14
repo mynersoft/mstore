@@ -17,13 +17,17 @@ export default function ServiceListPage() {
 	const { list, loading, total, stats } = useSelector((s) => s.service);
 
 
-alert(list);
+
 
 
 
 
 
 	useEffect(() => {
+
+
+alert(list);
+
 		dispatch(fetchServiceStats({ type: "daily" })); // initial stats
 	}, [dispatch]);
 
