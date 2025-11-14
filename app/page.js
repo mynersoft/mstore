@@ -45,11 +45,12 @@ export default function DashboardPage() {
 			{/* Header */}
 
 			{/* Stat Cards */}
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 text-gray-200">
+			<div className="grid  grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 text-gray-200">
 				<StatCard
 					title="Daily Sale"
 					value={`${daily.totalSale || 0} tk`}
 					color="red"
+					className="bg-gray-900"
 				/>
 				<StatCard
 					title="Daily Profit"
