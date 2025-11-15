@@ -1,9 +1,8 @@
-// app/products/page.jsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts, deleteProduct, setPage } from "@/redux/productSlice";
+import { fetchProducts, deleteProduct } from "@/redux/productSlice";
 import ProductFormModal from "@/components/ProductFormModal";
 import CategoryForm from "@/components/CategoryForm";
 
@@ -15,14 +14,13 @@ export default function ProductsPage() {
 		page: reduxPage,
 		limit,
 	} = useSelector((s) => s.products);
+
 	const [pageLocal, setPageLocal] = useState(reduxPage || 1);
 	const [showModal, setShowModal] = useState(false);
 	const [showCatModal, setShowCatModal] = useState(false);
 	const [editingProduct, setEditingProduct] = useState(null);
-	const [open, setOpen] = useState(false);
-	const handleCancel = () => {
-		setShowCatModal(false);
-	};
+
+	const handleCancel = () => setShowCatModal(false);
 
 	useEffect(() => {
 		dispatch(fetchProducts({ page: pageLocal, limit }));
@@ -31,35 +29,34 @@ export default function ProductsPage() {
 	const handleDelete = async (id) => {
 		if (!confirm("Delete product?")) return;
 		await dispatch(deleteProduct(id)).unwrap();
-		// refresh current page
 		dispatch(fetchProducts({ page: pageLocal, limit }));
 	};
 
 	const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
 
 	return (
-		<div className="p-6 min-h-screen  bg-gray-950 text-gray-300">
+		<div className="p-6 min-h-screen bg-gray-950 text-gray-300">
+			{/* HEADER */}
 			<div className="flex justify-between items-center mb-6">
 				<h1 className="text-2xl font-semibold">Products</h1>
 				<div className="flex items-center gap-2">
 					<button
 						onClick={() => {
 							setEditingProduct(null);
-							setOpen(true);
+							setShowModal(true);
 						}}
 						className="bg-green-600 px-4 py-2 rounded">
 						+ Add Product
 					</button>
 					<button
-						onClick={() => {
-							setShowCatModal(true);
-						}}
+						onClick={() => setShowCatModal(true)}
 						className="bg-green-600 px-4 py-2 rounded">
 						+ Add Category
 					</button>
 				</div>
 			</div>
 
+			{/* TABLE */}
 			<div className="overflow-x-auto bg-gray-900 rounded-lg">
 				<table className="w-full text-sm">
 					<thead className="bg-gray-800">
@@ -77,20 +74,12 @@ export default function ProductsPage() {
 					<tbody>
 						{items && items.length ? (
 							items.map((p) => (
-								<tr
-									key={p._id}
-									className="border-b border-gray-800 hover:bg-gray-800/40">
+								<tr key={p._id} className="border-b border-gray-800 hover:bg-gray-800/40">
 									<td className="p-3">
 										{p.image ? (
-											<img
-												src={p.image}
-												alt={p.name}
-												className="w-10 h-10 object-cover rounded"
-											/>
+											<img src={p.image} alt={p.name} className="w-10 h-10 object-cover rounded" />
 										) : (
-											<span className="text-gray-500">
-												No
-											</span>
+											<span className="text-gray-500">No</span>
 										)}
 									</td>
 									<td className="p-3">{p.name}</td>
@@ -118,9 +107,7 @@ export default function ProductsPage() {
 							))
 						) : (
 							<tr>
-								<td
-									colSpan={8}
-									className="p-6 text-center text-gray-500">
+								<td colSpan={8} className="p-6 text-center text-gray-500">
 									No products
 								</td>
 							</tr>
@@ -129,7 +116,7 @@ export default function ProductsPage() {
 				</table>
 			</div>
 
-			{/* pagination */}
+			{/* PAGINATION */}
 			<div className="flex justify-center gap-2 mt-4">
 				{Array.from({ length: totalPages }).map((_, i) => {
 					const num = i + 1;
@@ -138,9 +125,7 @@ export default function ProductsPage() {
 							key={num}
 							onClick={() => setPageLocal(num)}
 							className={`px-3 py-1 rounded ${
-								pageLocal === num
-									? "bg-green-600 text-white"
-									: "bg-gray-800 text-gray-400"
+								pageLocal === num ? "bg-green-600 text-white" : "bg-gray-800 text-gray-400"
 							}`}>
 							{num}
 						</button>
@@ -148,21 +133,20 @@ export default function ProductsPage() {
 				})}
 			</div>
 
-			{/* modal */}
-			{open && (
-				// <ProductFormModal
-				// 	open={open}
-				// 	editingProduct={editingProduct}
-				// 	onClose={() => {
-				// 		setOpen(false);
-				// 		setEditingProduct(null);
-				// 		dispatch(fetchProducts({ page: pageLocal, limit }));
-				// 	}}
-				// 	currentPage={pageLocal}
-				// />
-
-				<ProductFormModal open={open} onClose={() => setOpen(false)} />
+			{/* PRODUCT MODAL */}
+			{showModal && (
+				<ProductFormModal
+					open={showModal}
+					editingProduct={editingProduct}
+					onClose={() => {
+						setShowModal(false);
+						setEditingProduct(null);
+						dispatch(fetchProducts({ page: pageLocal, limit }));
+					}}
+				/>
 			)}
+
+			{/* CATEGORY MODAL */}
 			{showCatModal && (
 				<CategoryForm
 					editingProduct={editingProduct}
