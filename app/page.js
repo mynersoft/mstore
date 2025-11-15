@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import StatCard from "@/components/StatCard";
 import ProductTable from "@/components/ProductTable";
 import SalesChart from "@/components/SalesChart";
 import { useDispatch, useSelector } from "react-redux";
 import { getTopProducts, getStockOutProducts } from "@/lib/dashboardUtils";
-import DashboardStats from "@/components/DashboardStats";
 
 export default function DashboardPage() {
+	const bestSelling = useSelector((state) => state.products.bestSelling);
 	const products = useSelector((state) => state?.products?.items || []);
 	const dues = useSelector((state) => state?.dues?.items || []);
 	const { daily, monthly, breakdown, loading } = useSelector(
@@ -41,7 +42,7 @@ export default function DashboardPage() {
 	}, [salesData, products, dues, totalAmount]);
 
 	return (
-		<div className="p-6 space-y-6">
+		<div className="p-6 space-y-6 bg-gray-800">
 			{/* Header */}
 
 			{/* Stat Cards */}
@@ -50,7 +51,6 @@ export default function DashboardPage() {
 					title="Daily Sale"
 					value={`${daily.totalSale || 0} tk`}
 					color="red"
-					className="bg-gray-900"
 				/>
 				<StatCard
 					title="Daily Profit"
@@ -93,13 +93,66 @@ export default function DashboardPage() {
 
 			{/* Top Products */}
 			<div className="bg-gray-900 rounded-2xl shadow p-6">
-				<h2 className="text-xl font-semibold mb-4">🏆 Top Products</h2>
+				<h2 className="text-xl text-white font-semibold mb-4">
+					🏆 Top Products
+				</h2>
 				{topProducts.length ? (
 					<ProductTable products={topProducts} showActions={false} />
 				) : (
 					<p className="text-gray-400">No top products found.</p>
 				)}
 			</div>
+
+			{/* best selling products  */}
+			{bestSelling && (
+				<div className="p-4 bg-gray-800 rounded-lg text-white">
+					<h2 className="text-xl font-bold mb-3">
+						🔥 Best Selling Product
+					</h2>
+
+					<table className="w-full border border-gray-700 text-left">
+						<thead>
+							<tr className="bg-gray-700">
+								<th className="p-2 border border-gray-600">
+									Image
+								</th>
+								<th className="p-2 border border-gray-600">
+									Name
+								</th>
+								<th className="p-2 border border-gray-600">
+									Brand
+								</th>
+								<th className="p-2 border border-gray-600">
+									Sold
+								</th>
+							</tr>
+						</thead>
+
+						<tbody>
+							<tr>
+								<td className="p-2 border border-gray-700">
+									<Image
+										src={bestSelling.image}
+										alt={bestSelling.name}
+										width={60}
+										height={60}
+										className="rounded object-cover"
+									/>
+								</td>
+								<td className="p-2 border border-gray-700">
+									{bestSelling.name}
+								</td>
+								<td className="p-2 border border-gray-700">
+									{bestSelling.brand}
+								</td>
+								<td className="p-2 border border-gray-700 text-green-400 font-bold">
+									{bestSelling.soldCount} pcs
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			)}
 
 			{/* Stock Out */}
 			<div className="bg-gray-900 rounded-2xl shadow p-6">

@@ -29,7 +29,7 @@ export async function POST(req) {
 		const body = await req.json();
 		const { customer, items, discount, subtotal, total, invoice } = body;
 
-		// 1️⃣ SAVE SALE DATA
+		// Save Sale
 		const newSale = await Sale.create({
 			customer,
 			items,
@@ -39,29 +39,30 @@ export async function POST(req) {
 			invoice,
 		});
 
-		// 2️⃣ FOR EACH ITEM → CREATE PROFIT ENTRY
 		for (let item of items) {
+			// Always find product by ID
 			const product = await Product.findOne({ name: item.name });
 
 			if (!product) continue;
 
-			const sellPrice = item.price; // sale price
-			const regularPrice = product.regularPrice; // buying price
-			const profitPerItem = sellPrice - regularPrice;
+			// PROFIT ENTRY
+			const profitPerItem = item.price - product.regularPrice;
 
-			// Save profit entry
 			await SaleProfit.create({
 				productId: product._id,
 				productName: product.name,
 				qty: item.qty,
-				sellPrice,
-				regularPrice,
-				totalSale: sellPrice * item.qty,
+				sellPrice: item.price,
+				regularPrice: product.regularPrice,
+				totalSale: item.price * item.qty,
 				profit: profitPerItem * item.qty,
 			});
 
-			// 3️⃣ STOCK REDUCE
+			// STOCK & SOLD COUNT UPDATE
 			product.stock -= item.qty;
+
+			product.soldCount = (product.soldCount || 0) + item.qty;
+
 			await product.save();
 		}
 

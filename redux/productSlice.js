@@ -37,6 +37,14 @@ export const deleteProduct = createAsyncThunk(
 	}
 );
 
+export const fetchBestSelling = createAsyncThunk(
+	"products/fetchBestSelling",
+	async () => {
+		const res = await axios.get("/api/products/best-selling");
+		return res.data;
+	}
+);
+
 const productSlice = createSlice({
 	name: "products",
 	initialState: {
@@ -44,6 +52,7 @@ const productSlice = createSlice({
 		loading: false,
 		error: null,
 		totalAmount: 0,
+		bestSelling: null,
 	},
 	reducers: {},
 	extraReducers: (builder) => {
@@ -117,6 +126,9 @@ const productSlice = createSlice({
 			})
 			.addCase(deleteProduct.rejected, (state, action) => {
 				state.error = action.error.message;
+			})
+			.addCase(fetchBestSelling.fulfilled, (state, action) => {
+				state.bestSelling = action.payload;
 			});
 	},
 });

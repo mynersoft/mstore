@@ -50,54 +50,66 @@ export default function CategoriesPage() {
 	};
 
 	return (
-		<div className="p-4 sm:p-6 space-y-6">
+		<div className="p-4 sm:p-6 space-y-6 bg-[#0c0c0f] min-h-screen text-gray-200">
+			{/* Page Header */}
 			<h1 className="text-2xl font-bold flex justify-between items-center">
-				📦 Manage Categories
+				<span>📦 Manage Categories</span>
+
 				<button
 					onClick={handleAddCategory}
-					className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 w-full md:w-auto">
-					Add Category
+					className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:opacity-90 transition-all shadow-lg">
+					+ Add Category
 				</button>
 			</h1>
 
-			{/* Category List */}
-			<div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-4 sm:p-6">
+			{/* Category List Box */}
+			<div className="bg-[#131318] border border-gray-800 rounded-2xl shadow-xl p-4 sm:p-6">
 				<h2 className="text-xl font-semibold mb-4">All Categories</h2>
 
 				{loading ? (
-					<p>Loading...</p>
+					<p className="text-gray-400">Loading...</p>
 				) : categories.length === 0 ? (
 					<p className="text-gray-500">No categories found.</p>
 				) : (
 					<div className="overflow-x-auto">
-						<table className="w-full min-w-[500px] border-collapse text-gray-200">
+						<table className="w-full min-w-[500px] border-collapse">
 							<thead>
-								<tr className="border-b">
-									<th className="p-2 text-left">Name</th>
-									<th className="p-2 text-left">Subcategories</th>
-									<th className="p-2 text-left">Actions</th>
+								<tr className="bg-[#1a1a20] border-b border-gray-800">
+									<th className="p-3 text-left text-gray-300">
+										Name
+									</th>
+									<th className="p-3 text-left text-gray-300">
+										Subcategories
+									</th>
+									<th className="p-3 text-left text-gray-300">
+										Actions
+									</th>
 								</tr>
 							</thead>
+
 							<tbody>
 								{categories.map((cat, index) => (
 									<tr
 										key={cat._id || index}
-										className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
-										<td className="p-2">{cat.name}</td>
-										<td className="p-2">
-											{(cat.subCategories || []).join(", ")}
+										className="border-b border-gray-800 bg-[#0e0e11] hover:bg-[#16161c] transition-colors">
+										<td className="p-3">{cat.name}</td>
+										<td className="p-3 text-gray-400">
+											{(cat.subCategories || []).join(
+												", "
+											)}
 										</td>
-										<td className="p-2 flex gap-2 flex-wrap">
+										<td className="p-3 flex gap-2 flex-wrap">
 											<button
 												onClick={() => handleEdit(cat)}
-												className="px-3 py-1 bg-yellow-500 text-white rounded-md">
+												className="px-3 py-1 rounded-md bg-yellow-600 text-white hover:bg-yellow-700 transition-all">
 												Edit
 											</button>
+
 											<button
 												onClick={() =>
 													handleDelete(cat._id)
 												}
-												className="px-3 py-1 bg-red-600 text-white rounded-md">
+												className="px-3 py-1 rounded-md bg-red-600 text-white hover:bg-red-700 transition-all">
 												Delete
 											</button>
 										</td>
@@ -111,9 +123,9 @@ export default function CategoriesPage() {
 
 			{/* Modal */}
 			{showModal && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-					<div className="bg-gray-900 text-gray-100 rounded-lg w-full max-w-lg p-4 md:p-6">
-						<h3 className="text-lg mb-3 font-semibold">
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+					<div className="bg-[#1a1a1f] border border-gray-700 rounded-2xl w-full max-w-lg p-6 shadow-xl animate-fade-in">
+						<h3 className="text-lg mb-4 font-semibold text-gray-100">
 							{editingCategory ? "Edit Category" : "Add Category"}
 						</h3>
 

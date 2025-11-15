@@ -1,13 +1,11 @@
 "use client";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { fetchProducts } from "@/redux/productSlice";
+import { fetchBestSelling, fetchProducts } from "@/redux/productSlice";
 import { fetchDues } from "@/redux/duesSlice";
 import { fetchCategories } from "@/redux/categorySlice";
 
-import {
-	fetchServices,
-} from "@/redux/serviceSlice";
+import { fetchServices } from "@/redux/serviceSlice";
 
 import {
 	fetchDailyStats,
@@ -15,7 +13,7 @@ import {
 	fetchMonthlyStats,
 } from "@/redux/saleprofitSlice";
 
-export function GlobalInitializer({  year, month }) {
+export function GlobalInitializer({ year, month }) {
 	const dispatch = useDispatch();
 	useEffect(() => {
 		dispatch(fetchProducts());
@@ -24,10 +22,9 @@ export function GlobalInitializer({  year, month }) {
 		dispatch(fetchDailyStats());
 		dispatch(fetchMonthlyStats({ year, month }));
 		dispatch(fetchMonthlyBreakdown({ year, month }));
-
-                dispatch(fetchServices());
-
-
+		dispatch(fetchBestSelling());
+		dispatch(fetchServices());
+		
 	}, [dispatch]);
 	return null;
 }

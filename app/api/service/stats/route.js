@@ -44,6 +44,40 @@ export async function GET(req) {
 				totalCount: res.totalCount,
 				totalBills: res.totalBills,
 			});
+		} else if (type === "weekly") {
+			const now = new Date();
+
+			// সপ্তাহের শুরু (Saturday অথবা Sunday ধরতে চাইলে adjust করতে পারেন)
+			const day = now.getDay();
+			const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+			const start = new Date(now.setDate(diff));
+			start.setHours(0, 0, 0, 0);
+
+			const end = new Date(start);
+			end.setDate(start.getDate() + 6);
+			end.setHours(23, 59, 59, 999);
+
+			const agg = await ServiceRecords.aggregate([
+				{ $match: { createdAt: { $gte: start, $lte: end } } },
+				{
+					$group: {
+						_id: null,
+						totalCount: { $sum: 1 },
+						totalBills: { $sum: "$billAmount" },
+					},
+				},
+			]);
+
+			const res = agg[0] || { totalCount: 0, totalBills: 0 };
+
+			return NextResponse.json({
+				success: true,
+				type: "weekly",
+				weekStart: start.toISOString(),
+				weekEnd: end.toISOString(),
+				totalCount: res.totalCount,
+				totalBills: res.totalBills,
+			});
 		} else if (type === "monthly") {
 			const yearParam = Number(url.searchParams.get("year"));
 			const monthParam = Number(url.searchParams.get("month")); // 1-12

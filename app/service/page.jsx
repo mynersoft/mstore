@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
 	fetchServices,
@@ -10,33 +10,29 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { showDeleteConfirm } from "@/components/sweetalert/DeleteConfirm";
+import ServiceFormModal from "@/components/modal/ServiceFormModal";
+import { generateInvoiceNumber } from "@/lib/generateInvoice";
 
 export default function ServiceListPage() {
+	const [mode, setMode] = useState("add"); // add | edit
+	const [currentRecord, setCurrentRecord] = useState(null);
+	const [modalOpen, setModalOpen] = useState(false);
 	const dispatch = useDispatch();
 	const router = useRouter();
-	const { list, loading, total, stats } = useSelector((s) => s.service);
+	const { list, stats } = useSelector((s) => s.service);
 
-
-
-
-
-
-
+	const [range, setRange] = useState("daily"); // daily | weekly | monthly
 
 	useEffect(() => {
-
-
-alert(list);
-
-		dispatch(fetchServiceStats({ type: "daily" })); // initial stats
-	}, [dispatch]);
+		dispatch(fetchServiceStats({ type: range }));
+		dispatch(fetchServices({ type: range }));
+	}, [dispatch, range]);
 
 	const handleDelete = (id) => {
 		showDeleteConfirm("service record", () => dispatch(deleteService(id)));
 	};
 
 	const printRecord = (record) => {
-		// open printable window
 		const html = `
       <html>
       <head>
@@ -70,98 +66,134 @@ alert(list);
 		w.print();
 	};
 
-	// totals cards
 	const totalServices = stats?.totalCount ?? 0;
 	const totalBill = stats?.totalBills ?? 0;
 
-	return (
-		<div className="p-6">
-			<div className="flex gap-4 mb-4">
-				<div className="bg-gray-800 p-4 rounded shadow">
-					<div className="text-sm text-gray-400">
-						Total services (day)
-					</div>
-					<div className="text-2xl font-bold">{totalServices}</div>
-				</div>
-				<div className="bg-gray-800 p-4 rounded shadow">
-					<div className="text-sm text-gray-400">
-						Total bill (day)
-					</div>
-					<div className="text-2xl font-bold">{totalBill} Tk</div>
-				</div>
-				<Link
-					href="/service/add"
-					className="ml-auto bg-green-600 px-4 py-2 rounded">
-					Add Service
-				</Link>
-			</div>
+	const handleEdit = (rec) => {
 
-			<div className="bg-gray-900 p-4 rounded">
-				<table className="w-full text-sm">
-					<thead className="text-left">
-						<tr>
-							<th className="p-2">ID</th>
-							<th className="p-2">Customer</th>
-							<th className="p-2">Phone</th>
-							<th className="p-2">Device</th>
-							<th className="p-2 text-right">Bill</th>
-							<th className="p-2">Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						{list.map((rec) => (
-							<tr
-								key={rec._id}
-								className="border-t border-gray-800">
-								<td className="p-2">{rec._id}</td>
-								<td className="p-2">{rec.customerName}</td>
-								<td className="p-2">{rec.phone}</td>
-								<td className="p-2">{rec.servicingeDevice}</td>
-								<td className="p-2 text-right">
-									{rec.billAmount} Tk
-								</td>
-								<td className="p-2">
-									<button
-										className="mr-2 bg-blue-600 px-2 py-1 rounded"
-										onClick={() =>
-											router.push(`/service/${rec._id}`)
-										}>
-										View
-									</button>
-									<button
-										className="mr-2 bg-indigo-600 px-2 py-1 rounded"
-										onClick={() => printRecord(rec)}>
-										Print
-									</button>
-									<button
-										className="mr-2 bg-yellow-600 px-2 py-1 rounded"
-										onClick={() =>
-											router.push(
-												`/service/${rec._id}/edit`
-											)
-										}>
-										Edit
-									</button>
-									<button
-										className="bg-red-600 px-2 py-1 rounded"
-										onClick={() => handleDelete(rec._id)}>
-										Delete
-									</button>
-								</td>
-							</tr>
-						))}
-						{list.length === 0 && (
+
+
+
+		setCurrentRecord(rec);
+		setMode("edit");
+		setModalOpen(true);
+	};
+	return (
+		<>
+			<ServiceFormModal
+				open={modalOpen}
+				mode={mode}
+				currentRecord={currentRecord}
+				onClose={() => setModalOpen(false)}
+			/>
+			<div className="p-6 text-gray-200 bg-gray-900 min-h-screen">
+				{/* HEADER */}
+				<div className="flex flex-col sm:flex-row gap-4 mb-6 items-start sm:items-center">
+					<select
+						value={range}
+						onChange={(e) => setRange(e.target.value)}
+						className="bg-gray-800 border border-gray-700 px-3 py-2 rounded-md focus:outline-none">
+						<option value="daily">Today</option>
+						<option value="weekly">This Week</option>
+						<option value="monthly">This Month</option>
+					</select>
+
+					<div className="flex gap-4">
+						<div className="bg-gray-800 p-4 rounded shadow min-w-[120px]">
+							<div className="text-sm text-gray-400">
+								Total services
+							</div>
+							<div className="text-2xl font-bold">
+								{totalServices}
+							</div>
+						</div>
+
+						<div className="bg-gray-800 p-4 rounded shadow min-w-[120px]">
+							<div className="text-sm text-gray-400">
+								Total bill
+							</div>
+							<div className="text-2xl font-bold">
+								{totalBill} Tk
+							</div>
+						</div>
+					</div>
+
+					<button
+						onClick={() => setModalOpen(true)}
+						className="bg-green-600 px-4 py-2 rounded">
+						Add Service
+					</button>
+				</div>
+
+				{/* TABLE */}
+				<div className="bg-gray-800 p-4 rounded shadow">
+					<table className="w-full text-sm">
+						<thead className="text-left text-gray-300">
 							<tr>
-								<td
-									colSpan="6"
-									className="p-4 text-center text-gray-400">
-									No records
-								</td>
+								<th className="p-2">ID</th>
+								<th className="p-2">Customer</th>
+								<th className="p-2">Phone</th>
+								<th className="p-2">Device</th>
+								<th className="p-2 text-right">Bill</th>
+								<th className="p-2">Actions</th>
 							</tr>
-						)}
-					</tbody>
-				</table>
+						</thead>
+						<tbody>
+							{list?.map((rec) => (
+								<tr
+									key={rec._id}
+									className="border-t border-gray-700 hover:bg-gray-700/40">
+									<td className="p-2">{rec._id}</td>
+									<td className="p-2">{rec.customerName}</td>
+									<td className="p-2">{rec.phone}</td>
+									<td className="p-2">
+										{rec.servicingeDevice}
+									</td>
+									<td className="p-2 text-right">
+										{rec.billAmount} Tk
+									</td>
+									<td className="p-2 flex gap-2">
+										<button
+											className="bg-blue-600 px-2 py-1 rounded hover:bg-blue-700"
+											onClick={() =>
+												router.push(
+													`/service/${rec._id}`
+												)
+											}>
+											View
+										</button>
+										<button
+											className="bg-indigo-600 px-2 py-1 rounded hover:bg-indigo-700"
+											onClick={() => printRecord(rec)}>
+											Print
+										</button>
+										<button
+											onClick={() => handleEdit(rec)}
+											className="bg-yellow-600 px-2 py-1 rounded hover:bg-yellow-700">
+											Edit
+										</button>
+										<button
+											className="bg-red-600 px-2 py-1 rounded hover:bg-red-700"
+											onClick={() => handleDelete(rec)}>
+											Delete
+										</button>
+									</td>
+								</tr>
+							))}
+
+							{list.length === 0 && (
+								<tr>
+									<td
+										colSpan="6"
+										className="p-4 text-center text-gray-400">
+										No records found
+									</td>
+								</tr>
+							)}
+						</tbody>
+					</table>
+				</div>
 			</div>
-		</div>
+		</>
 	);
 }

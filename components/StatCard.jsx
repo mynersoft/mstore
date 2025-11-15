@@ -17,10 +17,10 @@ export default function StatCard({
 	};
 
 	return (
-		<div className="flex items-center justify-between p-5 bg-white dark:bg-gray-900 rounded-2xl shadow hover:shadow-md transition-all">
+		<div className="flex items-center justify-between p-5 bg-gray-900 rounded-2xl shadow hover:shadow-md transition-all">
 			<div>
-				<h3 className="text-gray-500 text-sm font-medium">{title}</h3>
-				<p className="text-2xl font-bold mt-1">{value}</p>
+				<h3 className="text-gray-300 text-[16px] text-sm ">{title}</h3>
+				<p className="text-2xl text-gray-400  mt-1">{value}</p>
 			</div>
 			<div
 				className={cn(

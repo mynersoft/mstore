@@ -1,50 +1,20 @@
-// redux/serviceSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 export const fetchServices = createAsyncThunk(
 	"service/fetchServices",
+	async ({ type }) => {
+		const res = await axios.get(`/api/service?type=${type}`);
+		return res.data; // API response: { success, list, total, page, limit }
+	}
+);
+
+export const fetchServiceStats = createAsyncThunk(
+	"service/fetchStats",
 	async (params = {}) => {
-		// params: { page, limit, date }
 		const qs = new URLSearchParams(params).toString();
-		const res = await axios.get(`/api/service${qs ? "?" + qs : ""}`);
+		const res = await axios.get(`/api/service/stats${qs ? "?" + qs : ""}`);
 		return res.data;
-	}
-);
-
-export const fetchService = createAsyncThunk(
-	"service/fetchService",
-	async (id) => {
-		const res = await axios.get(`/api/service/${id}`);
-		return res.data;
-	}
-);
-
-export const addService = createAsyncThunk(
-	"service/addService",
-	async (payload, { rejectWithValue }) => {
-		try {
-			const res = await axios.post("/api/service", payload);
-			return res.data;
-		} catch (err) {
-			return rejectWithValue(
-				err.response?.data || { message: err.message }
-			);
-		}
-	}
-);
-
-export const updateService = createAsyncThunk(
-	"service/updateService",
-	async ({ id, payload }, { rejectWithValue }) => {
-		try {
-			const res = await axios.put(`/api/service/${id}`, payload);
-			return res.data;
-		} catch (err) {
-			return rejectWithValue(
-				err.response?.data || { message: err.message }
-			);
-		}
 	}
 );
 
@@ -62,13 +32,32 @@ export const deleteService = createAsyncThunk(
 	}
 );
 
-export const fetchServiceStats = createAsyncThunk(
-	"service/fetchStats",
-	async (params = {}) => {
-		// params: { type: 'daily'|'monthly'|'monthlyBreakdown', date, year, month }
-		const qs = new URLSearchParams(params).toString();
-		const res = await axios.get(`/api/service/stats${qs ? "?" + qs : ""}`);
-		return res.data;
+export const addService = createAsyncThunk(
+	"service/addService",
+	async (payload, { rejectWithValue }) => {
+		try {
+			const res = await axios.post("/api/service", payload);
+			// API response: { success: true, record: {...} }
+			return res.data;
+		} catch (err) {
+			return rejectWithValue(
+				err.response?.data || { message: err.message }
+			);
+		}
+	}
+);
+
+export const updateService = createAsyncThunk(
+	"service/updateService",
+	async ({ id, payload }, { rejectWithValue }) => {
+		try {
+			const res = await axios.put(`/api/service/${id}`, payload);
+			return res.data; // backend থেকে return { success: true, record }
+		} catch (err) {
+			return rejectWithValue(
+				err.response?.data || { message: err.message }
+			);
+		}
 	}
 );
 
@@ -81,6 +70,8 @@ const slice = createSlice({
 		loading: false,
 		error: null,
 		stats: null,
+		page: 1,
+		limit: 50,
 	},
 	reducers: {
 		clearCurrent(state) {
@@ -89,44 +80,49 @@ const slice = createSlice({
 	},
 	extraReducers: (builder) => {
 		builder
+			// Fetch services
 			.addCase(fetchServices.pending, (s) => {
 				s.loading = true;
 				s.error = null;
 			})
 			.addCase(fetchServices.fulfilled, (s, a) => {
 				s.loading = false;
-				s.list = a.payload.records || [];
+				s.list = a.payload.list || [];
 				s.total = a.payload.total || 0;
+				s.page = a.payload.page || 1;
+				s.limit = a.payload.limit || 50;
 			})
 			.addCase(fetchServices.rejected, (s, a) => {
 				s.loading = false;
 				s.error = a.error?.message || a.payload?.message;
 			})
 
-			.addCase(fetchService.pending, (s) => {
+			// Fetch stats
+			.addCase(fetchServiceStats.pending, (s) => {
 				s.loading = true;
 			})
-			.addCase(fetchService.fulfilled, (s, a) => {
+			.addCase(fetchServiceStats.fulfilled, (s, a) => {
 				s.loading = false;
-				s.current = a.payload.record || null;
+				s.stats = a.payload;
 			})
-			.addCase(fetchService.rejected, (s, a) => {
-				s.loading = false;
-				s.error = a.error?.message || a.payload?.message;
-			})
-
-			.addCase(addService.pending, (s) => {
-				s.loading = true;
-			})
-			.addCase(addService.fulfilled, (s, a) => {
-				s.loading = false;
-				if (a.payload.record) s.list.unshift(a.payload.record);
-			})
-			.addCase(addService.rejected, (s, a) => {
+			.addCase(fetchServiceStats.rejected, (s, a) => {
 				s.loading = false;
 				s.error = a.payload?.message || a.error?.message;
 			})
 
+			// Delete service
+			.addCase(deleteService.pending, (s) => {
+				s.loading = true;
+			})
+			.addCase(deleteService.fulfilled, (s, a) => {
+				s.loading = false;
+				s.list = s.list.filter((i) => i._id !== a.payload.id);
+				s.total -= 1;
+			})
+			.addCase(deleteService.rejected, (s, a) => {
+				s.loading = false;
+				s.error = a.payload?.message || a.error?.message;
+			})
 			.addCase(updateService.pending, (s) => {
 				s.loading = true;
 			})
@@ -141,30 +137,6 @@ const slice = createSlice({
 				}
 			})
 			.addCase(updateService.rejected, (s, a) => {
-				s.loading = false;
-				s.error = a.payload?.message || a.error?.message;
-			})
-
-			.addCase(deleteService.pending, (s) => {
-				s.loading = true;
-			})
-			.addCase(deleteService.fulfilled, (s, a) => {
-				s.loading = false;
-				s.list = s.list.filter((i) => i._id !== a.payload.id);
-			})
-			.addCase(deleteService.rejected, (s, a) => {
-				s.loading = false;
-				s.error = a.payload?.message || a.error?.message;
-			})
-
-			.addCase(fetchServiceStats.pending, (s) => {
-				s.loading = true;
-			})
-			.addCase(fetchServiceStats.fulfilled, (s, a) => {
-				s.loading = false;
-				s.stats = a.payload;
-			})
-			.addCase(fetchServiceStats.rejected, (s, a) => {
 				s.loading = false;
 				s.error = a.payload?.message || a.error?.message;
 			});
