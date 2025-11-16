@@ -37,7 +37,7 @@ const printRecord = (record) => {
   <html>  
   <head>  
     <style>  
-      body{font-family: Arial; padding:20px;}  
+      body{font-family: Poppins; padding:20px;}  
       table{width:100%; border-collapse: collapse;}  
       th, td{border:1px solid #ccc; padding:8px; text-align:left;}  
     </style>  
@@ -128,8 +128,7 @@ return (
 			<div className="bg-gray-800 p-4 rounded shadow">  
 				<table className="w-full text-sm">  
 					<thead className="text-left text-gray-300">  
-						<tr>  
-							<th className="p-2">ID</th>  
+						<tr> 
 							<th className="p-2">Customer</th>  
 							<th className="p-2">Phone</th>  
 							<th className="p-2">Device</th>  
@@ -152,15 +151,7 @@ return (
 									{rec.billAmount} Tk  
 								</td>  
 								<td className="p-2 flex gap-2">  
-									{/* <button  
-										className="bg-blue-600 px-2 py-1 rounded hover:bg-blue-700"  
-										onClick={() =>  
-											router.push(  
-												`/service/${rec._id}`  
-											)  
-										}>  
-										View  
-									</button> */}  
+								
 									<button  
 										className="bg-indigo-600 px-2 py-1 rounded hover:bg-indigo-700"  
 										onClick={() => printRecord(rec)}>  
