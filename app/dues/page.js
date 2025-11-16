@@ -15,13 +15,9 @@ export default function DuesPage() {
 		note: "",
 	});
 
-	useEffect(() => {
-		dispatch(fetchDues());
-	}, [dispatch]);
-
 	const handleAdd = async (e) => {
 		e.preventDefault();
-		if (!form.name || !form.phone || !form.amount) return;
+		if (!form.name || !form.amount) return;
 
 		const result = await dispatch(
 			addDue({
@@ -47,10 +43,14 @@ export default function DuesPage() {
 	};
 
 	const handleDelete = async (id) => {
-		if (confirm("Delete this due record?")) await dispatch(deleteDue(id));
+		if (confirm("Delete this due record?")) dispatch(deleteDue(id));
 	};
 
 	const totalDue = dues.reduce((sum, d) => sum + d.amount, 0);
+
+	useEffect(() => {
+		dispatch(fetchDues());
+	}, [dispatch]);
 
 	return (
 		<div className="p-6 text-gray-600 dark:text-gray-300">
@@ -58,7 +58,7 @@ export default function DuesPage() {
 				💰 Customer Due Management
 			</h1>
 
-			{/* Total Overview */}
+			{/* Total Card */}
 			<div className="bg-gray-800 text-white p-4 rounded-lg mb-6 flex justify-between">
 				<p>
 					Total Due:{" "}
@@ -86,7 +86,6 @@ export default function DuesPage() {
 						setForm({ ...form, phone: e.target.value })
 					}
 					className="p-2 rounded bg-gray-700 text-white flex-1"
-					required
 				/>
 				<input
 					type="number"
@@ -112,7 +111,7 @@ export default function DuesPage() {
 				</button>
 			</form>
 
-			{/* Dues Table */}
+			{/* Table */}
 			{loading ? (
 				<p className="text-gray-400">Loading...</p>
 			) : (

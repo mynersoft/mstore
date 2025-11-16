@@ -1,47 +1,44 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
-const API_URL = "/api/dues";
+import axios from "axios";
 
 // Fetch all dues
-export const fetchDues = createAsyncThunk("dues/fetch", async () => {
-	const res = await fetch(API_URL);
-	return res.json();
+export const fetchDues = createAsyncThunk("dues/fetchDues", async () => {
+	const res = await axios.get("/api/dues");
+	return res.data;
 });
 
-// Add new due
-export const addDue = createAsyncThunk("dues/add", async (due) => {
-	const res = await fetch(API_URL, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(due),
-	});
-	return res.json();
+// Add due
+export const addDue = createAsyncThunk("dues/addDue", async (data) => {
+	const res = await axios.post("/api/dues", data);
+	return res.data;
 });
 
 // Pay due
-export const payDue = createAsyncThunk("dues/pay", async ({ id, amount }) => {
-	const res = await fetch(`${API_URL}/${id}/pay`, {
-		method: "PUT",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ amount }),
-	});
-	return res.json();
-});
+export const payDue = createAsyncThunk(
+	"dues/payDue",
+	async ({ id, amount }) => {
+		const res = await axios.put(`/api/dues/${id}`, { amount });
+		return res.data.updated; // IMPORTANT
+	}
+);
 
 // Delete due
-export const deleteDue = createAsyncThunk("dues/delete", async (id) => {
-	await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+export const deleteDue = createAsyncThunk("dues/deleteDue", async (id) => {
+	await axios.delete(`/api/dues/${id}`);
 	return id;
 });
 
-const dueSlice = createSlice({
+const duesSlice = createSlice({
 	name: "dues",
 	initialState: {
 		items: [],
-		loading: false
+		loading: false,
 	},
+
 	extraReducers: (builder) => {
 		builder
+
+			// Fetch
 			.addCase(fetchDues.pending, (state) => {
 				state.loading = true;
 			})
@@ -49,21 +46,25 @@ const dueSlice = createSlice({
 				state.loading = false;
 				state.items = action.payload;
 			})
-			.addCase(fetchDues.rejected, (state) => {
-				state.loading = false;
-			})
 
+			// Add
 			.addCase(addDue.fulfilled, (state, action) => {
 				state.items.push(action.payload);
 			})
 
+			// Pay
 			.addCase(payDue.fulfilled, (state, action) => {
-				const idx = state.items.findIndex(
-					(d) => d._id === action.payload._id
+				const updated = action.payload;
+				const index = state.items.findIndex(
+					(d) => d._id === updated._id
 				);
-				if (idx >= 0) state.items[idx] = action.payload;
+
+				if (index !== -1) {
+					state.items[index] = updated; // UI UPDATE FIXED 🚀
+				}
 			})
 
+			// Delete
 			.addCase(deleteDue.fulfilled, (state, action) => {
 				state.items = state.items.filter(
 					(d) => d._id !== action.payload
@@ -72,4 +73,4 @@ const dueSlice = createSlice({
 	},
 });
 
-export default dueSlice.reducer;
+export default duesSlice.reducer;

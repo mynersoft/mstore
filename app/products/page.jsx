@@ -20,6 +20,9 @@ export default function ProductsPage() {
 	const [showCatModal, setShowCatModal] = useState(false);
 	const [editingProduct, setEditingProduct] = useState(null);
 
+	// 🔍 Search state for product name
+	const [search, setSearch] = useState("");
+
 	const handleCancel = () => setShowCatModal(false);
 
 	useEffect(() => {
@@ -32,6 +35,11 @@ export default function ProductsPage() {
 		dispatch(fetchProducts({ page: pageLocal, limit }));
 	};
 
+	// 🔎 Filter items by search text (exact + partial match)
+	const filteredItems = items?.filter((p) =>
+		p.name.toLowerCase().includes(search.toLowerCase())
+	);
+
 	const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
 
 	return (
@@ -39,6 +47,16 @@ export default function ProductsPage() {
 			{/* HEADER */}
 			<div className="flex justify-between items-center mb-6">
 				<h1 className="text-2xl font-semibold">Products</h1>
+
+				{/* 🔍 Search Box */}
+				<input
+					type="text"
+					value={search}
+					onChange={(e) => setSearch(e.target.value)}
+					placeholder="Search product..."
+					className="px-3 py-2 rounded bg-gray-800 border border-gray-700 text-gray-300 mr-3"
+				/>
+
 				<div className="flex items-center gap-2">
 					<button
 						onClick={() => {
@@ -72,14 +90,22 @@ export default function ProductsPage() {
 						</tr>
 					</thead>
 					<tbody>
-						{items && items.length ? (
-							items.map((p) => (
-								<tr key={p._id} className="border-b border-gray-800 hover:bg-gray-800/40">
+						{filteredItems && filteredItems.length ? (
+							filteredItems.map((p) => (
+								<tr
+									key={p._id}
+									className="border-b border-gray-800 hover:bg-gray-800/40">
 									<td className="p-3">
 										{p.image ? (
-											<img src={p.image} alt={p.name} className="w-10 h-10 object-cover rounded" />
+											<img
+												src={p.image}
+												alt={p.name}
+												className="w-10 h-10 object-cover rounded"
+											/>
 										) : (
-											<span className="text-gray-500">No</span>
+											<span className="text-gray-500">
+												No
+											</span>
 										)}
 									</td>
 									<td className="p-3">{p.name}</td>
@@ -107,8 +133,10 @@ export default function ProductsPage() {
 							))
 						) : (
 							<tr>
-								<td colSpan={8} className="p-6 text-center text-gray-500">
-									No products
+								<td
+									colSpan={8}
+									className="p-6 text-center text-gray-500">
+									No products found
 								</td>
 							</tr>
 						)}
@@ -125,7 +153,9 @@ export default function ProductsPage() {
 							key={num}
 							onClick={() => setPageLocal(num)}
 							className={`px-3 py-1 rounded ${
-								pageLocal === num ? "bg-green-600 text-white" : "bg-gray-800 text-gray-400"
+								pageLocal === num
+									? "bg-green-600 text-white"
+									: "bg-gray-800 text-gray-400"
 							}`}>
 							{num}
 						</button>

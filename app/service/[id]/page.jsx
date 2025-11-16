@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchService } from "@/redux/serviceSlice";
 import { useParams } from "next/navigation";
 
 export default function ServiceView() {

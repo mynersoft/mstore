@@ -70,10 +70,6 @@ export default function ServiceListPage() {
 	const totalBill = stats?.totalBills ?? 0;
 
 	const handleEdit = (rec) => {
-
-
-
-
 		setCurrentRecord(rec);
 		setMode("edit");
 		setModalOpen(true);
@@ -153,7 +149,7 @@ export default function ServiceListPage() {
 										{rec.billAmount} Tk
 									</td>
 									<td className="p-2 flex gap-2">
-										<button
+										{/* <button
 											className="bg-blue-600 px-2 py-1 rounded hover:bg-blue-700"
 											onClick={() =>
 												router.push(
@@ -161,7 +157,7 @@ export default function ServiceListPage() {
 												)
 											}>
 											View
-										</button>
+										</button> */}
 										<button
 											className="bg-indigo-600 px-2 py-1 rounded hover:bg-indigo-700"
 											onClick={() => printRecord(rec)}>

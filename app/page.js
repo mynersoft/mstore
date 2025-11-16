@@ -8,6 +8,7 @@ import SalesChart from "@/components/SalesChart";
 import { useDispatch, useSelector } from "react-redux";
 import { getTopProducts, getStockOutProducts } from "@/lib/dashboardUtils";
 import DailySaleProfit from "@/components/chart/DailySaleProfit";
+import axios from "axios";
 
 export default function DashboardPage() {
 	const bestSelling = useSelector((state) => state.products.bestSelling);
@@ -25,18 +26,18 @@ export default function DashboardPage() {
 	const [totalDue, setTotalDue] = useState(0);
 	const [totalAmountProducts, setTotalAmountProducts] = useState(0);
 
-	useEffect(() => {
-		loadMonthly();
-	}, []);
+	// useEffect(() => {
+	// 	loadMonthly();
+	// }, []);
 
-	const loadMonthly = async () => {
-		const res = await axios.get(
-			"/api/service/stats?type=monthly&year=2025&month=1"
-		);
-		const formatted = buildMonthlyTable(res.data.list, 2025, 1);
-		setTableData(formatted);
-		setMonthData(formatted);
-	};
+	// const loadMonthly = async () => {
+	// 	const res = await axios.get(
+	// 		"/api/service/stats?type=monthly&year=2025&month=1"
+	// 	);
+	// 	const formatted = buildMonthlyTable(res.data.list, 2025, 1);
+	// 	setTableData(formatted);
+	// 	setMonthData(formatted);
+	// };
 
 	const [salesData] = useState([
 		{ date: "2025-10-01", sales: 300, profit: 100 },
@@ -98,7 +99,7 @@ export default function DashboardPage() {
 			</div>
 
 			{/* best selling products  */}
-			{bestSelling && (
+			{bestSelling?.soldCount > 0 && (
 				<div className="p-4 bg-gray-800 rounded-lg text-white">
 					<h2 className="text-xl font-bold mb-3">
 						🔥 Best Selling Product
@@ -125,13 +126,15 @@ export default function DashboardPage() {
 						<tbody>
 							<tr>
 								<td className="p-2 border border-gray-700">
-									<Image
+									{ bestSelling.image ? (
+								<Image
 										src={bestSelling.image}
 										alt={bestSelling.name}
 										width={60}
 										height={60}
 										className="rounded object-cover"
-									/>
+									/>	
+								): "N/A"}
 								</td>
 								<td className="p-2 border border-gray-700">
 									{bestSelling.name}
