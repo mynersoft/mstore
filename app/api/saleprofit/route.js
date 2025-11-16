@@ -3,10 +3,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/dbConnect";
 import SaleProfit from "@/models/SaleProfit";
 
-/**
- * Helper: build start/end for a given day in server-local timezone
- * If you want to force Asia/Dhaka, compute offsets or use luxon/moment-timezone.
- */
+
 function dayRange(date = new Date()) {
 	const start = new Date(date);
 	start.setHours(0, 0, 0, 0);
@@ -16,12 +13,9 @@ function dayRange(date = new Date()) {
 }
 
 /**
- * GET /api/stats?type=daily
- * GET /api/stats?type=monthly
- * Optional query:
- *  - date=2025-11-14   (for daily)
- *  - year=2025&month=11 (for monthly, month is 1-12)
- */
+ * GET /api/saleprofit?type=daily
+ * GET /api/saleprofit?type=monthly
+ **/
 export async function GET(req) {
 	try {
 		await connectDB();

@@ -1,6 +1,5 @@
 // app/api/service/route.js
 import { NextResponse } from "next/server";
-import mongoose from "mongoose";
 import { connectDB } from "@/lib/dbConnect";
 import ServiceRecords from "@/models/ServiceRecords";
 

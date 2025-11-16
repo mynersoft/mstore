@@ -7,6 +7,7 @@ import ProductTable from "@/components/ProductTable";
 import SalesChart from "@/components/SalesChart";
 import { useDispatch, useSelector } from "react-redux";
 import { getTopProducts, getStockOutProducts } from "@/lib/dashboardUtils";
+import DailySaleProfit from "@/components/chart/DailySaleProfit";
 
 export default function DashboardPage() {
 	const bestSelling = useSelector((state) => state.products.bestSelling);
@@ -16,11 +17,26 @@ export default function DashboardPage() {
 		(state) => state.saleprofit
 	);
 	const { totalAmount } = useSelector((state) => state.products);
+	const [tableData, setTableData] = useState([]);
+	const [monthData, setMonthData] = useState([]);
 
 	const [topProducts, setTopProducts] = useState([]);
 	const [stockOut, setStockOut] = useState([]);
 	const [totalDue, setTotalDue] = useState(0);
 	const [totalAmountProducts, setTotalAmountProducts] = useState(0);
+
+	useEffect(() => {
+		loadMonthly();
+	}, []);
+
+	const loadMonthly = async () => {
+		const res = await axios.get(
+			"/api/service/stats?type=monthly&year=2025&month=1"
+		);
+		const formatted = buildMonthlyTable(res.data.list, 2025, 1);
+		setTableData(formatted);
+		setMonthData(formatted);
+	};
 
 	const [salesData] = useState([
 		{ date: "2025-10-01", sales: 300, profit: 100 },
@@ -79,28 +95,6 @@ export default function DashboardPage() {
 					value={`${totalAmountProducts} tk`}
 					color="green"
 				/>
-			</div>
-
-			{/* Chart 
-			<div className="bg-gray-900 rounded-2xl shadow p-6">
-				<h2 className="text-xl font-semibold mb-4">
-					Sales & Profit Chart
-				</h2>
-				<SalesChart data={salesData} />
-			</div>
-
-*/}
-
-			{/* Top Products */}
-			<div className="bg-gray-900 rounded-2xl shadow p-6">
-				<h2 className="text-xl text-white font-semibold mb-4">
-					🏆 Top Products
-				</h2>
-				{topProducts.length ? (
-					<ProductTable products={topProducts} showActions={false} />
-				) : (
-					<p className="text-gray-400">No top products found.</p>
-				)}
 			</div>
 
 			{/* best selling products  */}
