@@ -141,8 +141,7 @@ return (
 							<tr  
 								key={rec._id}  
 								className="border-t border-gray-700 hover:bg-gray-700/40">  
-								<td className="p-2">{rec._id}</td>  
-								<td className="p-2">{rec.customerName}</td>  
+											<td className="p-2">{rec.customerName}</td>  
 								<td className="p-2">{rec.phone}</td>  
 								<td className="p-2">  
 									{rec.servicingeDevice}  
