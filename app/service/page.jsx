@@ -1,185 +1,65 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { addService, updateService } from "@/redux/serviceSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchDues } from "@/redux/duesSlice";
+import DueFormModal from "@/components/DueFormModal";
 
-export default function ServiceFormModal({
-	open,
-	onClose,
-	mode,
-	currentRecord,
-}) {
-	const dispatch = useDispatch();
+export default function DuePage() {
+  const dispatch = useDispatch();
+  const dues = useSelector((s) => s.dues.items);
 
-	const [form, setForm] = useState({
-		customerName: "",
-		phone: "",
-		servicingeDevice: "",
-		billAmount: "",
-		warrantyMonths: "",
-		hasWarranty: false,
-		notes: "",
-	});
+  const [modalOpen, setModalOpen] = useState(false);
+  const [mode, setMode] = useState("add");
+  const [currentDue, setCurrentDue] = useState(null);
 
-	useEffect(() => {
-		if (mode === "edit" && currentRecord) {
-			setForm({
-				customerName: currentRecord.customerName,
-				phone: currentRecord.phone,
-				servicingeDevice: currentRecord.servicingeDevice,
-				billAmount: currentRecord.billAmount,
-				warrantyMonths: currentRecord?.warranty?.warrantyMonths || "",
-				hasWarranty: currentRecord?.warranty?.hasWarranty || false,
-				notes: currentRecord.notes || "",
-			});
-		}
-	}, [mode, currentRecord]);
+  useEffect(() => {
+    dispatch(fetchDues());
+  }, [dispatch]);
 
-	const handleSubmit = (e) => {
-		e.preventDefault();
+  const handleEdit = (item) => {
+    setMode("edit");
+    setCurrentDue(item);
+    setModalOpen(true);
+  };
 
-		const payload = {
-			customerName: form.customerName,
-			phone: form.phone,
-			servicingeDevice: form.servicingeDevice,
-			billAmount: Number(form.billAmount),
-			warranty: {
-				hasWarranty: form.hasWarranty,
-				warrantyMonths: Number(form.warrantyMonths) || 0,
-			},
-			notes: form.notes,
-		};
+  return (
+    <div className="p-5">
+      <h1 className="text-2xl font-bold">Customer Dues</h1>
 
-		if (mode === "edit") {
-			dispatch(updateService({ id: currentRecord._id, data: payload }));
-		} else {
-			dispatch(addService(payload));
-		}
+      <table className="w-full mt-5 border">
+        <thead className="bg-gray-100">
+          <tr>
+            <th className="border p-2">Customer</th>
+            <th className="border p-2">Amount</th>
+            <th className="border p-2">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {dues.map((d) => (
+            <tr key={d._id}>
+              <td className="border p-2">{d.customer}</td>
+              <td className="border p-2">{d.amount}</td>
+              <td className="border p-2">
+                <button
+                  onClick={() => handleEdit(d)}
+                  className="bg-green-600 text-white px-3 py-1 rounded"
+                >
+                  Edit
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
-		onClose();
-	};
-
-	if (!open) return null;
-
-	return (
-		<div className="fixed inset-0 bg-black/50 flex justify-center items-center p-4">
-			<div className="bg-gray-900 p-6 rounded-lg w-full max-w-lg text-gray-200">
-				<h2 className="text-xl font-semibold mb-4">
-					{mode === "edit" ? "Edit Service" : "Add Service"}
-				</h2>
-
-				<form onSubmit={handleSubmit} className="flex flex-col gap-3">
-					<input
-						type="text"
-						placeholder="Customer Name"
-						className="p-2 rounded bg-gray-700 text-white"
-						value={form.customerName}
-						onChange={(e) =>
-							setForm({ ...form, customerName: e.target.value })
-						}
-						required
-					/>
-
-					<input
-						type="text"
-						placeholder="Phone"
-						className="p-2 rounded bg-gray-700 text-white"
-						value={form.phone}
-						onChange={(e) =>
-							setForm({ ...form, phone: e.target.value })
-						}
-						required
-					/>
-
-					{/* SERVICE DROPDOWN */}
-					<select
-						value={form.servicingeDevice}
-						onChange={(e) =>
-							setForm({
-								...form,
-								servicingeDevice: e.target.value,
-							})
-						}
-						className="p-2 rounded bg-gray-700 text-white"
-						required>
-						<option value="">Select Service</option>
-						<option value="Charging port">Charging port</option>
-						<option value="Keypad clean">Keypad clean</option>
-						<option value="Charging error">Charging error</option>
-						<option value="Half short">Half short</option>
-						<option value="Full short">Full short</option>
-						<option value="Display change">Display change</option>
-						<option value="Gorila change">Gorila change</option>
-						<option value="Torch light">Torch light</option>
-						<option value="Port ceiling">Port ceiling</option>
-						<option value="Full coil">Full coil</option>
-						<option value="Single coil">Single coil</option>
-					</select>
-
-					<input
-						type="number"
-						placeholder="Bill Amount"
-						className="p-2 rounded bg-gray-700 text-white"
-						value={form.billAmount}
-						onChange={(e) =>
-							setForm({ ...form, billAmount: e.target.value })
-						}
-						required
-					/>
-
-					{/* Warranty Toggle */}
-					<div className="flex items-center gap-2">
-						<input
-							type="checkbox"
-							checked={form.hasWarranty}
-							onChange={(e) =>
-								setForm({
-									...form,
-									hasWarranty: e.target.checked,
-								})
-							}
-						/>
-						<label>Has Warranty?</label>
-					</div>
-
-					{form.hasWarranty && (
-						<input
-							type="number"
-							placeholder="Warranty Months"
-							className="p-2 rounded bg-gray-700 text-white"
-							value={form.warrantyMonths}
-							onChange={(e) =>
-								setForm({
-									...form,
-									warrantyMonths: e.target.value,
-								})
-							}
-						/>
-					)}
-
-					<textarea
-						placeholder="Notes"
-						className="p-2 rounded bg-gray-700 text-white"
-						value={form.notes}
-						onChange={(e) =>
-							setForm({ ...form, notes: e.target.value })
-						}></textarea>
-
-					<button
-						className="bg-green-600 py-2 rounded mt-3"
-						type="submit">
-						{mode === "edit" ? "Update" : "Add"}
-					</button>
-
-					<button
-						className="bg-red-600 py-2 rounded"
-						onClick={onClose}
-						type="button">
-						Close
-					</button>
-				</form>
-			</div>
-		</div>
-	);
+      {/* Modal */}
+      <DueFormModal
+        open={modalOpen}
+        mode={mode}
+        currentDue={currentDue}
+        onClose={() => setModalOpen(false)}
+      />
+    </div>
+  );
 }
