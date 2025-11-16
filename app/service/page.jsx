@@ -1,195 +1,185 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-	fetchServices,
-	deleteService,
-	fetchServiceStats,
-} from "@/redux/serviceSlice";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { showDeleteConfirm } from "@/components/sweetalert/DeleteConfirm";
-import ServiceFormModal from "@/components/modal/ServiceFormModal";
-import { generateInvoiceNumber } from "@/lib/generateInvoice";
+import { useDispatch } from "react-redux";
+import { addService, updateService } from "@/redux/serviceSlice";
 
-export default function ServiceListPage() {
-	const [mode, setMode] = useState("add"); // add | edit
-	const [currentRecord, setCurrentRecord] = useState(null);
-	const [modalOpen, setModalOpen] = useState(false);
+export default function ServiceFormModal({
+	open,
+	onClose,
+	mode,
+	currentRecord,
+}) {
 	const dispatch = useDispatch();
-	const router = useRouter();
-	const { list, stats } = useSelector((s) => s.service);
 
-	const [range, setRange] = useState("daily"); // daily | weekly | monthly
+	const [form, setForm] = useState({
+		customerName: "",
+		phone: "",
+		servicingeDevice: "",
+		billAmount: "",
+		warrantyMonths: "",
+		hasWarranty: false,
+		notes: "",
+	});
 
 	useEffect(() => {
-		dispatch(fetchServiceStats({ type: range }));
-		dispatch(fetchServices({ type: range }));
-	}, [dispatch, range]);
+		if (mode === "edit" && currentRecord) {
+			setForm({
+				customerName: currentRecord.customerName,
+				phone: currentRecord.phone,
+				servicingeDevice: currentRecord.servicingeDevice,
+				billAmount: currentRecord.billAmount,
+				warrantyMonths: currentRecord?.warranty?.warrantyMonths || "",
+				hasWarranty: currentRecord?.warranty?.hasWarranty || false,
+				notes: currentRecord.notes || "",
+			});
+		}
+	}, [mode, currentRecord]);
 
-	const handleDelete = (id) => {
-		showDeleteConfirm("service record", () => dispatch(deleteService(id)));
+	const handleSubmit = (e) => {
+		e.preventDefault();
+
+		const payload = {
+			customerName: form.customerName,
+			phone: form.phone,
+			servicingeDevice: form.servicingeDevice,
+			billAmount: Number(form.billAmount),
+			warranty: {
+				hasWarranty: form.hasWarranty,
+				warrantyMonths: Number(form.warrantyMonths) || 0,
+			},
+			notes: form.notes,
+		};
+
+		if (mode === "edit") {
+			dispatch(updateService({ id: currentRecord._id, data: payload }));
+		} else {
+			dispatch(addService(payload));
+		}
+
+		onClose();
 	};
 
-	const printRecord = (record) => {
-		const html = `
-      <html>
-      <head>
-        <style>
-          body{font-family: Arial; padding:20px;}
-          table{width:100%; border-collapse: collapse;}
-          th, td{border:1px solid #ccc; padding:8px; text-align:left;}
-        </style>
-      </head>
-      <body>
-        <h2>Service Record</h2>
-        <p><strong>Invoice/ID:</strong> ${record._id}</p>
-        <p><strong>Customer:</strong> ${record.customerName || "N/A"}</p>
-        <p><strong>Phone:</strong> ${record.phone || "N/A"}</p>
-        <p><strong>Device:</strong> ${record.servicingeDevice}</p>
-        <p><strong>Bill:</strong> ${record.billAmount} Tk</p>
-        <p><strong>Warranty:</strong> ${
-			record.warranty?.hasWarranty
-				? record.warranty.warrantyMonths + " months"
-				: "No"
-		}</p>
-        <p><strong>Notes:</strong> ${record.notes || ""}</p>
-        <hr/>
-        <p>Printed: ${new Date().toLocaleString()}</p>
-      </body>
-      </html>
-    `;
-		const w = window.open("", "", "width=800,height=900");
-		w.document.write(html);
-		w.document.close();
-		w.print();
-	};
+	if (!open) return null;
 
-	const totalServices = stats?.totalCount ?? 0;
-	const totalBill = stats?.totalBills ?? 0;
-
-	const handleEdit = (rec) => {
-		setCurrentRecord(rec);
-		setMode("edit");
-		setModalOpen(true);
-	};
 	return (
-		<>
-			<ServiceFormModal
-				open={modalOpen}
-				mode={mode}
-				currentRecord={currentRecord}
-				onClose={() => setModalOpen(false)}
-			/>
-			<div className="p-6 text-gray-200 bg-gray-900 min-h-screen">
-				{/* HEADER */}
-				<div className="flex flex-col sm:flex-row gap-4 mb-6 items-start sm:items-center">
+		<div className="fixed inset-0 bg-black/50 flex justify-center items-center p-4">
+			<div className="bg-gray-900 p-6 rounded-lg w-full max-w-lg text-gray-200">
+				<h2 className="text-xl font-semibold mb-4">
+					{mode === "edit" ? "Edit Service" : "Add Service"}
+				</h2>
+
+				<form onSubmit={handleSubmit} className="flex flex-col gap-3">
+					<input
+						type="text"
+						placeholder="Customer Name"
+						className="p-2 rounded bg-gray-700 text-white"
+						value={form.customerName}
+						onChange={(e) =>
+							setForm({ ...form, customerName: e.target.value })
+						}
+						required
+					/>
+
+					<input
+						type="text"
+						placeholder="Phone"
+						className="p-2 rounded bg-gray-700 text-white"
+						value={form.phone}
+						onChange={(e) =>
+							setForm({ ...form, phone: e.target.value })
+						}
+						required
+					/>
+
+					{/* SERVICE DROPDOWN */}
 					<select
-						value={range}
-						onChange={(e) => setRange(e.target.value)}
-						className="bg-gray-800 border border-gray-700 px-3 py-2 rounded-md focus:outline-none">
-						<option value="daily">Today</option>
-						<option value="weekly">This Week</option>
-						<option value="monthly">This Month</option>
+						value={form.servicingeDevice}
+						onChange={(e) =>
+							setForm({
+								...form,
+								servicingeDevice: e.target.value,
+							})
+						}
+						className="p-2 rounded bg-gray-700 text-white"
+						required>
+						<option value="">Select Service</option>
+						<option value="Charging port">Charging port</option>
+						<option value="Keypad clean">Keypad clean</option>
+						<option value="Charging error">Charging error</option>
+						<option value="Half short">Half short</option>
+						<option value="Full short">Full short</option>
+						<option value="Display change">Display change</option>
+						<option value="Gorila change">Gorila change</option>
+						<option value="Torch light">Torch light</option>
+						<option value="Port ceiling">Port ceiling</option>
+						<option value="Full coil">Full coil</option>
+						<option value="Single coil">Single coil</option>
 					</select>
 
-					<div className="flex gap-4">
-						<div className="bg-gray-800 p-4 rounded shadow min-w-[120px]">
-							<div className="text-sm text-gray-400">
-								Total services
-							</div>
-							<div className="text-2xl font-bold">
-								{totalServices}
-							</div>
-						</div>
+					<input
+						type="number"
+						placeholder="Bill Amount"
+						className="p-2 rounded bg-gray-700 text-white"
+						value={form.billAmount}
+						onChange={(e) =>
+							setForm({ ...form, billAmount: e.target.value })
+						}
+						required
+					/>
 
-						<div className="bg-gray-800 p-4 rounded shadow min-w-[120px]">
-							<div className="text-sm text-gray-400">
-								Total bill
-							</div>
-							<div className="text-2xl font-bold">
-								{totalBill} Tk
-							</div>
-						</div>
+					{/* Warranty Toggle */}
+					<div className="flex items-center gap-2">
+						<input
+							type="checkbox"
+							checked={form.hasWarranty}
+							onChange={(e) =>
+								setForm({
+									...form,
+									hasWarranty: e.target.checked,
+								})
+							}
+						/>
+						<label>Has Warranty?</label>
 					</div>
 
+					{form.hasWarranty && (
+						<input
+							type="number"
+							placeholder="Warranty Months"
+							className="p-2 rounded bg-gray-700 text-white"
+							value={form.warrantyMonths}
+							onChange={(e) =>
+								setForm({
+									...form,
+									warrantyMonths: e.target.value,
+								})
+							}
+						/>
+					)}
+
+					<textarea
+						placeholder="Notes"
+						className="p-2 rounded bg-gray-700 text-white"
+						value={form.notes}
+						onChange={(e) =>
+							setForm({ ...form, notes: e.target.value })
+						}></textarea>
+
 					<button
-						onClick={() => setModalOpen(true)}
-						className="bg-green-600 px-4 py-2 rounded">
-						Add Service
+						className="bg-green-600 py-2 rounded mt-3"
+						type="submit">
+						{mode === "edit" ? "Update" : "Add"}
 					</button>
-				</div>
 
-				{/* TABLE */}
-				<div className="bg-gray-800 p-4 rounded shadow">
-					<table className="w-full text-sm">
-						<thead className="text-left text-gray-300">
-							<tr>
-								<th className="p-2">ID</th>
-								<th className="p-2">Customer</th>
-								<th className="p-2">Phone</th>
-								<th className="p-2">Device</th>
-								<th className="p-2 text-right">Bill</th>
-								<th className="p-2">Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{list?.map((rec) => (
-								<tr
-									key={rec._id}
-									className="border-t border-gray-700 hover:bg-gray-700/40">
-									<td className="p-2">{rec._id}</td>
-									<td className="p-2">{rec.customerName}</td>
-									<td className="p-2">{rec.phone}</td>
-									<td className="p-2">
-										{rec.servicingeDevice}
-									</td>
-									<td className="p-2 text-right">
-										{rec.billAmount} Tk
-									</td>
-									<td className="p-2 flex gap-2">
-										{/* <button
-											className="bg-blue-600 px-2 py-1 rounded hover:bg-blue-700"
-											onClick={() =>
-												router.push(
-													`/service/${rec._id}`
-												)
-											}>
-											View
-										</button> */}
-										<button
-											className="bg-indigo-600 px-2 py-1 rounded hover:bg-indigo-700"
-											onClick={() => printRecord(rec)}>
-											Print
-										</button>
-										<button
-											onClick={() => handleEdit(rec)}
-											className="bg-yellow-600 px-2 py-1 rounded hover:bg-yellow-700">
-											Edit
-										</button>
-										<button
-											className="bg-red-600 px-2 py-1 rounded hover:bg-red-700"
-											onClick={() => handleDelete(rec)}>
-											Delete
-										</button>
-									</td>
-								</tr>
-							))}
-
-							{list.length === 0 && (
-								<tr>
-									<td
-										colSpan="6"
-										className="p-4 text-center text-gray-400">
-										No records found
-									</td>
-								</tr>
-							)}
-						</tbody>
-					</table>
-				</div>
+					<button
+						className="bg-red-600 py-2 rounded"
+						onClick={onClose}
+						type="button">
+						Close
+					</button>
+				</form>
 			</div>
-		</>
+		</div>
 	);
 }
