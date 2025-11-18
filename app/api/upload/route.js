@@ -1,31 +1,51 @@
 import { NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
+import Product from "@/models/Product";
+import { connectDB } from "@/lib/dbConnect";
 
 export async function POST(req) {
   try {
+    await connectDB();
+
     const formData = await req.formData();
+
+    // 📌 Get fields from formData
+    const name = formData.get("name");
+    const price = formData.get("price");
+    const description = formData.get("description");
+
     const file = formData.get("image");
 
     if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+      return NextResponse.json({ error: "Image is required" }, { status: 400 });
     }
 
+    // 📌 Convert image file to buffer
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    const result = await new Promise((resolve) => {
+    // 📌 Upload to Cloudinary
+    const uploadRes = await new Promise((resolve) => {
       cloudinary.uploader
-        .upload_stream({ folder: "products" }, (err, res) => {
+        .upload_stream({ folder: "products" }, (err, result) => {
           if (err) resolve({ error: err.message });
-          resolve(res);
+          resolve(result);
         })
         .end(buffer);
     });
 
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 500 });
+    if (uploadRes.error) {
+      return NextResponse.json({ error: uploadRes.error }, { status: 500 });
     }
 
-    return NextResponse.json(result);
+    // 📌 Save product in DB
+    const product = await Product.create({
+      name,
+      price,
+      description,
+      image: uploadRes.secure_url,
+    });
+
+    return NextResponse.json(product);
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
