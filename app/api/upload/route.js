@@ -1,37 +1,30 @@
 import { NextResponse } from "next/server";
-import { v2 as cloudinary } from "cloudinary";
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import cloudinary from "@/lib/cloudinary";
 
 export async function POST(req) {
   try {
     const formData = await req.formData();
-    const file = formData.get("file");
+    const file = formData.get("image");
 
-    if (!file) {
-      return NextResponse.json({ error: "No file found" }, { status: 400 });
-    }
+    if (!file) return NextResponse.json({ error: "Image not found" });
 
-    const buffer = Buffer.from(await file.arrayBuffer());
+    // Read file as buffer
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-    const uploadRes = await new Promise((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream({ folder: "uploads" }, (error, result) => {
+    // Cloudinary upload via upload_stream
+    return new Promise((resolve, reject) => {
+      const upload = cloudinary.uploader.upload_stream(
+        { folder: "next_uploads" },
+        (error, result) => {
           if (error) reject(error);
-          else resolve(result);
-        })
-        .end(buffer);
-    });
+          else resolve(NextResponse.json(result));
+        }
+      );
 
-    return NextResponse.json({
-      url: uploadRes.secure_url,
-      public_id: uploadRes.public_id,
+      upload.end(buffer);
     });
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
