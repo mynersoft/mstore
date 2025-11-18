@@ -4,61 +4,39 @@ import { useState } from "react";
 
 export default function UploadPage() {
   const [image, setImage] = useState(null);
-  const [url, setUrl] = useState("");
-  const [loading, setLoading] = useState(false);
-
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // 🔹 Upload image to Cloudinary
-  async function uploadToCloudinary() {
-    const formData = new FormData();
-    formData.append("image", image);
-
-    const res = await fetch("/api/upload", { method: "POST", body: formData });
-    const data = await res.json();
-
-    if (res.ok && data.secure_url) {
-      return data.secure_url;
-    } else {
-      throw new Error(data.error || "Upload failed");
-    }
-  }
-
-  // 🔹 Submit all data
   async function handleSubmit() {
-    if (!image) return alert("Please select an image");
-    if (!name || !price) return alert("Input fields required");
+    if (!image) return alert("Image required");
+    if (!name || !price) return alert("Input fields missing");
 
     setLoading(true);
 
     try {
-      // upload image
-      const uploadedUrl = await uploadToCloudinary();
-      setUrl(uploadedUrl);
+      const formData = new FormData();
+      formData.append("image", image);
+      formData.append("name", name);
+      formData.append("price", price);
+      formData.append("description", description);
 
-      // post to backend
-      const res = await fetch("/api/products", {
+      const res = await fetch("/api/upload", {
         method: "POST",
-        body: JSON.stringify({
-          name,
-          price,
-          description,
-          image: uploadedUrl,
-        }),
+        body: formData,
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        alert("Product saved successfully!");
-        console.log("Saved:", data);
+        alert("Product saved!");
+        console.log(data);
       } else {
-        alert("Save error: " + data.error);
+        alert(data.error);
       }
     } catch (err) {
-      alert("Error: " + err.message);
+      alert(err.message);
     } finally {
       setLoading(false);
     }
@@ -68,47 +46,35 @@ export default function UploadPage() {
     <div style={{ padding: 20 }}>
       <h2>Add Product</h2>
 
-      <br />
-
       <input
         type="text"
-        placeholder="Product Name"
-        value={name}
+        placeholder="Name"
         onChange={(e) => setName(e.target.value)}
       />
-
       <br />
+
       <input
         type="number"
-        placeholder="Product Price"
-        value={price}
+        placeholder="Price"
         onChange={(e) => setPrice(e.target.value)}
       />
-
       <br />
+
       <textarea
         placeholder="Description"
-        value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
-
       <br />
+
       <input
         type="file"
         accept="image/*"
         onChange={(e) => setImage(e.target.files[0])}
       />
 
-      <button onClick={handleSubmit} disabled={loading} style={{ marginTop: 10 }}>
+      <button onClick={handleSubmit} disabled={loading}>
         {loading ? "Saving..." : "Save Product"}
       </button>
-
-      {url && (
-        <div>
-          <h3>Uploaded Image:</h3>
-          <img src={url} width="200" />
-        </div>
-      )}
     </div>
   );
 }
