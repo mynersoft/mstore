@@ -9,18 +9,6 @@ export async function GET(request, { params }) {
 	return NextResponse.json(p);
 }
 
-// export async function PUT(request, { params }) {
-	const body = await request.json();
-	await connectDB();
-
-	const updated = await Product.findByIdAndUpdate(params.id, body, {
-		new: true,
-	});
-
-	return NextResponse.json(updated);
-}
-
-
 
 
 
