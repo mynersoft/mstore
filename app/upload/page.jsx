@@ -21,6 +21,7 @@ export default function UploadPage() {
 
     if (data.secure_url) {
       setUrl(data.secure_url);
+alert(" ok");
     } else {
       alert("Upload failed: " + data.error);
     }
