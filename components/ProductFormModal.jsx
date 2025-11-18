@@ -1,305 +1,200 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { addProduct, updateProduct, fetchProducts } from "@/redux/productSlice";
-import { fetchCategories } from "@/redux/categorySlice";
-import { showAddConfirm } from "./sweetalert/AddConfirm";
+import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import {
+  addProduct,
+  updateProduct,
+  fetchProducts,
+} from "@/redux/productSlice";
 
 export default function ProductFormModal({
-  editingProduct,
+  open,
   onClose,
-  currentPage = 1,
+  editingProduct,
+  currentPage,
 }) {
   const dispatch = useDispatch();
-  const { list: categories, loading: catLoading } = useSelector(
-    (state) => state.categories
-  );
+
+  const [file, setFile] = useState(null); // new image file
+  const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
+    price: "",
     category: "",
     subCategory: "",
-    brand: "",
-    stock: "",
-    regularPrice: "",
-    sellPrice: "",
-    warranty: "",
     image: "",
   });
-  const [file, setFile] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchCategories());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (editingProduct) setForm(editingProduct);
-    else
+    if (editingProduct) {
+      setForm(editingProduct);
+      setFile(null);
+    } else {
       setForm({
         name: "",
+        price: "",
         category: "",
         subCategory: "",
-        brand: "",
-        stock: "",
-        regularPrice: "",
-        sellPrice: "",
-        warranty: "",
         image: "",
       });
+      setFile(null);
+    }
   }, [editingProduct]);
 
-  const focusScroll = (e) => {
-    e.target.scrollIntoView({ behavior: "smooth", block: "center" });
+  // Handle input changes
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // 🔹 Upload image to Cloudinary
-  const handleUploadImage = async () => {
-    if (!file) return alert("Select an image first!");
-    setUploading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("image", file);
-
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      let data;
-      try {
-        data = await res.json();
-      } catch {
-        alert("Upload failed: Invalid server response");
-        setUploading(false);
-        return;
-      }
-
-      if (res.ok && data.secure_url) {
-        setForm({ ...form, image: data.secure_url });
-        alert("Image uploaded successfully!");
-        setFile(null);
-      } else {
-        alert("Upload failed: " + (data?.error || "Unknown error"));
-      }
-    } catch (err) {
-      alert("Upload error: " + err.message);
-    } finally {
-      setUploading(false);
-    }
-  };
-
+  // Submit handler (upload + save)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      setSaving(true);
+    setSaving(true);
 
-      if (!form.image && file) {
-        // upload image first
-        await handleUploadImage();
+    try {
+      let imageUrl = form.image;
+
+      // If new image selected → upload first
+      if (file) {
+        const fd = new FormData();
+        fd.append("image", file);
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: fd,
+        });
+
+        const uploadData = await uploadRes.json();
+
+        if (!uploadRes.ok || !uploadData.secure_url) {
+          alert("Image upload failed");
+          setSaving(false);
+          return;
+        }
+
+        imageUrl = uploadData.secure_url;
       }
 
-      const payload = { ...form };
+      // Build final payload
+      const payload = {
+        ...form,
+        image: imageUrl,
+      };
 
       if (editingProduct) {
         await dispatch(updateProduct(payload)).unwrap();
       } else {
-        showAddConfirm("product", () => dispatch(addProduct(payload)).unwrap());
+        await dispatch(addProduct(payload)).unwrap();
       }
 
       dispatch(fetchProducts({ page: currentPage }));
       onClose();
-    } catch (err) {
-      alert("Save failed: " + (err.message || err));
+    } catch (error) {
+      alert("Save failed: " + error.message);
     } finally {
       setSaving(false);
     }
   };
 
-  const selectedCategory = categories.find((cat) => cat.name === form.category) || {};
+  if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-3 sm:p-4">
-      <div className="bg-gray-900 text-gray-100 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-xl scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
-        
-        {/* Header */}
-        <div className="flex justify-between items-center mb-4 sticky top-0 bg-gray-900 pb-3">
-          <h3 className="text-lg font-semibold">
-            {editingProduct ? "Edit Product" : "Add Product"}
-          </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-200 text-xl">
-            ✕
-          </button>
-        </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+        <h2 className="text-xl font-semibold mb-4">
+          {editingProduct ? "Update Product" : "Add Product"}
+        </h2>
 
-        <form onSubmit={handleSubmit} className="grid gap-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           {/* Product Name */}
-          <div className="flex flex-col gap-1">
-            <label className="text-gray-300">Product Name</label>
+          <div>
+            <label className="font-medium">Name</label>
             <input
-              required
-              placeholder="Product Name"
+              name="name"
               value={form.name}
-              onFocus={focusScroll}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="p-3 rounded bg-gray-800 w-full text-base"
+              onChange={handleChange}
+              required
+              className="border w-full p-2 rounded"
             />
           </div>
 
-          {/* Category & Subcategory */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-gray-300">Category</label>
-              <select
-                required
-                value={form.category}
-                onFocus={focusScroll}
-                onChange={(e) =>
-                  setForm({ ...form, category: e.target.value, subCategory: "" })
-                }
-                className="p-3 rounded bg-gray-800 w-full text-base"
-              >
-                <option value="">Select category</option>
-                {catLoading ? (
-                  <option>Loading...</option>
-                ) : (
-                  categories.map((cat) => (
-                    <option key={cat.name} value={cat.name}>
-                      {cat.name}
-                    </option>
-                  ))
-                )}
-              </select>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-gray-300">Subcategory</label>
-              <select
-                required
-                value={form.subCategory}
-                onFocus={focusScroll}
-                onChange={(e) => setForm({ ...form, subCategory: e.target.value })}
-                className="p-3 rounded bg-gray-800 w-full text-base"
-                disabled={!selectedCategory.subCategories}
-              >
-                <option value="">Select subcategory</option>
-                {selectedCategory.subCategories?.map((sub) => (
-                  <option key={sub} value={sub}>
-                    {sub}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Brand & Stock */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-gray-300">Brand</label>
-              <input
-                placeholder="Brand"
-                value={form.brand}
-                onFocus={focusScroll}
-                onChange={(e) => setForm({ ...form, brand: e.target.value })}
-                className="p-3 rounded bg-gray-800 w-full text-base"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-gray-300">Stock</label>
-              <input
-                type="number"
-                placeholder="Stock"
-                value={form.stock}
-                onFocus={focusScroll}
-                onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })}
-                className="p-3 rounded bg-gray-800 w-full text-base"
-              />
-            </div>
-          </div>
-
-          {/* Prices */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-gray-300">Regular Price</label>
-              <input
-                type="number"
-                placeholder="Regular Price"
-                value={form.regularPrice}
-                onFocus={focusScroll}
-                onChange={(e) => setForm({ ...form, regularPrice: Number(e.target.value) })}
-                className="p-3 rounded bg-gray-800 w-full text-base"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-gray-300">Sell Price</label>
-              <input
-                type="number"
-                placeholder="Sell Price"
-                value={form.sellPrice}
-                onFocus={focusScroll}
-                onChange={(e) => setForm({ ...form, sellPrice: Number(e.target.value) })}
-                className="p-3 rounded bg-gray-800 w-full text-base"
-              />
-            </div>
-          </div>
-
-          {/* Warranty */}
-          <div className="flex flex-col gap-1">
-            <label className="text-gray-300">Warranty</label>
+          {/* Price */}
+          <div>
+            <label className="font-medium">Price</label>
             <input
-              placeholder="Warranty (e.g., 6 months)"
-              value={form.warranty}
-              onFocus={focusScroll}
-              onChange={(e) => setForm({ ...form, warranty: e.target.value })}
-              className="p-3 rounded bg-gray-800 w-full text-base"
+              name="price"
+              type="number"
+              value={form.price}
+              onChange={handleChange}
+              required
+              className="border w-full p-2 rounded"
             />
           </div>
 
-          {/* Image Upload */}
-          <div className="flex flex-col gap-1">
-            <label className="text-gray-300">Product Image</label>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              <input
-                type="file"
-                accept="image/*"
-                onFocus={focusScroll}
-                onChange={(e) => setFile(e.target.files[0])}
-                className="text-sm"
-              />
-              <button
-                type="button"
-                onClick={handleUploadImage}
-                disabled={uploading || !file}
-                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm"
-              >
-                {uploading ? "Uploading..." : "Upload Image"}
-              </button>
-
-              <div className="flex gap-2">
-                {form.image && (
-                  <img src={form.image} alt="preview" className="w-16 h-16 object-cover rounded" />
-                )}
-              </div>
-            </div>
+          {/* Category */}
+          <div>
+            <label className="font-medium">Category</label>
+            <input
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+              className="border w-full p-2 rounded"
+            />
           </div>
 
-          {/* Buttons */}
-          <div className="flex flex-col sm:flex-row justify-end gap-2 mt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded w-full sm:w-auto"
-            >
-              Cancel
-            </button>
+          {/* Sub Category */}
+          <div>
+            <label className="font-medium">Sub Category</label>
+            <input
+              name="subCategory"
+              value={form.subCategory}
+              onChange={handleChange}
+              className="border w-full p-2 rounded"
+            />
+          </div>
 
+          {/* Image Select */}
+          <div>
+            <label className="font-medium">Product Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFile(e.target.files[0])}
+              className="w-full"
+            />
+          </div>
+
+          {/* Existing image preview */}
+          {form.image && !file && (
+            <img
+              src={form.image}
+              alt="Old"
+              className="w-24 h-24 object-cover rounded mt-2"
+            />
+          )}
+
+          {/* Submit buttons */}
+          <div className="flex gap-2 mt-4">
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded w-full sm:w-auto"
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
             >
-              {saving ? "Saving..." : editingProduct ? "Update" : "Add"}
+              {saving
+                ? "Saving..."
+                : editingProduct
+                ? "Update Product"
+                : "Add Product"}
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            >
+              Cancel
             </button>
           </div>
         </form>
