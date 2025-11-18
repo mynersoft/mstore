@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchService, updateService } from "@/redux/serviceSlice";
+import { updateService } from "@/redux/serviceSlice";
 import { useParams, useRouter } from "next/navigation";
 import { showAddConfirm } from "@/components/sweetalert/AddConfirm"; // reuse as confirm "update"
 
@@ -13,9 +13,7 @@ export default function EditService() {
 	const { current } = useSelector((s) => s.service);
 	const [form, setForm] = useState(null);
 
-	useEffect(() => {
-		if (id) dispatch(fetchService(id));
-	}, [id, dispatch]);
+	
 
 	useEffect(() => {
 		if (current)
