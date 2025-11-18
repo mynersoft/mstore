@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addProduct, updateProduct, fetchProducts } from "@/redux/productSlice";
 import { fetchCategories } from "@/redux/categorySlice";
-import { uploadToCloudinary } from "@/lib/cloudinary";
 import { showAddConfirm } from "./sweetalert/AddConfirm";
 
 export default function ProductFormModal({
@@ -66,7 +65,7 @@ export default function ProductFormModal({
 			setSaving(true);
 			let imageUrl = form.image;
 
-			if (file) imageUrl = await uploadToCloudinary(file);
+			
 
 			const payload = { ...form, image: imageUrl };
 
