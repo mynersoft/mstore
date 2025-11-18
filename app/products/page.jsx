@@ -1,3 +1,6 @@
+"use client";
+
+
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/dbConnect";
 import Product from "@/models/Product";
