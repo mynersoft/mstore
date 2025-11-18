@@ -129,54 +129,56 @@ export default function ProductsPage() {
 				</table>
 			</div>
 
-			{/* MOBILE CARD VIEW (hidden on desktop) */}
-			<div className="md:hidden grid grid-cols-1 gap-4">
+			{/* MOBILE CARD VIEW */}
+			<div className="md:hidden space-y-4">
 				{filteredItems?.length ? (
 					filteredItems.map((p) => (
-						<div key={p._id} className="bg-gray-900 p-4 rounded-lg shadow">
-							
-							{/* Product Header */}
-							<div className="flex items-center gap-4">
+						<div
+							key={p._id}
+							className="bg-gray-900 p-4 rounded-lg shadow border border-gray-800"
+						>
+							<div className="flex items-center gap-3">
 								<img
-									src={p.image || ""}
-									alt={p.name}
-									className="w-16 h-16 rounded object-cover bg-gray-800"
+									src={p.image}
+									className="w-14 h-14 rounded object-cover"
 								/>
 								<div>
-									<h2 className="text-lg font-semibold">{p.name}</h2>
-									<p className="text-gray-400 text-sm">{p.category}</p>
+									<h2 className="font-semibold">{p.name}</h2>
+									<p className="text-gray-400 text-sm">
+										{p.category} • {p.brand}
+									</p>
 								</div>
 							</div>
 
-							{/* Info */}
-							<div className="mt-3 text-sm text-gray-300 space-y-1">
-								<p><strong>Brand:</strong> {p.brand}</p>
-								<p><strong>Stock:</strong> {p.stock}</p>
-								<p><strong>Regular:</strong> ৳{p.regularPrice}</p>
-								<p><strong>Sell:</strong> ৳{p.sellPrice}</p>
+							<div className="mt-3 grid grid-cols-2 text-sm">
+								<p>Stock: {p.stock}</p>
+								<p>Regular: {p.regularPrice}</p>
+								<p>Sell: {p.sellPrice}</p>
 							</div>
 
-							{/* Actions */}
-							<div className="flex justify-end gap-2 mt-4">
+							<div className="flex gap-2 mt-3">
 								<button
 									onClick={() => {
 										setEditingProduct(p);
 										setShowModal(true);
 									}}
-									className="bg-blue-600 px-3 py-1 rounded text-sm">
+									className="bg-blue-600 px-3 py-1 rounded w-full"
+								>
 									Edit
 								</button>
-
 								<button
 									onClick={() => handleDelete(p._id)}
-									className="bg-red-600 px-3 py-1 rounded text-sm">
+									className="bg-red-600 px-3 py-1 rounded w-full"
+								>
 									Delete
 								</button>
 							</div>
 						</div>
 					))
 				) : (
-					<p className="text-center text-gray-500">No products found</p>
+					<p className="text-center text-gray-500">
+						No products found
+					</p>
 				)}
 			</div>
 
