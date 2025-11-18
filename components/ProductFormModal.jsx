@@ -22,13 +22,12 @@ export default function ProductFormModal({
 		category: "",
 		subCategory: "",
 		brand: "",
-		stock: 0,
-		regularPrice: 0,
-		sellPrice: 0,
+		stock: "",
+		regularPrice: "",
+		sellPrice: "",
 		warranty: "",
 		image: "",
 	});
-
 	const [file, setFile] = useState(null);
 	const [saving, setSaving] = useState(false);
 
@@ -54,11 +53,19 @@ export default function ProductFormModal({
 		}
 	}, [editingProduct]);
 
+	const focusScroll = (e) => {
+		e.target.scrollIntoView({
+			behavior: "smooth",
+			block: "center",
+		});
+	};
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
 			setSaving(true);
 			let imageUrl = form.image;
+
 			if (file) imageUrl = await uploadToCloudinary(file);
 
 			const payload = { ...form, image: imageUrl };
@@ -75,7 +82,6 @@ export default function ProductFormModal({
 			onClose();
 		} catch (err) {
 			alert("Save failed: " + (err.message || err));
-			console.error(err);
 		} finally {
 			setSaving(false);
 		}
@@ -85,15 +91,19 @@ export default function ProductFormModal({
 		categories.find((cat) => cat.name === form.category) || {};
 
 	return (
-		<div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4">
-			<div className="bg-gray-900 text-gray-100 rounded-lg w-full max-w-2xl max-h-[95vh] overflow-y-auto p-5 sm:p-6 shadow-xl">
-				<div className="flex justify-between items-center mb-4">
+		<div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-3 sm:p-4">
+			<div className="bg-gray-900 text-gray-100 rounded-lg w-full max-w-2xl 
+                max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-xl 
+                scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
+				
+				{/* Header */}
+				<div className="flex justify-between items-center mb-4 sticky top-0 bg-gray-900 pb-3">
 					<h3 className="text-lg font-semibold">
 						{editingProduct ? "Edit Product" : "Add Product"}
 					</h3>
 					<button
 						onClick={onClose}
-						className="text-gray-400 hover:text-gray-200 text-lg">
+						className="text-gray-400 hover:text-gray-200 text-xl">
 						✕
 					</button>
 				</div>
@@ -106,10 +116,11 @@ export default function ProductFormModal({
 							required
 							placeholder="Product Name"
 							value={form.name}
+							onFocus={focusScroll}
 							onChange={(e) =>
 								setForm({ ...form, name: e.target.value })
 							}
-							className="p-3 rounded bg-gray-800 w-full"
+							className="p-3 rounded bg-gray-800 w-full text-base"
 						/>
 					</div>
 
@@ -120,6 +131,7 @@ export default function ProductFormModal({
 							<select
 								required
 								value={form.category}
+								onFocus={focusScroll}
 								onChange={(e) =>
 									setForm({
 										...form,
@@ -127,7 +139,7 @@ export default function ProductFormModal({
 										subCategory: "",
 									})
 								}
-								className="p-3 rounded bg-gray-800 w-full">
+								className="p-3 rounded bg-gray-800 w-full text-base">
 								<option value="">Select category</option>
 								{catLoading ? (
 									<option>Loading...</option>
@@ -146,13 +158,14 @@ export default function ProductFormModal({
 							<select
 								required
 								value={form.subCategory}
+								onFocus={focusScroll}
 								onChange={(e) =>
 									setForm({
 										...form,
 										subCategory: e.target.value,
 									})
 								}
-								className="p-3 rounded bg-gray-800 w-full"
+								className="p-3 rounded bg-gray-800 w-full text-base"
 								disabled={!selectedCategory.subCategories}>
 								<option value="">Select subcategory</option>
 								{selectedCategory.subCategories?.map((sub) => (
@@ -171,10 +184,11 @@ export default function ProductFormModal({
 							<input
 								placeholder="Brand"
 								value={form.brand}
+								onFocus={focusScroll}
 								onChange={(e) =>
 									setForm({ ...form, brand: e.target.value })
 								}
-								className="p-3 rounded bg-gray-800 w-full"
+								className="p-3 rounded bg-gray-800 w-full text-base"
 							/>
 						</div>
 
@@ -184,34 +198,34 @@ export default function ProductFormModal({
 								type="number"
 								placeholder="Stock"
 								value={form.stock}
+								onFocus={focusScroll}
 								onChange={(e) =>
 									setForm({
 										...form,
 										stock: Number(e.target.value),
 									})
 								}
-								className="p-3 rounded bg-gray-800 w-full"
+								className="p-3 rounded bg-gray-800 w-full text-base"
 							/>
 						</div>
 					</div>
 
-					{/* Regular & Sell Price */}
+					{/* Prices */}
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 						<div className="flex flex-col gap-1">
-							<label className="text-gray-300">
-								Regular Price
-							</label>
+							<label className="text-gray-300">Regular Price</label>
 							<input
 								type="number"
 								placeholder="Regular Price"
 								value={form.regularPrice}
+								onFocus={focusScroll}
 								onChange={(e) =>
 									setForm({
 										...form,
 										regularPrice: Number(e.target.value),
 									})
 								}
-								className="p-3 rounded bg-gray-800 w-full"
+								className="p-3 rounded bg-gray-800 w-full text-base"
 							/>
 						</div>
 
@@ -221,13 +235,14 @@ export default function ProductFormModal({
 								type="number"
 								placeholder="Sell Price"
 								value={form.sellPrice}
+								onFocus={focusScroll}
 								onChange={(e) =>
 									setForm({
 										...form,
 										sellPrice: Number(e.target.value),
 									})
 								}
-								className="p-3 rounded bg-gray-800 w-full"
+								className="p-3 rounded bg-gray-800 w-full text-base"
 							/>
 						</div>
 					</div>
@@ -238,10 +253,11 @@ export default function ProductFormModal({
 						<input
 							placeholder="Warranty (e.g., 6 months)"
 							value={form.warranty}
+							onFocus={focusScroll}
 							onChange={(e) =>
 								setForm({ ...form, warranty: e.target.value })
 							}
-							className="p-3 rounded bg-gray-800 w-full"
+							className="p-3 rounded bg-gray-800 w-full text-base"
 						/>
 					</div>
 
@@ -253,6 +269,7 @@ export default function ProductFormModal({
 								id="img"
 								type="file"
 								accept="image/*"
+								onFocus={focusScroll}
 								onChange={(e) => setFile(e.target.files[0])}
 								className="text-sm"
 							/>
