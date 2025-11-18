@@ -7,51 +7,106 @@ export default function UploadPage() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleUpload() {
-  if (!image) return alert("Select an image first!");
-  setLoading(true);
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
 
-  try {
+  // 🔹 Upload image to Cloudinary
+  async function uploadToCloudinary() {
     const formData = new FormData();
     formData.append("image", image);
 
     const res = await fetch("/api/upload", { method: "POST", body: formData });
-
-    let data;
-    try {
-      data = await res.json();
-    } catch {
-      alert("Upload failed: Invalid response from server");
-      setLoading(false);
-      return;
-    }
+    const data = await res.json();
 
     if (res.ok && data.secure_url) {
-      setUrl(data.secure_url);
-      alert("Upload successful!");
+      return data.secure_url;
     } else {
-      alert("Upload failed: " + (data?.error || "Unknown error"));
+      throw new Error(data.error || "Upload failed");
     }
-  } catch (err) {
-    alert("Upload error: " + err.message);
-  } finally {
-    setLoading(false);
   }
-}
+
+  // 🔹 Submit all data
+  async function handleSubmit() {
+    if (!image) return alert("Please select an image");
+    if (!name || !price) return alert("Input fields required");
+
+    setLoading(true);
+
+    try {
+      // upload image
+      const uploadedUrl = await uploadToCloudinary();
+      setUrl(uploadedUrl);
+
+      // post to backend
+      const res = await fetch("/api/products", {
+        method: "POST",
+        body: JSON.stringify({
+          name,
+          price,
+          description,
+          image: uploadedUrl,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Product saved successfully!");
+        console.log("Saved:", data);
+      } else {
+        alert("Save error: " + data.error);
+      }
+    } catch (err) {
+      alert("Error: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div style={{ padding: 20 }}>
-      <h2>Upload Image to Cloudinary</h2>
+      <h2>Add Product</h2>
 
-      <input type="file" name="name"  accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
+      <br />
 
-      <button onClick={handleUpload} style={{ marginTop: 10 }} disabled={loading}>
-        {loading ? "Uploading..." : "Upload"}
+      <input
+        type="text"
+        placeholder="Product Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+
+      <br />
+      <input
+        type="number"
+        placeholder="Product Price"
+        value={price}
+        onChange={(e) => setPrice(e.target.value)}
+      />
+
+      <br />
+      <textarea
+        placeholder="Description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
+
+      <br />
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setImage(e.target.files[0])}
+      />
+
+      <button onClick={handleSubmit} disabled={loading} style={{ marginTop: 10 }}>
+        {loading ? "Saving..." : "Save Product"}
       </button>
 
       {url && (
-        <div style={{ marginTop: 20 }}>
+        <div>
           <h3>Uploaded Image:</h3>
-          <img src={url} width="300" />
+          <img src={url} width="200" />
         </div>
       )}
     </div>
