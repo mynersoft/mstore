@@ -17,8 +17,9 @@ export default function UploadPage() {
     try {
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       const data = await res.json();
+alert(data.secur_url);
 
-      if (res.ok && data.secure_url) {
+      if (res.ok) {
         setUrl(data.secure_url);
         alert("Upload successful!");
       } else {
@@ -35,7 +36,7 @@ export default function UploadPage() {
     <div style={{ padding: 20 }}>
       <h2>Upload Image to Cloudinary</h2>
 
-      <input type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
+      <input type="file" name="name"  accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
 
       <button onClick={handleUpload} style={{ marginTop: 10 }} disabled={loading}>
         {loading ? "Uploading..." : "Upload"}
