@@ -8,19 +8,13 @@ import CategoryForm from "@/components/CategoryForm";
 
 export default function ProductsPage() {
 	const dispatch = useDispatch();
-	const {
-		items,
-		total,
-		page: reduxPage,
-		limit,
-	} = useSelector((s) => s.products);
+	const { items, total, page: reduxPage, limit } = useSelector((s) => s.products);
 
 	const [pageLocal, setPageLocal] = useState(reduxPage || 1);
 	const [showModal, setShowModal] = useState(false);
 	const [showCatModal, setShowCatModal] = useState(false);
 	const [editingProduct, setEditingProduct] = useState(null);
 
-	// 🔍 Search state for product name
 	const [search, setSearch] = useState("");
 
 	const handleCancel = () => setShowCatModal(false);
@@ -35,7 +29,6 @@ export default function ProductsPage() {
 		dispatch(fetchProducts({ page: pageLocal, limit }));
 	};
 
-	// 🔎 Filter items by search text (exact + partial match)
 	const filteredItems = items?.filter((p) =>
 		p.name.toLowerCase().includes(search.toLowerCase())
 	);
@@ -43,18 +36,19 @@ export default function ProductsPage() {
 	const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
 
 	return (
-		<div className="p-6 min-h-screen bg-gray-950 text-gray-300">
+		<div className="p-4 md:p-6 min-h-screen bg-gray-950 text-gray-300">
+
 			{/* HEADER */}
-			<div className="flex justify-between items-center mb-6">
+			<div className="flex flex-col md:flex-row md:justify-between gap-3 md:items-center mb-6">
 				<h1 className="text-2xl font-semibold">Products</h1>
 
-				{/* 🔍 Search Box */}
+				{/* Search */}
 				<input
 					type="text"
 					value={search}
 					onChange={(e) => setSearch(e.target.value)}
 					placeholder="Search product..."
-					className="px-3 py-2 rounded bg-gray-800 border border-gray-700 text-gray-300 mr-3"
+					className="px-3 py-2 rounded bg-gray-800 border border-gray-700 text-gray-300 w-full md:w-60"
 				/>
 
 				<div className="flex items-center gap-2">
@@ -63,19 +57,20 @@ export default function ProductsPage() {
 							setEditingProduct(null);
 							setShowModal(true);
 						}}
-						className="bg-green-600 px-4 py-2 rounded">
+						className="bg-green-600 px-4 py-2 rounded text-sm">
 						+ Add Product
 					</button>
+
 					<button
 						onClick={() => setShowCatModal(true)}
-						className="bg-green-600 px-4 py-2 rounded">
+						className="bg-green-600 px-4 py-2 rounded text-sm">
 						+ Add Category
 					</button>
 				</div>
 			</div>
 
-			{/* TABLE */}
-			<div className="overflow-x-auto bg-gray-900 rounded-lg">
+			{/* DESKTOP TABLE (hidden on mobile) */}
+			<div className="hidden md:block overflow-x-auto bg-gray-900 rounded-lg">
 				<table className="w-full text-sm">
 					<thead className="bg-gray-800">
 						<tr>
@@ -90,23 +85,14 @@ export default function ProductsPage() {
 						</tr>
 					</thead>
 					<tbody>
-						{filteredItems && filteredItems.length ? (
+						{filteredItems?.length ? (
 							filteredItems.map((p) => (
-								<tr
-									key={p._id}
+								<tr key={p._id}
 									className="border-b border-gray-800 hover:bg-gray-800/40">
 									<td className="p-3">
 										{p.image ? (
-											<img
-												src={p.image}
-												alt={p.name}
-												className="w-10 h-10 object-cover rounded"
-											/>
-										) : (
-											<span className="text-gray-500">
-												No
-											</span>
-										)}
+											<img src={p.image} className="w-10 h-10 object-cover rounded" />
+										) : <span className="text-gray-500">No</span>}
 									</td>
 									<td className="p-3">{p.name}</td>
 									<td className="p-3">{p.category}</td>
@@ -114,6 +100,7 @@ export default function ProductsPage() {
 									<td className="p-3">{p.stock}</td>
 									<td className="p-3">{p.regularPrice}</td>
 									<td className="p-3">{p.sellPrice}</td>
+
 									<td className="p-3 text-center flex gap-2 justify-center">
 										<button
 											onClick={() => {
@@ -133,9 +120,7 @@ export default function ProductsPage() {
 							))
 						) : (
 							<tr>
-								<td
-									colSpan={8}
-									className="p-6 text-center text-gray-500">
+								<td colSpan={8} className="p-6 text-center text-gray-500">
 									No products found
 								</td>
 							</tr>
@@ -144,8 +129,59 @@ export default function ProductsPage() {
 				</table>
 			</div>
 
+			{/* MOBILE CARD VIEW (hidden on desktop) */}
+			<div className="md:hidden grid grid-cols-1 gap-4">
+				{filteredItems?.length ? (
+					filteredItems.map((p) => (
+						<div key={p._id} className="bg-gray-900 p-4 rounded-lg shadow">
+							
+							{/* Product Header */}
+							<div className="flex items-center gap-4">
+								<img
+									src={p.image || ""}
+									alt={p.name}
+									className="w-16 h-16 rounded object-cover bg-gray-800"
+								/>
+								<div>
+									<h2 className="text-lg font-semibold">{p.name}</h2>
+									<p className="text-gray-400 text-sm">{p.category}</p>
+								</div>
+							</div>
+
+							{/* Info */}
+							<div className="mt-3 text-sm text-gray-300 space-y-1">
+								<p><strong>Brand:</strong> {p.brand}</p>
+								<p><strong>Stock:</strong> {p.stock}</p>
+								<p><strong>Regular:</strong> ৳{p.regularPrice}</p>
+								<p><strong>Sell:</strong> ৳{p.sellPrice}</p>
+							</div>
+
+							{/* Actions */}
+							<div className="flex justify-end gap-2 mt-4">
+								<button
+									onClick={() => {
+										setEditingProduct(p);
+										setShowModal(true);
+									}}
+									className="bg-blue-600 px-3 py-1 rounded text-sm">
+									Edit
+								</button>
+
+								<button
+									onClick={() => handleDelete(p._id)}
+									className="bg-red-600 px-3 py-1 rounded text-sm">
+									Delete
+								</button>
+							</div>
+						</div>
+					))
+				) : (
+					<p className="text-center text-gray-500">No products found</p>
+				)}
+			</div>
+
 			{/* PAGINATION */}
-			<div className="flex justify-center gap-2 mt-4">
+			<div className="flex justify-center gap-2 mt-6 flex-wrap">
 				{Array.from({ length: totalPages }).map((_, i) => {
 					const num = i + 1;
 					return (
@@ -179,7 +215,6 @@ export default function ProductsPage() {
 			{/* CATEGORY MODAL */}
 			{showCatModal && (
 				<CategoryForm
-					editingProduct={editingProduct}
 					onCancel={handleCancel}
 					onClose={() => {
 						setShowCatModal(false);
