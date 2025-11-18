@@ -45,12 +45,6 @@ export async function GET(req) {
 }
 
 // ================== POST ===================
-export async function POST(request) {
-  await connectDB();
-  const body = await request.json();
-  const product = await Product.create(body);
-  return NextResponse.json(product);
-}
 
 // ================== PUT ===================
 export const POST = async (req) => {
