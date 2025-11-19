@@ -86,7 +86,7 @@ export default function ProductFormModal({
       });
 
       // 🔹 send all data to single API
-      const res = await fetch("/api/upload", {
+      const res = await fetch("/api/products", {
         method: "POST",
         body: formData,
       });
