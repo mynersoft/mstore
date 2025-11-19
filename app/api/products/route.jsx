@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/dbConnect";
 import Product from "@/models/Product";
 
+import cloudinary from "@/lib/cloudinary";
+
 // ================== GET ===================
 export async function GET(req) {
   try {
