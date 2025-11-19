@@ -2,6 +2,8 @@ import { connectDB } from "@/lib/dbConnect";
 import Product from "@/models/Product";
 import { NextResponse } from "next/server";
 
+import cloudinary from "@/lib/cloudinary";
+
 export async function GET(request, { params }) {
 	await connectDB();
 	const p = await Product.findById(params.id);
