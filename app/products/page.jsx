@@ -30,10 +30,14 @@ export default function ProductsPage() {
 		dispatch(fetchProducts({ page: pageLocal, limit }));
 	};
 
-	// Filter items by product name (case-insensitive)
-	const filteredItems = items?.filter((p) =>
-		p.name.toLowerCase().includes(search.toLowerCase())
-	);
+	
+
+const filteredItems = items?.filter(
+  (p) =>
+    p.name?.toLowerCase().includes(search.toLowerCase()) // optional chaining
+);
+
+
 
 	const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
 
