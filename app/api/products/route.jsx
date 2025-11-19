@@ -51,48 +51,72 @@ export async function GET(req) {
 
 
 
+
+
+// 🔹 Cloudinary Config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// ======================================================
+// ⭐ POST → Add new product
+// ======================================================
 export async function POST(req) {
   try {
-    // 1️⃣ Connect to DB
     await connectDB();
 
-    // 2️⃣ Get form data
     const formData = await req.formData();
 
     const name = formData.get("name");
     const category = formData.get("category");
     const subCategory = formData.get("subCategory");
     const brand = formData.get("brand");
-    const stock = formData.get("stock");
-    const regularPrice = formData.get("regularPrice");
-    const sellPrice = formData.get("sellPrice");
+    const stock = Number(formData.get("stock") || 0);
+    const regularPrice = Number(formData.get("regularPrice") || 0);
+    const sellPrice = Number(formData.get("sellPrice") || 0);
     const warranty = formData.get("warranty");
 
+    let finalImage = "";
+
+    // 🔹 Case 1 → User selected Google Image (URL → Cloudinary)
+    const googleImageUrl = formData.get("imageUrl");
+
+    if (googleImageUrl) {
+      const uploadResponse = await cloudinary.uploader.upload(googleImageUrl, {
+        folder: "products",
+      });
+      finalImage = uploadResponse.secure_url;
+    }
+
+    // 🔹 Case 2 → User uploaded local image file
     const file = formData.get("image");
+    if (file && file.size > 0) {
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
 
-    if (!file) {
-      return NextResponse.json({ error: "Image is required" }, { status: 400 });
+      const uploadResponse = await new Promise((resolve, reject) => {
+        cloudinary.uploader
+          .upload_stream(
+            { folder: "products" },
+            (err, result) => (err ? reject(err) : resolve(result))
+          )
+          .end(buffer);
+      });
+
+      finalImage = uploadResponse.secure_url;
     }
 
-    // 3️⃣ Convert image file to buffer
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    // 4️⃣ Upload image to Cloudinary
-    const uploadRes = await new Promise((resolve) => {
-      cloudinary.uploader
-        .upload_stream({ folder: "products" }, (err, result) => {
-          if (err) resolve({ error: err.message });
-          resolve(result);
-        })
-        .end(buffer);
-    });
-
-    if (uploadRes.error) {
-      return NextResponse.json({ error: uploadRes.error }, { status: 500 });
+    // 🔹 Case 3 → Editing product with old image
+    if (!finalImage) {
+      finalImage = formData.get("image") || "";
     }
 
-    // 5️⃣ Save product in DB
-    const product = await Product.create({
+    // ======================================================
+    // ⭐ Save Product
+    // ======================================================
+    const newProduct = await Product.create({
       name,
       category,
       subCategory,
@@ -101,18 +125,20 @@ export async function POST(req) {
       regularPrice,
       sellPrice,
       warranty,
-      image: uploadRes.secure_url,
+      image: finalImage,
     });
 
-    return NextResponse.json(product);
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({
+      product: JSON.parse(JSON.stringify(newProduct)),
+    });
+  } catch (error) {
+    console.error("PRODUCT ADD ERROR:", error);
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
   }
 }
-
-
-
-
 
 
 // ================== PUT ===================
