@@ -12,6 +12,8 @@ export async function POST(req) {
     const res = await fetch(url);
     const data = await res.json();
 
+console.lof(data.items);
+
     return Response.json({ images: data.items || [] });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
