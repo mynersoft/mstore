@@ -32,12 +32,9 @@ export default function ProductsPage() {
 
 	
 
-const filteredItems = (items || []).filter((p) => {
-  const name = p?.name;
-  if (!name) return false; // skip items with no name
-  return name.toLowerCase().includes((search || "").toLowerCase());
-});
-
+const filteredItems = items?.filter((p) =>
+		p.name.toLowerCase().includes(search.toLowerCase())
+	);
 
 
 	const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
