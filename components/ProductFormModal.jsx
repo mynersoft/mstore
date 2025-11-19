@@ -59,6 +59,10 @@ export default function ProductFormModal({
 		});
 	};
 
+
+
+
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
@@ -76,6 +80,52 @@ export default function ProductFormModal({
 					dispatch(addProduct(payload)).unwrap()
 				);
 			}
+
+
+new _-------------------
+
+
+
+
+
+
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit() {
+    if (!image) return alert("Image required");
+    if (!name || !sellPrice ||! regularPrice || ) return alert("Input fields missing");
+
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("image", image);
+      formData.append("name", name);
+      formData.append("price", price);
+      formData.append("description", description);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Product saved!");
+        console.log(data);
+      } else {
+        alert(data.error);
+      }
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
+
 
 			dispatch(fetchProducts({ page: currentPage }));
 			onClose();
