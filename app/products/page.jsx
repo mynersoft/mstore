@@ -32,10 +32,11 @@ export default function ProductsPage() {
 
 	
 
-const filteredItems = items?.filter(
-  (p) =>
-    p?.name?.toLowerCase()?.includes(search.toLowerCase()) // optional chaining
-);
+const filteredItems = Array.isArray(items)
+  ? items.filter(
+      (p) => p?.name?.toLowerCase().includes(search?.toLowerCase() || "")
+    )
+  : [];
 
 
 
