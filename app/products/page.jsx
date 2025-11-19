@@ -20,6 +20,9 @@ export default function ProductsPage() {
 	// Search state
 	const [search, setSearch] = useState("");
 
+	// Filtered items state
+	const [filteredItems, setFilteredItems] = useState([]);
+
 	useEffect(() => {
 		dispatch(fetchProducts({ page: pageLocal, limit }));
 	}, [dispatch, pageLocal, limit]);
@@ -30,12 +33,21 @@ export default function ProductsPage() {
 		dispatch(fetchProducts({ page: pageLocal, limit }));
 	};
 
-	
+	// ✅ Filter items when items or search changes
+	useEffect(() => {
+		if (!Array.isArray(items)) {
+			setFilteredItems([]);
+			return;
+		}
 
-const filteredItems = items?.filter((p) =>
-		p.name.toLowerCase().includes(search.toLowerCase())
-	);
+		const filtered = items.filter((p) => {
+			const name = p?.name;
+			if (!name) return false; // skip items with no name
+			return name.toLowerCase().includes((search || "").toLowerCase());
+		});
 
+		setFilteredItems(filtered);
+	}, [items, search]);
 
 	const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
 
