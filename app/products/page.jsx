@@ -40,9 +40,11 @@ export default function ProductsPage() {
   }
 
   const filtered = items.filter((p) => {
-    // Coerce name to string safely
-    const name = p?.name ? String(p.name) : "";
-    return name.toLowerCase().includes((search || "").toLowerCase());
+    const name = p?.name;
+    if (!name) return false;
+
+    const regex = new RegExp(search, "i"); // 'i' for case-insensitive
+    return regex.test(name);
   });
 
   setFilteredItems(filtered);
