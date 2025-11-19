@@ -34,7 +34,7 @@ export default function ProductsPage() {
 
 const filteredItems = items?.filter(
   (p) =>
-    p.name?.toLowerCase().includes(search.toLowerCase()) // optional chaining
+    p?.name?.toLowerCase()?.includes(search.toLowerCase()) // optional chaining
 );
 
 
