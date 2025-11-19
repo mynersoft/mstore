@@ -40,16 +40,16 @@ export default function ProductsPage() {
   }
 
   const filtered = items.filter((p) => {
-    const name = p?.name;
-    if (!name) return false;
+    const name = p?.name;  // safe optional chaining
+    if (!name) return false; // skip null/undefined names
+    if (!search) return true; // show all if search is empty
 
-    const regex = new RegExp(search, "i"); // 'i' for case-insensitive
-    return regex.test(name);
+    // Case-insensitive search without toLowerCase
+    return name.toString().toLocaleLowerCase().includes(search.toString().toLocaleLowerCase());
   });
 
   setFilteredItems(filtered);
 }, [items, search]);
-
 
 
 
