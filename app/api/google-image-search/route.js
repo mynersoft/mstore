@@ -12,7 +12,7 @@ export async function POST(req) {
     const res = await fetch(url);
     const data = await res.json();
 
-console.lof(data.items);
+console.log(data.items);
 
     return Response.json({ images: data.items || [] });
   } catch (error) {
