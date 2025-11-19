@@ -7,6 +7,7 @@ export async function POST(req) {
     const upload = await cloudinary.uploader.upload(imageUrl, {
       folder: "products",
     });
+console.log(imageUrl);
 
     return Response.json({ url: upload.secure_url });
   } catch (error) {
