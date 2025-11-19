@@ -27,6 +27,16 @@ export default function ProductFormModal({
 		warranty: "",
 		image: "",
 	});
+const [loading, setLoading] = useState(false);
+const{name,
+		category,
+		subCategory,
+		brand,
+		stock,
+		regularPrice,
+		sellPrice,
+		warranty,
+		image} = form;
 	const [file, setFile] = useState(null);
 	const [saving, setSaving] = useState(false);
 
@@ -63,36 +73,10 @@ export default function ProductFormModal({
 
 
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		try {
-			setSaving(true);
-			let imageUrl = form.image;
 
-			
-
-			const payload = { ...form, image: imageUrl };
-
-			if (editingProduct) {
-				await dispatch(updateProduct(payload)).unwrap();
-			} else {
-				showAddConfirm("product", () =>
-					dispatch(addProduct(payload)).unwrap()
-				);
-			}
-
-
-new _-------------------
-
-
-
-
-
-
-  const [loading, setLoading] = useState(false);
 
   async function handleSubmit() {
-    if (!image) return alert("Image required");
+    if (!form.image) return alert("Image required");
     if (!name || !sellPrice ||! regularPrice || ) return alert("Input fields missing");
 
     setLoading(true);
@@ -101,8 +85,15 @@ new _-------------------
       const formData = new FormData();
       formData.append("image", image);
       formData.append("name", name);
-      formData.append("price", price);
-      formData.append("description", description);
+      formData.append("sellPrice", sellPrice);
+formData.append("regularPrice",regularPrice);
+      formData.append("brand",brand);
+formData.append("stock",stock);
+formData.append("warranty",warranty);
+formData.append("category ",category );
+formData.append("subCategory",subCategory );
+
+
 
       const res = await fetch("/api/upload", {
         method: "POST",
@@ -114,7 +105,17 @@ new _-------------------
       if (res.ok) {
         alert("Product saved!");
         console.log(data);
-      } else {
+      } 
+
+if (editingProduct) {
+				await dispatch(updateProduct(payload)).unwrap();
+			} else {
+				showAddConfirm("product", () =>
+					dispatch(addProduct(payload)).unwrap()
+				);
+
+
+else {
         alert(data.error);
       }
     } catch (err) {
