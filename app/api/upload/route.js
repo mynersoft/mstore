@@ -5,14 +5,20 @@ import { connectDB } from "@/lib/dbConnect";
 
 export async function POST(req) {
   try {
+    // 1️⃣ Connect to DB
     await connectDB();
 
+    // 2️⃣ Get form data
     const formData = await req.formData();
 
-    // 📌 Get fields from formData
     const name = formData.get("name");
-    const price = formData.get("price");
-    const description = formData.get("description");
+    const category = formData.get("category");
+    const subCategory = formData.get("subCategory");
+    const brand = formData.get("brand");
+    const stock = formData.get("stock");
+    const regularPrice = formData.get("regularPrice");
+    const sellPrice = formData.get("sellPrice");
+    const warranty = formData.get("warranty");
 
     const file = formData.get("image");
 
@@ -20,10 +26,10 @@ export async function POST(req) {
       return NextResponse.json({ error: "Image is required" }, { status: 400 });
     }
 
-    // 📌 Convert image file to buffer
+    // 3️⃣ Convert image file to buffer
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // 📌 Upload to Cloudinary
+    // 4️⃣ Upload image to Cloudinary
     const uploadRes = await new Promise((resolve) => {
       cloudinary.uploader
         .upload_stream({ folder: "products" }, (err, result) => {
@@ -37,11 +43,16 @@ export async function POST(req) {
       return NextResponse.json({ error: uploadRes.error }, { status: 500 });
     }
 
-    // 📌 Save product in DB
+    // 5️⃣ Save product in DB
     const product = await Product.create({
       name,
-      price,
-      description,
+      category,
+      subCategory,
+      brand,
+      stock,
+      regularPrice,
+      sellPrice,
+      warranty,
       image: uploadRes.secure_url,
     });
 
