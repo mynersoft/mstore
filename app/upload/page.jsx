@@ -1,79 +1,66 @@
 "use client";
 
 import { useState } from "react";
+import GoogleImagePicker from "@/components/GoogleImagePicker";
 
-export default function UploadPage() {
-  const [image, setImage] = useState(null);
+export default function AddProduct() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [description, setDescription] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
 
-  async function handleSubmit() {
-    if (!image) return alert("Image required");
-    if (!name || !price) return alert("Input fields missing");
+  const handleImageSelect = async (googleImageUrl) => {
+    const res = await fetch("/api/upload-image", {
+      method: "POST",
+      body: JSON.stringify({ imageUrl: googleImageUrl }),
+    });
 
-    setLoading(true);
+    const data = await res.json();
+    setImageUrl(data.url);
+  };
 
-    try {
-      const formData = new FormData();
-      formData.append("image", image);
-      formData.append("name", name);
-      formData.append("price", price);
-      formData.append("description", description);
+  const saveProduct = async () => {
+    const res = await fetch("/api/products", {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        price,
+        image: imageUrl,
+      }),
+    });
 
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("Product saved!");
-        console.log(data);
-      } else {
-        alert(data.error);
-      }
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }
+    const data = await res.json();
+    alert("Product saved!");
+  };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Add Product</h2>
+    <div className="p-6">
+      <h1 className="text-2xl mb-4">Add Product</h1>
 
       <input
-        type="text"
-        placeholder="Name"
+        className="border p-2 w-full mb-2"
+        placeholder="Product Name"
+        value={name}
         onChange={(e) => setName(e.target.value)}
       />
-      <br />
 
       <input
-        type="number"
+        className="border p-2 w-full mb-2"
         placeholder="Price"
+        value={price}
         onChange={(e) => setPrice(e.target.value)}
       />
-      <br />
 
-      <textarea
-        placeholder="Description"
-        onChange={(e) => setDescription(e.target.value)}
-      />
-      <br />
+      <GoogleImagePicker onSelect={handleImageSelect} />
 
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => setImage(e.target.files[0])}
-      />
+      {imageUrl && (
+        <img src={imageUrl} className="mt-4 w-40 border rounded" />
+      )}
 
-      <button onClick={handleSubmit} disabled={loading}>
-        {loading ? "Saving..." : "Save Product"}
+      <button
+        className="mt-4 bg-green-600 text-white px-4 py-2"
+        onClick={saveProduct}
+      >
+        Save Product
       </button>
     </div>
   );
