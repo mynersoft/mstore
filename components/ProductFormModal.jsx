@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import GoogleImagePicker from "@/components/GoogleImagePicker";
 import { useDispatch, useSelector } from "react-redux";
 import { addProduct, updateProduct, fetchProducts } from "@/redux/productSlice";
 import { fetchCategories } from "@/redux/categorySlice";
@@ -15,6 +16,25 @@ export default function ProductFormModal({
   const { list: categories, loading: catLoading } = useSelector(
     (state) => state.categories
   );
+
+
+
+
+  const [imageUrl, setImageUrl] = useState("");
+
+  const handleImageSelect = async (googleImageUrl) => {
+    const res = await fetch("/api/upload-image", {
+      method: "POST",
+      body: JSON.stringify({ imageUrl: googleImageUrl }),
+    });
+
+    const data = await res.json();
+    setImageUrl(data.url);
+  };
+
+
+
+
 
   const [form, setForm] = useState({
     name: "",
