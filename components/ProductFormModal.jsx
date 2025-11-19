@@ -77,7 +77,7 @@ const{name,
 
   async function handleSubmit() {
     if (!form.image) return alert("Image required");
-    if (!name || !sellPrice ||! regularPrice || ) return alert("Input fields missing");
+    if (!name || !sellPrice ||! regularPrice ) return alert("Input fields missing");
 
     setLoading(true);
 
