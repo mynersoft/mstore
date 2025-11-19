@@ -23,6 +23,7 @@ export default function ProductsPage() {
 	// Filtered items state
 	const [filteredItems, setFilteredItems] = useState([]);
 
+	// Fetch products on page change
 	useEffect(() => {
 		dispatch(fetchProducts({ page: pageLocal, limit }));
 	}, [dispatch, pageLocal, limit]);
@@ -33,26 +34,24 @@ export default function ProductsPage() {
 		dispatch(fetchProducts({ page: pageLocal, limit }));
 	};
 
+	// Safe search filter
 	useEffect(() => {
-  if (!Array.isArray(items)) {
-    setFilteredItems([]);
-    return;
-  }
+		if (!Array.isArray(items)) {
+			setFilteredItems([]);
+			return;
+		}
 
-  const filtered = items.filter((p) => {
-    const name = p?.name;  // safe optional chaining
-    if (!name) return false; // skip null/undefined names
-    if (!search) return true; // show all if search is empty
+		const filtered = items.filter((p) => {
+			const name = p?.name;
+			if (!name) return false; // skip items with null/undefined name
+			if (!search) return true; // show all if search is empty
 
-    // Case-insensitive search without toLowerCase
-    return name.toString().toLocaleLowerCase().includes(search.toString().toLocaleLowerCase());
-  });
+			// Convert both to string to avoid errors and use includes
+			return String(name).includes(String(search));
+		});
 
-  setFilteredItems(filtered);
-}, [items, search]);
-
-
-
+		setFilteredItems(filtered);
+	}, [items, search]);
 
 	const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
 
