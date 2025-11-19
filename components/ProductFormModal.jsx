@@ -82,62 +82,66 @@ export default function ProductFormModal({
 
   // ------------------------------------------------------------
   // ✅ FINAL WORKING handleSubmit
-  // ------------------------------------------------------------
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // -------------------------------------------
+// ------------------------------------------------------------
+// ✅ FINAL WORKING handleSubmit (uses /api/products route)
+// ------------------------------------------------------------
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!form.name || !form.sellPrice || !form.regularPrice) {
-      return alert("Required fields missing!");
+  if (!form.name || !form.sellPrice || !form.regularPrice) {
+    return alert("Required fields missing!");
+  }
+
+  setSaving(true);
+
+  try {
+    const formData = new FormData();
+
+    // 🔹 image file from input
+    if (file) {
+      formData.append("image", file);
     }
 
-    setSaving(true);
+    // 🔹 append all input fields
+    Object.keys(form).forEach((key) => {
+      formData.append(key, form[key]);
+    });
 
-    try {
-      const formData = new FormData();
+    // 🔹 send to /api/products route
+    const res = await fetch("/api/products", {
+      method: editingProduct ? "PUT" : "POST",
+      body: formData,
+    });
 
-      // 🔹 image file from input
-      if (file) {
-        formData.append("image", file);
-      }
+    const data = await res.json();
 
-      // 🔹 append all input fields
-      Object.keys(form).forEach((key) => {
-        formData.append(key, form[key]);
-      });
-
-      // 🔹 send all data to single API
-      const res = await fetch("/api/products", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.error || "Upload failed");
-        setSaving(false);
-        return;
-      }
-
-      // 🔹 API returns: { product }
-      const payload = data.product;
-
-      if (editingProduct) {
-        await dispatch(updateProduct(payload)).unwrap();
-      } else {
-        showAddConfirm("product", () =>
-          dispatch(addProduct(payload)).unwrap()
-        );
-      }
-
-      dispatch(fetchProducts({ page: currentPage }));
-      onClose();
-    } catch (error) {
-      alert("Save failed: " + error.message);
-    } finally {
+    if (!res.ok) {
+      alert(data.error || "Upload failed");
       setSaving(false);
+      return;
     }
-  };
+
+    // 🔹 API returns: { product }
+    const payload = data.product;
+
+    if (editingProduct) {
+      await dispatch(updateProduct(payload)).unwrap();
+    } else {
+      showAddConfirm("product", () =>
+        dispatch(addProduct(payload)).unwrap()
+      );
+    }
+
+    dispatch(fetchProducts({ page: currentPage }));
+    onClose();
+  } catch (error) {
+    alert("Save failed: " + error.message);
+  } finally {
+    setSaving(false);
+  }
+};
+
 
   const selectedCategory =
     categories.find((cat) => cat.name === form.category) || {};
