@@ -297,6 +297,15 @@ export default function ProductFormModal({
               className="text-sm"
             />
 
+
+<GoogleImagePicker onSelect={handleImageSelect} />
+
+      {imageUrl && (
+        <img src={imageUrl} className="mt-4 w-40 border rounded" />
+      )}
+
+
+
             <div className="flex gap-2 mt-2">
               {form.image && !file && (
                 <img
