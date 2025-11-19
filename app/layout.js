@@ -7,6 +7,10 @@ import Header from "@/components/Header";
 
 import { useEffect, useState } from "react";
 
+
+import ErudaLoader from "@/components/ErudaLoader";
+
+
 import Loader from "@/components/Loader";
 
 {/* export const metadata = {
@@ -34,6 +38,7 @@ export default function RootLayout({ children }) {
 
         {!loading && (
           <>
+<ErudaLoader/>
             <Header />
 
             <ReduxProvider>
