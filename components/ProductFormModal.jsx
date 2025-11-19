@@ -2,11 +2,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addProduct, updateProduct, fetchProducts } from "@/redux/productSlice";
+import { fetchCategories } from "@/redux/categorySlice";
 
 export default function ProductFormModal({ editingProduct, onClose, currentPage = 1 }) {
   const dispatch = useDispatch();
+
+  // ⬇️ Load all categories from Redux
+  const categories = useSelector((state) => state.categories.items || []);
 
   const [form, setForm] = useState({
     name: "",
@@ -24,8 +28,11 @@ export default function ProductFormModal({ editingProduct, onClose, currentPage 
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    dispatch(fetchCategories());
+  }, []);
+
+  useEffect(() => {
     if (editingProduct) {
-      // ensure fields exist
       setForm({
         name: editingProduct.name || "",
         category: editingProduct.category || "",
@@ -57,35 +64,26 @@ export default function ProductFormModal({ editingProduct, onClose, currentPage 
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  // single button submit: upload image (if selected) then create/update product
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
 
     try {
       const fd = new FormData();
-      fd.append("name", form.name);
-      fd.append("category", form.category);
-      fd.append("subCategory", form.subCategory);
-      fd.append("brand", form.brand);
-      fd.append("stock", form.stock);
-      fd.append("regularPrice", form.regularPrice);
-      fd.append("sellPrice", form.sellPrice);
-      fd.append("warranty", form.warranty);
+      Object.keys(form).forEach((key) => {
+        if (key !== "image" && key !== "_id") fd.append(key, form[key]);
+      });
 
-      // include existing image so server keeps it if no new file
       if (form.image) fd.append("existingImage", form.image);
       if (file) fd.append("image", file);
 
       if (form._id) {
-        // update
         await dispatch(updateProduct({ id: form._id, formData: fd })).unwrap();
       } else {
-        // add
         await dispatch(addProduct(fd)).unwrap();
       }
 
-      await dispatch(fetchProducts({ page: currentPage, limit: 20 })); // refresh
+      await dispatch(fetchProducts({ page: currentPage, limit: 20 }));
       onClose();
     } catch (err) {
       console.error("Save error:", err);
@@ -95,29 +93,61 @@ export default function ProductFormModal({ editingProduct, onClose, currentPage 
     }
   };
 
+  // ⬇️ Sub-category list filter
+  const currentSubCategories =
+    categories.find((c) => c.name === form.category)?.subCategories || [];
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3">
       <div className="bg-gray-900 text-gray-100 rounded-lg w-full max-w-2xl p-5 max-h-[90vh] overflow-auto">
+        
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">{form._id ? "Edit Product" : "Add Product"}</h3>
           <button onClick={onClose} className="text-gray-400">✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="grid gap-3">
+
           <div>
             <label className="block text-sm">Name</label>
             <input name="name" value={form.name} onChange={handleChange} required className="p-3 rounded bg-gray-800 w-full" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+            {/* CATEGORY FIXED */}
             <div>
               <label className="block text-sm">Category</label>
-              <input name="category" value={form.category} onChange={handleChange} required className="p-3 rounded bg-gray-800 w-full" />
+              <select
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                required
+                className="p-3 rounded bg-gray-800 w-full"
+              >
+                <option value="">Select Category</option>
+                {categories.map((c) => (
+                  <option key={c._id} value={c.name}>{c.name}</option>
+                ))}
+              </select>
             </div>
+
+            {/* SUB CATEGORY AUTOLOAD FIXED */}
             <div>
               <label className="block text-sm">Sub Category</label>
-              <input name="subCategory" value={form.subCategory} onChange={handleChange} className="p-3 rounded bg-gray-800 w-full" />
+              <select
+                name="subCategory"
+                value={form.subCategory}
+                onChange={handleChange}
+                className="p-3 rounded bg-gray-800 w-full"
+              >
+                <option value="">Select Sub Category</option>
+                {currentSubCategories.map((sc, i) => (
+                  <option key={i} value={sc}>{sc}</option>
+                ))}
+              </select>
             </div>
+
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -162,6 +192,7 @@ export default function ProductFormModal({ editingProduct, onClose, currentPage 
               {saving ? "Saving..." : form._id ? "Update" : "Add"}
             </button>
           </div>
+
         </form>
       </div>
     </div>
