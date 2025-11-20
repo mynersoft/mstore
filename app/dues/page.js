@@ -56,7 +56,7 @@ export default function DuesPage() {
 	}, [dispatch]);
 
 	return (
-		<div className="p-6 text-gray-600 dark:text-gray-300">
+		<div className="p-6 bg-gray-900 text-gray-600 dark:text-gray-300">
 			<h1 className="text-3xl font-bold mb-4">
 				💰 Customer Due Management
 			</h1>
