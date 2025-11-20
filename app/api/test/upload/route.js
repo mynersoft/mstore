@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import cloudinary from "cloudinary";
 import TestProduct from "@/models/testProduct";
-import connectTestDB from "@/lib/testDbConnect";
+import connectDB from "@/lib/connectDB";
 
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -37,7 +37,7 @@ export async function POST(req) {
     });
 
     // Save in DB
-    await connectTestDB();
+    await connectDB();
     const product = await TestProduct.create({
       name: title,
       images: [{ url: uploadRes.secure_url, public_id: uploadRes.public_id }],
