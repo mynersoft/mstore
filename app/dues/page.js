@@ -8,6 +8,8 @@ export default function DuesPage() {
 	const dispatch = useDispatch();
 	const { items: dues, loading } = useSelector((state) => state.dues);
 
+	const [openModal, setOpenModal] = useState(false);
+
 	const [form, setForm] = useState({
 		name: "",
 		phone: "",
@@ -30,6 +32,7 @@ export default function DuesPage() {
 
 		if (addDue.fulfilled.match(result)) {
 			setForm({ name: "", phone: "", amount: "", note: "" });
+			setOpenModal(false);
 		} else {
 			alert("Failed to add due. Try again.");
 		}
@@ -64,52 +67,79 @@ export default function DuesPage() {
 					Total Due:{" "}
 					<span className="text-yellow-400">৳{totalDue}</span>
 				</p>
+
+				<button
+					onClick={() => setOpenModal(true)}
+					className="bg-green-600 hover:bg-green-500 px-4 py-2 rounded">
+					➕ Add Due
+				</button>
 			</div>
 
-			{/* Add Due Form */}
-			<form
-				onSubmit={handleAdd}
-				className="flex flex-col md:flex-row gap-3 bg-gray-800 p-4 rounded-lg mb-6">
-				<input
-					type="text"
-					placeholder="Customer Name"
-					value={form.name}
-					onChange={(e) => setForm({ ...form, name: e.target.value })}
-					className="p-2 rounded bg-gray-700 text-white flex-1"
-					required
-				/>
-				<input
-					type="text"
-					placeholder="Phone"
-					value={form.phone}
-					onChange={(e) =>
-						setForm({ ...form, phone: e.target.value })
-					}
-					className="p-2 rounded bg-gray-700 text-white flex-1"
-				/>
-				<input
-					type="number"
-					placeholder="Due Amount"
-					value={form.amount}
-					onChange={(e) =>
-						setForm({ ...form, amount: e.target.value })
-					}
-					className="p-2 rounded bg-gray-700 text-white flex-1"
-					required
-				/>
-				<input
-					type="text"
-					placeholder="Note"
-					value={form.note}
-					onChange={(e) => setForm({ ...form, note: e.target.value })}
-					className="p-2 rounded bg-gray-700 text-white flex-1"
-				/>
-				<button
-					type="submit"
-					className="bg-green-600 hover:bg-green-500 px-4 py-2 rounded text-white">
-					➕ Add
-				</button>
-			</form>
+			{/* Modal */}
+			{openModal && (
+				<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+					<div className="bg-gray-900 p-6 rounded-lg w-full max-w-lg border border-gray-700 shadow-lg">
+						<h2 className="text-xl font-bold mb-4 text-white">
+							Add Due
+						</h2>
+
+						<form onSubmit={handleAdd} className="flex flex-col gap-3">
+							<input
+								type="text"
+								placeholder="Customer Name"
+								value={form.name}
+								onChange={(e) =>
+									setForm({ ...form, name: e.target.value })
+								}
+								className="p-2 rounded bg-gray-700 text-white border border-gray-600"
+								required
+							/>
+							<input
+								type="text"
+								placeholder="Phone"
+								value={form.phone}
+								onChange={(e) =>
+									setForm({ ...form, phone: e.target.value })
+								}
+								className="p-2 rounded bg-gray-700 text-white border border-gray-600"
+							/>
+							<input
+								type="number"
+								placeholder="Due Amount"
+								value={form.amount}
+								onChange={(e) =>
+									setForm({ ...form, amount: e.target.value })
+								}
+								className="p-2 rounded bg-gray-700 text-white border border-gray-600"
+								required
+							/>
+							<input
+								type="text"
+								placeholder="Note"
+								value={form.note}
+								onChange={(e) =>
+									setForm({ ...form, note: e.target.value })
+								}
+								className="p-2 rounded bg-gray-700 text-white border border-gray-600"
+							/>
+
+							<div className="flex justify-end gap-3 mt-3">
+								<button
+									type="button"
+									onClick={() => setOpenModal(false)}
+									className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-500 text-white">
+									Cancel
+								</button>
+								<button
+									type="submit"
+									className="px-4 py-2 rounded bg-green-600 hover:bg-green-500 text-white">
+									Save
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			)}
 
 			{/* Table */}
 			{loading ? (
