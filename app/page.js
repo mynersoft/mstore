@@ -20,6 +20,12 @@ export default function DashboardPage() {
 	const [tableData, setTableData] = useState([]);
 	const [monthData, setMonthData] = useState([]);
 
+
+
+// Stock out products only
+const stockOutProducts = products.filter((p) => Number(p.stock) === 0);
+
+
 	const [topProducts, setTopProducts] = useState([]);
 	const [stockOut, setStockOut] = useState([]);
 	const [totalDue, setTotalDue] = useState(0);
@@ -157,7 +163,12 @@ export default function DashboardPage() {
 				</h2>
 
 
-				
+				{stockOutProducts?.map((p) => (
+  <div key={p._id}>
+    <h3>{p.name}</h3>
+    <p>Stock: {p.stock}</p>
+  </div>
+))}
 
 
 			</div>
