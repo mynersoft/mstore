@@ -5,7 +5,7 @@ export async function GET(req) {
   const query = searchParams.get("query") || "shoes";
 
   const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
-  const GOOGLE_CX = process.env.GOOGLE_CX;
+  const GOOGLE_CX = process.env.CX;
 
   try {
     const apiUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_CX}&searchType=image&q=${encodeURIComponent(
