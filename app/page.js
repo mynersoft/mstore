@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import StatCard from "@/components/StatCard";
-import ProductTable from "@/components/ProductTable";
 import SalesChart from "@/components/SalesChart";
 import { useDispatch, useSelector } from "react-redux";
 import { getTopProducts, getStockOutProducts } from "@/lib/dashboardUtils";
@@ -156,11 +155,11 @@ export default function DashboardPage() {
 				<h2 className="text-xl font-semibold mb-4 text-red-400">
 					⚠️ Stock Out Products
 				</h2>
-				{stockOut.length ? (
-					<ProductTable products={stockOut} showActions={false} />
-				) : (
-					<p className="text-gray-400">No stock-out products 🎉</p>
-				)}
+
+
+				
+
+
 			</div>
 		</div>
 	);
