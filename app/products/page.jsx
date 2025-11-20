@@ -122,8 +122,9 @@ export default function ProductsPage() {
 									<td className="p-3">{p.name}</td>
 									<td className="p-3">{p.category}</td>
 									<td className="p-3">{p.brand}</td>
+<td className="p-3">{p.regularPrice}</td>
 									<td className="p-3">{p.stock}</td>
-									<td className="p-3">{p.regularPrice}</td>
+									
 									<td className="p-3">{p.sellPrice}</td>
 									<td className="p-3 text-center flex gap-2 justify-center">
 										<button
@@ -180,8 +181,9 @@ export default function ProductsPage() {
 							</div>
 
 							<div className="mt-3 grid grid-cols-2 text-sm">
+<td className="p-3">{p.regularPrice}</td>
 								<p>Stock: {p.stock}</p>
-								<p>Regular: {p.regularPrice}</p>
+								
 								<p>Sell: {p.sellPrice}</p>
 							</div>
 
