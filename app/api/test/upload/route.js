@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import cloudinary from "cloudinary";
-import TestProduct from "@/models/testProduct";
+import TestProduct from "@/models/testProducts";
 import connectDB from "@/lib/connectDB";
 
 cloudinary.v2.config({
