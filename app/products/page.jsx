@@ -181,10 +181,10 @@ export default function ProductsPage() {
 							</div>
 
 							<div className="mt-3 grid grid-cols-2 text-sm">
-<td className="p-3">{p.regularPrice}</td>
+<td className="p-3">Regular price:{p.regularPrice}</td>
 								<p>Stock: {p.stock}</p>
 								
-								<p>Sell: {p.sellPrice}</p>
+								<p>Sell price: {p.sellPrice}</p>
 							</div>
 
 							<div className="flex gap-2 mt-3">
