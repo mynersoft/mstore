@@ -3,13 +3,10 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts, deleteProduct } from "@/redux/productSlice";
+
 import ProductFormModal from "@/components/ProductFormModal";
 import CategoryForm from "@/components/CategoryForm";
-
 import Modal from "@/components/Modal";
-
-
-
 
 export default function ProductsPage() {
 	const dispatch = useDispatch();
@@ -22,60 +19,56 @@ export default function ProductsPage() {
 	const [showCatModal, setShowCatModal] = useState(false);
 	const [editingProduct, setEditingProduct] = useState(null);
 
-
-
-	// Search state
 	const [search, setSearch] = useState("");
-
-	// Filtered items state
 	const [filteredItems, setFilteredItems] = useState([]);
 
-	// Fetch products on page change
+	// Fetch products when page changes
 	useEffect(() => {
 		dispatch(fetchProducts({ page: pageLocal, limit }));
 	}, [dispatch, pageLocal, limit]);
 
+	// Delete product
 	const handleDelete = async (id) => {
 		if (!confirm("Delete product?")) return;
+
 		await dispatch(deleteProduct(id)).unwrap();
 		dispatch(fetchProducts({ page: pageLocal, limit }));
 	};
 
-	// Safe search filter
+	// Search filter
 	useEffect(() => {
 		if (!Array.isArray(items)) {
 			setFilteredItems([]);
 			return;
 		}
 
-		const filtered = items.filter((p) => {
+		const result = items.filter((p) => {
 			const name = p?.name;
-			if (!name) return false; // skip items with null/undefined name
-			if (!search) return true; // show all if search is empty
-
-			// Convert both to string to avoid errors and use includes
-			return String(name).includes(String(search));
+			if (!name) return false;
+			if (!search) return true;
+			return `${name}`.toLowerCase().includes(search.toLowerCase());
 		});
 
-		setFilteredItems(filtered);
+		setFilteredItems(result);
 	}, [items, search]);
 
-	const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
+	const totalPages = Math.max(
+		1,
+		Math.ceil((total || 0) / (limit || 1))
+	);
 
-const handleCancel =() => setShowCatModal(false);
-
+	const handleCancel = () => {
+		setShowCatModal(false);
+	};
 
 	return (
 		<div className="p-4 min-h-screen bg-gray-950 text-gray-300">
-
-
-
 
 			{/* HEADER */}
 			<div className="flex flex-col md:flex-row justify-between items-center gap-3 mb-6">
 				<h1 className="text-2xl font-semibold">Products</h1>
 
-				{/* Search */}
+				{/* SEARCH */}
 				<input
 					type="text"
 					value={search}
@@ -90,14 +83,14 @@ const handleCancel =() => setShowCatModal(false);
 							setEditingProduct(null);
 							setShowModal(true);
 						}}
-						className="bg-green-600 px-4 py-2 rounded w-full md:w-auto"
+						className="bg-green-600 px-4 py-2 rounded"
 					>
 						+ Add Product
 					</button>
 
 					<button
 						onClick={() => setShowCatModal(true)}
-						className="bg-green-600 px-4 py-2 rounded w-full md:w-auto"
+						className="bg-green-600 px-4 py-2 rounded"
 					>
 						+ Add Category
 					</button>
@@ -119,8 +112,9 @@ const handleCancel =() => setShowCatModal(false);
 							<th className="p-3 text-center">Actions</th>
 						</tr>
 					</thead>
+
 					<tbody>
-						{filteredItems && filteredItems.length ? (
+						{filteredItems.length > 0 ? (
 							filteredItems.map((p) => (
 								<tr
 									key={p._id}
@@ -136,10 +130,10 @@ const handleCancel =() => setShowCatModal(false);
 									<td className="p-3">{p.name}</td>
 									<td className="p-3">{p.category}</td>
 									<td className="p-3">{p.brand}</td>
-<td className="p-3">{p.regularPrice}</td>
 									<td className="p-3">{p.stock}</td>
-									
+									<td className="p-3">{p.regularPrice}</td>
 									<td className="p-3">{p.sellPrice}</td>
+
 									<td className="p-3 text-center flex gap-2 justify-center">
 										<button
 											onClick={() => {
@@ -173,18 +167,18 @@ const handleCancel =() => setShowCatModal(false);
 				</table>
 			</div>
 
-			{/* MOBILE CARD VIEW */}
+			{/* MOBILE VIEW */}
 			<div className="md:hidden space-y-4">
-				{filteredItems?.length ? (
+				{filteredItems.length ? (
 					filteredItems.map((p) => (
 						<div
 							key={p._id}
-							className="bg-gray-900 p-4 rounded-lg shadow border border-gray-800"
+							className="bg-gray-900 p-4 rounded-lg border border-gray-800"
 						>
 							<div className="flex items-center gap-3">
 								<img
 									src={p.image}
-									className="w-14 h-14 rounded object-cover"
+									className="w-14 h-14 rounded"
 								/>
 								<div>
 									<h2 className="font-semibold">{p.name}</h2>
@@ -195,10 +189,9 @@ const handleCancel =() => setShowCatModal(false);
 							</div>
 
 							<div className="mt-3 grid grid-cols-2 text-sm">
-<td>Regular price:{p.regularPrice}</td>
-								<p> Stock: {p.stock}</p>
-								
-								<p> Sell price: {p.sellPrice}</p>
+								<p>Regular: {p.regularPrice}</p>
+								<p>Stock: {p.stock}</p>
+								<p>Sell: {p.sellPrice}</p>
 							</div>
 
 							<div className="flex gap-2 mt-3">
@@ -221,30 +214,25 @@ const handleCancel =() => setShowCatModal(false);
 						</div>
 					))
 				) : (
-					<p className="text-center text-gray-500">
-						No products found
-					</p>
+					<p className="text-center text-gray-500">No products found</p>
 				)}
 			</div>
 
 			{/* PAGINATION */}
 			<div className="flex justify-center gap-2 mt-4">
-				{Array.from({ length: totalPages }).map((_, i) => {
-					const num = i + 1;
-					return (
-						<button
-							key={num}
-							onClick={() => setPageLocal(num)}
-							className={`px-3 py-1 rounded ${
-								pageLocal === num
-									? "bg-green-600 text-white"
-									: "bg-gray-800 text-gray-400"
-							}`}
-						>
-							{num}
-						</button>
-					);
-				})}
+				{Array.from({ length: totalPages }).map((_, i) => (
+					<button
+						key={i + 1}
+						onClick={() => setPageLocal(i + 1)}
+						className={`px-3 py-1 rounded ${
+							pageLocal === i + 1
+								? "bg-green-600 text-white"
+								: "bg-gray-800 text-gray-400"
+						}`}
+					>
+						{i + 1}
+					</button>
+				))}
 			</div>
 
 			{/* PRODUCT MODAL */}
@@ -261,30 +249,13 @@ const handleCancel =() => setShowCatModal(false);
 			)}
 
 			{/* CATEGORY MODAL */}
-			{showCatModal && (
-				<CategoryForm
-					onSubmit={() => {}}
-					editingCategory={null}
-					onCancel={() => setShowCatModal(false)}
-				/>
-			)}
-
-
-
-<Modal show={showCatModal} onClose={handleCancel}>
+			<Modal show={showCatModal} onClose={handleCancel}>
 				<h3 className="text-lg mb-4 font-semibold text-gray-100">
-	Add Category
+					Add Category
 				</h3>
 
-				<CategoryForm
-					
-					onCancel={handleCancel}
-				/>
+				<CategoryForm onCancel={handleCancel} />
 			</Modal>
-
-
-
-
 		</div>
 	);
 }
