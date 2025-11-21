@@ -277,7 +277,7 @@ const handleCancel =() => setShowCatModal(false);
 				</h3>
 
 				<CategoryForm
-					onSubmit={handleSubmit}
+					
 					onCancel={handleCancel}
 				/>
 			</Modal>
