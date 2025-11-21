@@ -6,6 +6,10 @@ import { fetchProducts, deleteProduct } from "@/redux/productSlice";
 import ProductFormModal from "@/components/ProductFormModal";
 import CategoryForm from "@/components/CategoryForm";
 
+import Modal from "@/components/Modal";
+
+
+
 
 export default function ProductsPage() {
 	const dispatch = useDispatch();
