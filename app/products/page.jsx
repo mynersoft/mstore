@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts, deleteProduct } from "@/redux/productSlice";
 import ProductFormModal from "@/components/ProductFormModal";
 import CategoryForm from "@/components/CategoryForm";
+import AddCategoryButton from " @/components/AddCategoryButton";
 
 export default function ProductsPage() {
 	const dispatch = useDispatch();
@@ -57,6 +58,14 @@ export default function ProductsPage() {
 
 	return (
 		<div className="p-4 min-h-screen bg-gray-950 text-gray-300">
+
+
+<AddCategoryButton/>
+
+
+
+
+
 			{/* HEADER */}
 			<div className="flex flex-col md:flex-row justify-between items-center gap-3 mb-6">
 				<h1 className="text-2xl font-semibold">Products</h1>
