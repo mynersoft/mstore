@@ -8,7 +8,7 @@ export default function CategoryForm({ onSubmit, editingCategory, onCancel }) {
 
 	useEffect(() => {
 		if (editingCategory) {
-			setName(editingCategory.name);
+			setName(editingCategory.name || "");
 			setSubCategories((editingCategory.subCategories || []).join(", "));
 		} else {
 			setName("");
@@ -25,53 +25,55 @@ export default function CategoryForm({ onSubmit, editingCategory, onCancel }) {
 				.map((s) => s.trim())
 				.filter(Boolean),
 		});
-		setName("");
-		setSubCategories("");
 	};
 
 	return (
 		<form
 			onSubmit={handleSubmit}
-			className="bg-gray-900 rounded-2xl shadow p-6 space-y-4">
+			className="bg-[#131318] border border-gray-800 rounded-2xl shadow p-6 space-y-4 text-gray-200"
+		>
 			<div>
-				<label className="block font-medium">Category Name</label>
+				<label className="block font-medium mb-1">
+					Category Name
+				</label>
 				<input
 					type="text"
 					value={name}
 					onChange={(e) => setName(e.target.value)}
-					className="border rounded-md w-full p-2 mt-1"
+					className="border border-gray-700 bg-[#0e0e11] text-gray-200 rounded-md w-full p-2"
 					placeholder="Enter category name"
 					required
 				/>
 			</div>
 
 			<div>
-				<label className="block font-medium">
+				<label className="block font-medium mb-1">
 					Subcategories (comma-separated)
 				</label>
 				<input
 					type="text"
 					value={subCategories}
 					onChange={(e) => setSubCategories(e.target.value)}
-					className="border rounded-md w-full p-2 mt-1"
+					className="border border-gray-700 bg-[#0e0e11] text-gray-200 rounded-md w-full p-2"
 					placeholder="e.g. সকেট, সুইচ, বাতি"
 				/>
 			</div>
 
-			<div className="flex gap-2">
+			<div className="flex gap-2 pt-2">
 				<button
 					type="submit"
-					className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+					className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+				>
 					{editingCategory ? "Update Category" : "Add Category"}
 				</button>
-				
-					<button
-						type="button"
-						onClick={onCancel}
-						className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
-						Cancel
-					</button>
-			
+
+				<button
+					type="button"
+					onClick={onCancel}
+					className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+				>
+					Cancel
+				</button>
 			</div>
 		</form>
 	);
