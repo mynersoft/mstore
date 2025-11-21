@@ -18,6 +18,8 @@ export default function ProductsPage() {
 	const [showCatModal, setShowCatModal] = useState(false);
 	const [editingProduct, setEditingProduct] = useState(null);
 
+
+
 	// Search state
 	const [search, setSearch] = useState("");
 
@@ -56,12 +58,11 @@ export default function ProductsPage() {
 
 	const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
 
+const handleCancel =() => setShowCatModal(false);
+
+
 	return (
 		<div className="p-4 min-h-screen bg-gray-950 text-gray-300">
-
-
-<AddCategoryButton/>
-
 
 
 
@@ -263,6 +264,23 @@ export default function ProductsPage() {
 					onCancel={() => setShowCatModal(false)}
 				/>
 			)}
+
+
+
+<Modal show={showCatModal} onClose={handleCancel}>
+				<h3 className="text-lg mb-4 font-semibold text-gray-100">
+	Add Category
+				</h3>
+
+				<CategoryForm
+					onSubmit={handleSubmit}
+					onCancel={handleCancel}
+				/>
+			</Modal>
+
+
+
+
 		</div>
 	);
 }
