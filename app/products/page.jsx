@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts, deleteProduct } from "@/redux/productSlice";
 import ProductFormModal from "@/components/ProductFormModal";
 import CategoryForm from "@/components/CategoryForm";
-import AddCategoryButton from " @/components/AddCategoryButton";
+
 
 export default function ProductsPage() {
 	const dispatch = useDispatch();
