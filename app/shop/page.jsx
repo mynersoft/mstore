@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "@/redux/productsSlice";
 import ShopFilters from "@/components/ShopFilters";
-import ShopList from "@/components/ShopList";
+import ShopList from "@/components/ShopLists";
 
 export default function ShopPage() {
   const dispatch = useDispatch();
