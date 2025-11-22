@@ -30,8 +30,8 @@ export default function ShopPage() {
     }
 
     // Sort
-    if (sort === "low") data.sort((a, b) => a.price - b.price);
-    if (sort === "high") data.sort((a, b) => b.price - a.price);
+    if (sort === "low") data.sort((a, b) => a.sellPrice - b.sellPrice);
+    if (sort === "high") data.sort((a, b) => b.sellPrice - a.sellPrice);
 
     setFiltered(data);
   };
