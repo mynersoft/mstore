@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "@/redux/productsSlice";
-import ShopFilters from "@/components/ShopFilters";
+import ShopFilters from "@/components/ShopFillters";
 import ShopList from "@/components/ShopLists";
 
 export default function ShopPage() {
