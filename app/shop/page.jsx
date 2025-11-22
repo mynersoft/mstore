@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts } from "@/redux/productsSlice";
+import { fetchProducts } from "@/redux/productSlice";
 import ShopFilters from "@/components/ShopFillters";
 import ShopList from "@/components/ShopLists";
 
