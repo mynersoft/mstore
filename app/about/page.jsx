@@ -1,7 +1,8 @@
 "use client";
 
+
 import { useState } from "react";
-import ReusableModal from "@/components/ReusableModal";
+import ReusableModal from "@/components/modal/ReusableModal";
 
 export default function TestPage() {
   const [open, setOpen] = useState(false);
