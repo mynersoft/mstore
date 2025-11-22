@@ -37,7 +37,7 @@ export default function ShopPage() {
   };
 
 
-console.lo(items);
+console.log(items);
 
   return (
     <div className="p-6">
