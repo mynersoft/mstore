@@ -15,7 +15,7 @@ export default function ShopList({ products }) {
           />
 
           <h2 className="mt-2 text-lg font-semibold">{p.name}</h2>
-          <p className="text-yellow-400">৳{p.sellPrice}</p>
+          <p className="text-yellow-400">৳ {p.sellPrice}</p>
 
           <button className="mt-3 bg-blue-600 w-full py-1 rounded">
             Add to Cart
