@@ -36,6 +36,9 @@ export default function ShopPage() {
     setFiltered(data);
   };
 
+
+console.lo(items);
+
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold text-gray-700 mb-4">Shop</h1>
