@@ -15,16 +15,20 @@ export async function GET(req) {
 
     const skip = (page - 1) * limit;
 
+    // 1️⃣ Fetch paginated products
     const products = await Product.find()
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
 
-    // 🔥 Backend totalAmount calculation
-    const totalAmount = products.reduce(
-      (sum, p) => sum + (p.stock || 0) * (p.regularPrice || 0),
-      0
-    );
+    // 2️⃣ Calculate totalAmount from ALL products (no pagination)
+    const allProducts = await Product.find({}, { stock: 1, regularPrice: 1 });
+
+    const totalAmount = allProducts.reduce((sum, p) => {
+      const stock = Number(p.stock) || 0;
+      const price = Number(p.regularPrice) || 0;
+      return sum + stock * price;
+    }, 0);
 
     return NextResponse.json(
       {
@@ -34,6 +38,7 @@ export async function GET(req) {
       },
       { status: 200 }
     );
+
   } catch (error) {
     console.error("GET products error:", error);
     return NextResponse.json(
@@ -45,7 +50,6 @@ export async function GET(req) {
     );
   }
 }
-
 
 // ======================================================
 // ⭐ POST → Add new product
