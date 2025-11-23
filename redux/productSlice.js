@@ -4,7 +4,7 @@ import axios from "axios";
 // Fetch products (with backend totalAmount)
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
-  async ({ page = 1, limit = 10 } = {}) => {
+  async ({ page = 1, limit = 500 } = {}) => {
     const res = await axios.get(`/api/products?page=${page}&limit=${limit}`);
     return res.data; // {success, products, totalAmount}
   }
