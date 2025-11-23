@@ -24,6 +24,7 @@
     "react-redux": "^9.2.0",
     "recharts": "^3.2.1",
     "sweetalert2": "^11.26.3",
+"framer-motion": "^12.23.24",
     "sweetalert2-react-content": "^5.1.0"
   },
   "devDependencies": {
