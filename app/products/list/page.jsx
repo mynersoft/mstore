@@ -222,7 +222,7 @@ function ProductListPage() {
                         {product?.regularPrice ?? "—"}
                       </td>
                       <td className="border p-2">
-                        {product?.remarks ?? "—"}
+                        {product?.remarks ?? ""}
                       </td>
                     </tr>
                   ))}
