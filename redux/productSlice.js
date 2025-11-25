@@ -37,6 +37,21 @@ export const deleteProduct = createAsyncThunk(
   }
 );
 
+
+
+export const fetchProductsByCategory = createAsyncThunk(
+  "products/fetchByCategory",
+  async () => {
+    const res = await fetch("/api/getbycat");
+    const data = await res.json();
+    return data.categories || {};
+  }
+);
+
+
+
+
+
 export const fetchBestSelling = createAsyncThunk(
   "products/fetchBestSelling",
   async () => {
@@ -93,6 +108,15 @@ const productSlice = createSlice({
       // ===================== BEST SELLING =====================
       .addCase(fetchBestSelling.fulfilled, (state, action) => {
         state.bestSelling = action.payload;
+      }).addCase(fetchProductsByCategory.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchProductsByCategory.fulfilled, (state, action) => {
+        state.loading = false;
+        state.categories = action.payload;
+      })
+      .addCase(fetchProductsByCategory.rejected, (state) => {
+        state.loading = false;
       });
   },
 });
