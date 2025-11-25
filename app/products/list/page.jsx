@@ -115,7 +115,7 @@ function ProductListPage() {
     setSavingIds((s) => ({ ...s, [id]: true }));
     try {
       const body = { regularPrice: Number(newPrice === "" ? null : newPrice) };
-      const res = await fetch(`/api/products/${id}`, {
+      const res = await fetch(`/api/products/${id}/updateprice`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
