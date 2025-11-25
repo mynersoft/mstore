@@ -108,37 +108,36 @@ function ProductListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allProducts, activeCategory, search]);
 
-  // ---------------- Update price API (Option B)
-  // PUT /api/products/[id]  body: { regularPrice }
   const updatePrice = async (id, newPrice) => {
-    if (!id) return;
-    setSavingIds((s) => ({ ...s, [id]: true }));
-    try {
-      const body = { regularPrice: Number(newPrice === "" ? null : newPrice) };
-      const res = await fetch(`/api/products/${id}/updateprice`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+  if (!id) return;
+  setSavingIds((s) => ({ ...s, [id]: true }));
 
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || "Update failed");
-      }
+  try {
+    const formData = new FormData();
+    formData.append("regularPrice", newPrice);
+    formData.append("id", id);
 
-      // Optional: refresh list after update
-      await loadData();
-    } catch (err) {
-      console.error("updatePrice error:", err);
-      alert("Price update failed: " + (err.message || ""));
-    } finally {
-      setSavingIds((s) => {
-        const copy = { ...s };
-        delete copy[id];
-        return copy;
-      });
+    const res = await fetch(`/api/products/${id}`, {
+      method: "PUT",
+      body: formData, // no headers
+    });
+
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(txt || "Update failed");
     }
-  };
+
+    await loadData();
+  } catch (err) {
+    alert("Price update failed: " + (err.message || ""));
+  } finally {
+    setSavingIds((s) => {
+      const copy = { ...s };
+      delete copy[id];
+      return copy;
+    });
+  }
+};
 
   // Per-row onChange for input
   const handlePriceChange = (id, value) => {
