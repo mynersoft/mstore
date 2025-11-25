@@ -89,7 +89,7 @@ function ProductListPage() {
     <div className="flex">
       {/* === Sidebar Toggle Button === */}
       <button
-        className="absolute top-4 left-4 p-2 bg-black text-white rounded-md z-50"
+        className="absolute top-[60px] left-4 p-2 bg-black text-white rounded-md z-50"
         onClick={() => dispatch(toggleSidebar())}
       >
         {sidebarOpen ? "Hide Menu" : "Show Menu"}
