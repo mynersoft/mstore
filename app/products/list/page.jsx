@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createSlice, configureStore } from "@reduxjs/toolkit";
 import { Provider } from "react-redux";
-import * as XLSX from "xlsx"; // npm i xlsx
+import * as XLSX from "xlsx";
 
-// ---------------- Redux slice (same-file) ----------------
+// Redux Slice
 const productSlice = createSlice({
   name: "products",
   initialState: {
@@ -15,6 +15,7 @@ const productSlice = createSlice({
     activeCategory: null,
     loading: false,
     sidebarOpen: true,
+    searchText: "",
   },
   reducers: {
     setProductsByCategory(state, action) {
@@ -32,6 +33,9 @@ const productSlice = createSlice({
     toggleSidebar(state) {
       state.sidebarOpen = !state.sidebarOpen;
     },
+    setSearchText(state, action) {
+      state.searchText = action.payload;
+    },
   },
 });
 
@@ -41,41 +45,46 @@ const {
   setActiveCategory,
   setLoading,
   toggleSidebar,
+  setSearchText,
 } = productSlice.actions;
 
+// Store
 const store = configureStore({
-  reducer: { products: productSlice.reducer },
+  reducer: {
+    products: productSlice.reducer,
+  },
 });
 
-// ---------------- Page Component ----------------
 function ProductListPage() {
   const dispatch = useDispatch();
-  const { categories, allProducts, activeCategory, loading, sidebarOpen } =
-    useSelector((s) => s.products);
+  const { categories, allProducts, activeCategory, loading, sidebarOpen, searchText } =
+    useSelector((state) => state.products);
 
-  // local UI state
-  const [search, setSearch] = useState("");
-  const [priceEdits, setPriceEdits] = useState({}); // { [id]: "123" }
-  const [savingIds, setSavingIds] = useState({}); // loading per-row
+  const [localProducts, setLocalProducts] = useState([]); // for inline update
 
-  // Fetch API (same endpoint you used)
+  // Load API
   const loadData = async () => {
     try {
       dispatch(setLoading(true));
+
       const res = await fetch("/api/products/getbycat");
       const data = await res.json();
 
-      const cats = data.categories || {};
+      let cats = data.categories || {};
+
+      // Sort categories alphabetically
       const sortedCats = {};
       Object.keys(cats)
         .sort((a, b) => a.localeCompare(b))
-        .forEach((k) => (sortedCats[k] = cats[k]));
+        .forEach((key) => (sortedCats[key] = cats[key]));
 
       dispatch(setProductsByCategory(sortedCats));
-      dispatch(setAllProducts(Object.values(sortedCats).flat()));
+      const flat = Object.values(sortedCats).flat();
+      dispatch(setAllProducts(flat));
+      setLocalProducts(flat);
+
       dispatch(setLoading(false));
     } catch (err) {
-      console.error("loadData error:", err);
       dispatch(setLoading(false));
     }
   };
@@ -84,128 +93,72 @@ function ProductListPage() {
     loadData();
   }, []);
 
-  // Which products to show (category filter) then search filter
-  const shownByCategory =
-    activeCategory === null ? allProducts : categories[activeCategory] || [];
-
-  const shownProducts = shownByCategory.filter((p) =>
-    (p.name || "")
-      .toString()
-      .toLowerCase()
-      .includes(search.trim().toLowerCase())
+  // Search Filter
+  const filteredProducts = localProducts.filter((p) =>
+    p.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  // Initialize priceEdits when products load / change
-  useEffect(() => {
-    const map = {};
-    (shownProducts || []).forEach((p) => {
-      if (p && p._id) map[p._id] =
-        typeof p.regularPrice !== "undefined" && p.regularPrice !== null
-          ? p.regularPrice
-          : "";
-    });
-    setPriceEdits((prev) => ({ ...map, ...prev })); // preserve edits for other lists if any
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allProducts, activeCategory, search]);
+  // Category Filter
+  const shownProducts =
+    activeCategory === null
+      ? filteredProducts
+      : filteredProducts.filter((p) => p.category === activeCategory);
 
+  // Update Price (Only Price Updates)
   const updatePrice = async (id, newPrice) => {
-  if (!id) return;
-  setSavingIds((s) => ({ ...s, [id]: true }));
+    try {
+      const formData = new FormData();
+      formData.append("regularPrice", newPrice);
 
-  try {
-    const formData = new FormData();
-    formData.append("regularPrice", newPrice);
-    formData.append("id", id);
+      const res = await fetch(`/api/products/${id}`, {
+        method: "PUT",
+        body: formData,
+      });
 
-    const res = await fetch(`/api/products/${id}`, {
-      method: "PUT",
-      body: formData, // no headers
-    });
-
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(txt || "Update failed");
-    }
-
-    await loadData();
-  } catch (err) {
-    alert("Price update failed: " + (err.message || ""));
-  } finally {
-    setSavingIds((s) => {
-      const copy = { ...s };
-      delete copy[id];
-      return copy;
-    });
-  }
-};
-
-  // Per-row onChange for input
-  const handlePriceChange = (id, value) => {
-    setPriceEdits((p) => ({ ...p, [id]: value }));
-  };
-
-  // Save single row (called from Save button or onBlur)
-  const handleSave = (id) => {
-    const val = priceEdits[id];
-    updatePrice(id, val);
-  };
-
-  // Save all visible rows (bulk)
-  const saveAllVisible = async () => {
-    // iterate visible products and call updatePrice for those changed
-    for (const prod of shownProducts) {
-      const id = prod._id;
-      const newVal = priceEdits[id];
-      const oldVal = prod.regularPrice;
-      // Only call update if actually different (use loose compare)
-      if (String(newVal) !== String(oldVal)) {
-        // eslint-disable-next-line no-await-in-loop
-        await updatePrice(id, newVal);
+      if (!res.ok) {
+        alert("Price update failed");
+        return;
       }
+
+      alert("Price updated");
+      loadData();
+    } catch (err) {
+      alert("Price update failed");
     }
-    alert("Save completed.");
   };
 
-  // ===========================
-  //    EXPORT EXCEL FUNCTION
-  // ===========================
+  // Export Excel
   const exportToExcel = () => {
     const excelData = shownProducts.map((p, i) => ({
       SL: i + 1,
       Name: p.name,
-      Price: priceEdits[p._id] ?? p.regularPrice ?? "",
+      Price: p.regularPrice ?? "",
       Remarks: p.remarks ?? "",
     }));
+
     const ws = XLSX.utils.json_to_sheet(excelData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Products");
     XLSX.writeFile(wb, "products.xlsx");
   };
 
-  // ===========================
-  //         PRINT TABLE
-  // ===========================
+  // Print
   const printTable = () => {
-    const printContent = document.getElementById("print-area").innerHTML;
-    const win = window.open("", "", "width=1000,height=800");
+    const content = document.getElementById("print-area").innerHTML;
+    const win = window.open("", "", "width=900,height=600");
     win.document.write(`
       <html>
-        <head>
-          <title>Print Products</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 12px; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { border: 1px solid #000; padding: 8px; text-align: left; }
-            th { background: #f0f0f0; }
-          </style>
-        </head>
-        <body>
-          ${printContent}
-        </body>
+      <head>
+        <style>
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid #000; padding: 8px; }
+          th { background: #eee; }
+        </style>
+      </head>
+      <body>${content}</body>
       </html>
     `);
     win.document.close();
-    win.focus();
     win.print();
   };
 
@@ -216,7 +169,7 @@ function ProductListPage() {
         className="absolute top-[60px] left-4 p-2 bg-black text-white rounded-md z-50"
         onClick={() => dispatch(toggleSidebar())}
       >
-        {sidebarOpen ? "Hide Menu" : "Show Menu"}
+        {sidebarOpen ? "Hide" : "Show"}
       </button>
 
       {/* Sidebar */}
@@ -234,7 +187,7 @@ function ProductListPage() {
               All Products ({allProducts.length})
             </li>
 
-            {Object.keys(categories || {}).map((cat) => (
+            {Object.keys(categories).map((cat) => (
               <li
                 key={cat}
                 className={`p-2 bg-white rounded shadow cursor-pointer ${
@@ -249,130 +202,81 @@ function ProductListPage() {
         </aside>
       )}
 
-      {/* Main */}
+      {/* Main Table */}
       <main className="flex-1 p-6 ml-10">
         <h1 className="text-2xl font-bold mb-4">
-          {activeCategory === null
-            ? "All Products"
-            : `${activeCategory} Products`}
+          {activeCategory === null ? "All Products" : activeCategory}
         </h1>
 
-        {/* Controls */}
-        <div className="flex flex-wrap items-center gap-4 mb-4">
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              placeholder="Search all products by name..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="border px-3 py-2 rounded w-64"
-            />
-            <button
-              onClick={() => {
-                setSearch("");
-              }}
-              className="px-3 py-2 bg-gray-200 rounded"
-            >
-              Clear
-            </button>
-          </div>
+        {/* Search */}
+        <input
+          type="text"
+          placeholder="Search product..."
+          className="border px-3 py-2 mb-4 w-72"
+          value={searchText}
+          onChange={(e) => dispatch(setSearchText(e.target.value))}
+        />
 
-          <div className="flex gap-2 ml-auto">
-            <button
-              onClick={exportToExcel}
-              className="bg-green-600 text-white px-4 py-2 rounded"
-            >
-              Export Excel
-            </button>
-
-            <button
-              onClick={printTable}
-              className="bg-blue-600 text-white px-4 py-2 rounded"
-            >
-              Print
-            </button>
-
-            <button
-              onClick={saveAllVisible}
-              className="bg-indigo-600 text-white px-4 py-2 rounded"
-            >
-              Save All Visible
-            </button>
-          </div>
+        {/* Buttons */}
+        <div className="flex gap-4 mb-4">
+          <button onClick={exportToExcel} className="bg-green-600 text-white px-4 py-2 rounded">
+            Export Excel
+          </button>
+          <button onClick={printTable} className="bg-blue-600 text-white px-4 py-2 rounded">
+            Print
+          </button>
         </div>
 
         {loading && <p>Loading...</p>}
-        {!loading && shownProducts.length === 0 && <p>No products found.</p>}
 
         {/* PRINT AREA */}
         <div id="print-area">
           {!loading && shownProducts.length > 0 && (
-            <div className="overflow-x-auto">
-              <table className="w-full border border-gray-300">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="border p-2 text-left">SL</th>
-                    <th className="border p-2 text-left">Product Name</th>
-                    <th className="border p-2 text-left">Regular Price</th>
-                    <th className="border p-2 text-left">Remarks</th>
-                    <th className="border p-2 text-left">Actions</th>
+            <table className="w-full border border-gray-300">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="border p-2">SL</th>
+                  <th className="border p-2">Product Name</th>
+                  <th className="border p-2">Regular Price</th>
+                  <th className="border p-2">Save</th>
+                  <th className="border p-2">Remarks</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {shownProducts.map((p, i) => (
+                  <tr key={p._id}>
+                    <td className="border p-2">{i + 1}</td>
+                    <td className="border p-2">{p.name}</td>
+
+                    {/* Inline Price Edit */}
+                    <td className="border p-2">
+                      <input
+                        type="number"
+                        value={p.regularPrice || ""}
+                        onChange={(e) => {
+                          p.regularPrice = e.target.value;
+                          setLocalProducts([...localProducts]);
+                        }}
+                        className="border px-2 py-1 w-28"
+                      />
+                    </td>
+
+                    {/* Save Button */}
+                    <td className="border p-2">
+                      <button
+                        onClick={() => updatePrice(p._id, p.regularPrice)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded"
+                      >
+                        Save
+                      </button>
+                    </td>
+
+                    <td className="border p-2">{p.remarks || ""}</td>
                   </tr>
-                </thead>
-
-                <tbody>
-                  {shownProducts.map((product, idx) => {
-                    const id = product._id ?? idx;
-                    const currentVal =
-                      typeof priceEdits[id] !== "undefined"
-                        ? priceEdits[id]
-                        : product.regularPrice ?? "";
-                    return (
-                      <tr key={id} className="hover:bg-gray-50">
-                        <td className="border p-2">{idx + 1}</td>
-                        <td className="border p-2">{product.name}</td>
-
-                        <td className="border p-2">
-                          <input
-                            type="number"
-                            value={currentVal}
-                            onChange={(e) =>
-                              handlePriceChange(id, e.target.value)
-                            }
-                            onBlur={() => handleSave(id)}
-                            className="border px-2 py-1 w-28"
-                          />
-                        </td>
-
-                        <td className="border p-2">{product.remarks ?? ""}</td>
-
-                        <td className="border p-2">
-                          <button
-                            onClick={() => handleSave(id)}
-                            disabled={!!savingIds[id]}
-                            className="bg-blue-500 text-white px-3 py-1 rounded mr-2 disabled:opacity-50"
-                          >
-                            {savingIds[id] ? "Saving..." : "Save"}
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              // reset to original
-                              setPriceEdits((p) => ({
-                                ...p,
-                                [id]: product.regularPrice ?? "",
-                              }));
-                            }}
-                            className="bg-gray-300 text-black px-3 py-1 rounded"
-                          >
-                            Reset
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </main>
@@ -380,7 +284,6 @@ function ProductListPage() {
   );
 }
 
-// Final export wrapped with Provider
 export default function Page() {
   return (
     <Provider store={store}>
