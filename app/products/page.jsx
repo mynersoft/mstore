@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts, deleteProduct } from "@/redux/productSlice";
+import { useRouter } from "next/navigation";
 
 import ProductFormModal from "@/components/ProductFormModal";
 import CategoryForm from "@/components/CategoryForm";
@@ -13,6 +14,20 @@ export default function ProductsPage() {
 	const { items, total, page: reduxPage, limit } = useSelector(
 		(s) => s.products
 	);
+
+
+
+
+
+
+  const router = useRouter();
+
+  
+  
+ 
+
+
+
 
 	const [pageLocal, setPageLocal] = useState(reduxPage || 1);
 	const [showModal, setShowModal] = useState(false);
@@ -94,6 +109,12 @@ export default function ProductsPage() {
 					>
 						+ Add Category
 					</button>
+<button
+      onClick={() => router.push("/products/list")}
+      className="px-4 py-2 bg-blue-600 text-white rounded"
+    >
+     List
+    </button>
 				</div>
 			</div>
 
