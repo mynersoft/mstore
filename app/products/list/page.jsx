@@ -64,10 +64,20 @@ function ProductListPage() {
       const res = await fetch("/api/products/getbycat");
       const data = await res.json();
 
-      const cats = data.categories || {};
-      dispatch(setProductsByCategory(cats));
+      let cats = data.categories || {};
 
-      const all = Object.values(cats).flat();
+      // Sort category keys alphabetically
+      const sortedCats = {};
+      Object.keys(cats)
+        .sort((a, b) => a.localeCompare(b))
+        .forEach((key) => {
+          sortedCats[key] = cats[key];
+        });
+
+      dispatch(setProductsByCategory(sortedCats));
+
+      // Flatten products in alphabetical category order
+      const all = Object.values(sortedCats).flat();
       dispatch(setAllProducts(all));
 
       dispatch(setLoading(false));
@@ -128,7 +138,9 @@ function ProductListPage() {
       {/* === Product List === */}
       <main className="flex-1 p-6 ml-10">
         <h1 className="text-2xl font-bold mb-4">
-          {activeCategory === null ? "All Products" : `${activeCategory} Products`}
+          {activeCategory === null
+            ? "All Products"
+            : `${activeCategory} Products`}
         </h1>
 
         {loading && <p>Loading...</p>}
