@@ -110,7 +110,7 @@ function ProductListPage() {
       const formData = new FormData();
       formData.append("regularPrice", newPrice);
 
-      const res = await fetch(`/api/products/${id}`, {
+      const res = await fetch(`/api/products/${id}/uodatebyprice`, {
         method: "PUT",
         body: formData,
       });
