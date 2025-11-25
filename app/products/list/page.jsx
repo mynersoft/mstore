@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-// === Redux Slice Example (inside same file) ===
+// === Redux Slice (same file) ===
 import { createSlice, configureStore } from "@reduxjs/toolkit";
 import { Provider } from "react-redux";
 
@@ -11,10 +11,11 @@ import { Provider } from "react-redux";
 const productSlice = createSlice({
   name: "products",
   initialState: {
-    categories: {},   // category: [products]
-    allProducts: [],  // all products
+    categories: {}, // { categoryName: [products] }
+    allProducts: [],
     activeCategory: null,
     loading: false,
+    sidebarOpen: true,
   },
   reducers: {
     setProductsByCategory(state, action) {
@@ -29,11 +30,19 @@ const productSlice = createSlice({
     setLoading(state, action) {
       state.loading = action.payload;
     },
+    toggleSidebar(state) {
+      state.sidebarOpen = !state.sidebarOpen;
+    },
   },
 });
 
-const { setProductsByCategory, setAllProducts, setActiveCategory, setLoading } =
-  productSlice.actions;
+const {
+  setProductsByCategory,
+  setAllProducts,
+  setActiveCategory,
+  setLoading,
+  toggleSidebar,
+} = productSlice.actions;
 
 // Store
 const store = configureStore({
@@ -42,12 +51,11 @@ const store = configureStore({
   },
 });
 
-// === Component ===
+// === MAIN COMPONENT ===
 function ProductListPage() {
   const dispatch = useDispatch();
-  const { categories, allProducts, activeCategory, loading } = useSelector(
-    (state) => state.products
-  );
+  const { categories, allProducts, activeCategory, loading, sidebarOpen } =
+    useSelector((state) => state.products);
 
   // Fetch API
   const loadData = async () => {
@@ -56,10 +64,10 @@ function ProductListPage() {
       const res = await fetch("/api/products/getbycat");
       const data = await res.json();
 
-      dispatch(setProductsByCategory(data.categories || {}));
+      const cats = data.categories || {};
+      dispatch(setProductsByCategory(cats));
 
-      // collect all products from categories
-      const all = Object.values(data.categories || {}).flat();
+      const all = Object.values(cats).flat();
       dispatch(setAllProducts(all));
 
       dispatch(setLoading(false));
@@ -73,53 +81,61 @@ function ProductListPage() {
     loadData();
   }, []);
 
-  // Determine which product list to show
+  // Which products to show?
   const shownProducts =
-    activeCategory === null
-      ? allProducts
-      : categories[activeCategory] || [];
+    activeCategory === null ? allProducts : categories[activeCategory] || [];
 
   return (
     <div className="flex">
+      {/* === Sidebar Toggle Button === */}
+      <button
+        className="absolute top-4 left-4 p-2 bg-black text-white rounded-md z-50"
+        onClick={() => dispatch(toggleSidebar())}
+      >
+        {sidebarOpen ? "Hide Menu" : "Show Menu"}
+      </button>
+
       {/* === Sidebar === */}
-      <aside className="w-64 bg-gray-200 p-4 h-screen">
-        <h2 className="font-bold text-lg mb-3">Categories</h2>
+      {sidebarOpen && (
+        <aside className="w-64 bg-gray-200 p-4 min-h-screen">
+          <h2 className="font-bold text-lg mb-3">Categories</h2>
 
-        <ul className="space-y-1">
-          <li
-            className={`p-2 bg-white rounded shadow cursor-pointer ${
-              activeCategory === null ? "bg-blue-300" : ""
-            }`}
-            onClick={() => dispatch(setActiveCategory(null))}
-          >
-            All Products
-          </li>
-
-          {Object.keys(categories || {}).map((cat) => (
+          <ul className="space-y-1">
             <li
-              key={cat}
               className={`p-2 bg-white rounded shadow cursor-pointer ${
-                activeCategory === cat ? "bg-blue-300" : ""
+                activeCategory === null ? "bg-blue-300" : ""
               }`}
-              onClick={() => dispatch(setActiveCategory(cat))}
+              onClick={() => dispatch(setActiveCategory(null))}
             >
-              {cat}
+              All Products ({allProducts.length})
             </li>
-          ))}
-        </ul>
-      </aside>
+
+            {Object.keys(categories || {}).map((cat) => (
+              <li
+                key={cat}
+                className={`p-2 bg-white rounded shadow cursor-pointer ${
+                  activeCategory === cat ? "bg-blue-300" : ""
+                }`}
+                onClick={() => dispatch(setActiveCategory(cat))}
+              >
+                {cat} ({categories[cat]?.length || 0})
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )}
 
       {/* === Product List === */}
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 ml-10">
         <h1 className="text-2xl font-bold mb-4">
-          {activeCategory === null
-            ? "All Products"
-            : `${activeCategory} Category`}
+          {activeCategory === null ? "All Products" : `${activeCategory} Products`}
         </h1>
 
         {loading && <p>Loading...</p>}
 
-        {!loading && (
+        {!loading && shownProducts.length === 0 && <p>No products found.</p>}
+
+        {!loading && shownProducts.length > 0 && (
           <ul className="list-decimal ml-6">
             {shownProducts.map((product, idx) => (
               <li key={idx} className="py-1">
@@ -133,7 +149,7 @@ function ProductListPage() {
   );
 }
 
-// === Final Export with Redux Provider ===
+// === Final Export ===
 export default function Page() {
   return (
     <Provider store={store}>
