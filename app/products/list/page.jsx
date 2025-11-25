@@ -42,7 +42,7 @@ function ProductListPage() {
   const loadData = async () => {
     try {
       dispatch(setLoading(true));
-      const res = await fetch("/api/products-by-category");
+      const res = await fetch("/api/products/getbycat");
       const data = await res.json();
 
       dispatch(setProductsByCategory(data.categories || {}));
