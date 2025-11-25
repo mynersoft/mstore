@@ -93,10 +93,17 @@ function ProductListPage() {
     loadData();
   }, []);
 
-  // Search Filter
   const filteredProducts = localProducts.filter((p) =>
-    p.name.toLowerCase().includes(searchText.toLowerCase())
-  );
+  (p.name ?? "").toLowerCase().includes((searchText ?? "").toLowerCase())
+);
+
+
+
+
+
+
+
+
 
   // Category Filter
   const shownProducts =
