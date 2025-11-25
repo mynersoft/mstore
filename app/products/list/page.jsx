@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 // Redux Slice Actions (change according to your slice)
-import { setProductsByCategory } from "@/redux/productsSlice";
+import { setProductsByCategory } from "@/redux/productSlice";
 
 export default function ProductListPage() {
   const dispatch = useDispatch();
