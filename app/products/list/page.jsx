@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-// === Redux Slice Example (inside same file) ===
+// === Redux Slice (same file) ===
 import { createSlice, configureStore } from "@reduxjs/toolkit";
 import { Provider } from "react-redux";
 
@@ -11,12 +11,18 @@ import { Provider } from "react-redux";
 const productSlice = createSlice({
   name: "products",
   initialState: {
-    categories: {}, // category: [products]
+    categories: {}, // grouped products
+    allProducts: [], // ALL products
+    activeCategory: "All", // default show all products
     loading: false,
   },
   reducers: {
     setProductsByCategory(state, action) {
-      state.categories = action.payload;
+      state.categories = action.payload.categories;
+      state.allProducts = action.payload.allProducts;
+    },
+    setActiveCategory(state, action) {
+      state.activeCategory = action.payload;
     },
     setLoading(state, action) {
       state.loading = action.payload;
@@ -24,7 +30,8 @@ const productSlice = createSlice({
   },
 });
 
-const { setProductsByCategory, setLoading } = productSlice.actions;
+const { setProductsByCategory, setActiveCategory, setLoading } =
+  productSlice.actions;
 
 // Store
 const store = configureStore({
@@ -36,7 +43,9 @@ const store = configureStore({
 // === Component ===
 function ProductListPage() {
   const dispatch = useDispatch();
-  const { categories, loading } = useSelector((state) => state.products);
+  const { categories, allProducts, activeCategory, loading } = useSelector(
+    (state) => state.products
+  );
 
   // Fetch API
   const loadData = async () => {
@@ -45,7 +54,13 @@ function ProductListPage() {
       const res = await fetch("/api/products/getbycat");
       const data = await res.json();
 
-      dispatch(setProductsByCategory(data.categories || {}));
+      dispatch(
+        setProductsByCategory({
+          categories: data.categories || {},
+          allProducts: data.allProducts || [],
+        })
+      );
+
       dispatch(setLoading(false));
     } catch (error) {
       console.error("Fetch error:", error);
@@ -57,6 +72,15 @@ function ProductListPage() {
     loadData();
   }, []);
 
+  // Determine which products to show
+  let productsToShow = [];
+
+  if (activeCategory === "All") {
+    productsToShow = allProducts; // all products initially
+  } else {
+    productsToShow = categories[activeCategory] || [];
+  }
+
   return (
     <div className="flex">
       {/* === Sidebar === */}
@@ -64,8 +88,24 @@ function ProductListPage() {
         <h2 className="font-bold text-lg mb-3">Categories</h2>
 
         <ul className="space-y-1">
+          {/* Show ALL button */}
+          <li
+            onClick={() => dispatch(setActiveCategory("All"))}
+            className={`p-2 rounded cursor-pointer shadow ${
+              activeCategory === "All" ? "bg-blue-500 text-white" : "bg-white"
+            }`}
+          >
+            All Products
+          </li>
+
           {Object.keys(categories || {}).map((cat) => (
-            <li key={cat} className="p-2 bg-white rounded shadow">
+            <li
+              key={cat}
+              onClick={() => dispatch(setActiveCategory(cat))}
+              className={`p-2 rounded cursor-pointer shadow ${
+                activeCategory === cat ? "bg-blue-500 text-white" : "bg-white"
+              }`}
+            >
               {cat}
             </li>
           ))}
@@ -74,30 +114,29 @@ function ProductListPage() {
 
       {/* === Product List === */}
       <main className="flex-1 p-6">
-        <h1 className="text-2xl font-bold mb-4">Products by Category</h1>
+        <h1 className="text-2xl font-bold mb-4">
+          {activeCategory === "All"
+            ? "All Products"
+            : `${activeCategory} Category`}
+        </h1>
 
         {loading && <p>Loading...</p>}
 
-        {!loading &&
-          Object.keys(categories || {}).map((category) => (
-            <div key={category} className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">
-                {category} Category
-              </h2>
-
-              <ul className="list-decimal ml-6">
-                {(categories[category] || []).map((product, idx) => (
-                  <li key={idx}>{product.name}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        {!loading && (
+          <ul className="list-decimal ml-6">
+            {productsToShow.map((product, idx) => (
+              <li key={idx} className="mb-1">
+                {product.name}
+              </li>
+            ))}
+          </ul>
+        )}
       </main>
     </div>
   );
 }
 
-// === Final Export with Redux Provider ===
+// === Final Export ===
 export default function Page() {
   return (
     <Provider store={store}>
