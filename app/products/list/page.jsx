@@ -150,46 +150,26 @@ function ProductListPage() {
   };
 
   const printTable = () => {
-  const rows = Array.from(
-    document.querySelectorAll("#print-area table tbody tr")
-  );
-
-  let tableRows = "";
-
-  rows.forEach((row, index) => {
-    const cells = row.querySelectorAll("td");
-
-    const sl = cells[0]?.innerText || "";
-    const name = cells[1]?.innerText || "";
-    const priceInput = cells[2]?.querySelector("input");
-    const regularPrice = priceInput ? priceInput.value : cells[2]?.innerText;
-    const remarks = cells[4]?.innerText || "";
-
-    tableRows += `
-      <tr>
-        <td>${sl}</td>
-        <td>${name}</td>
-        <td>${regularPrice}</td>
-        <td>${regularPrice}</td> <!-- Update Price column -->
-        <td>${remarks}</td>
-      </tr>
-    `;
-  });
-
+  const content = document.getElementById("print-area").innerHTML;
   const win = window.open("", "", "width=900,height=600");
   win.document.write(`
     <html>
     <head>
       <style>
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th, td { border: 1px solid #000; padding: 8px; text-align: left; }
-        th { background: #eee; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #000; padding: 8px; }
+
+        /* hide Save column */
+        .no-print { display: none; }
+
+        /* input becomes plain text */
+        input { 
+          border: none; 
+          outline: none; 
+        }
       </style>
     </head>
     <body>
-
-      <h3 style="text-align:center;margin-bottom:10px;">Product Price List</h3>
-
       <table>
         <thead>
           <tr>
@@ -201,14 +181,23 @@ function ProductListPage() {
           </tr>
         </thead>
         <tbody>
-          ${tableRows}
+          ${shownProducts
+            .map(
+              (p, i) => `
+              <tr>
+                <td>${i + 1}</td>
+                <td>${p.name}</td>
+                <td>${p.regularPrice ?? ""}</td>
+                <td></td> <!-- ALWAYS EMPTY UPDATE PRICE -->
+                <td>${p.remarks ?? ""}</td>
+              </tr>`
+            )
+            .join("")}
         </tbody>
       </table>
-
     </body>
     </html>
   `);
-
   win.document.close();
   win.print();
 };
