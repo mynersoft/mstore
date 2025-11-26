@@ -149,25 +149,37 @@ function ProductListPage() {
     XLSX.writeFile(wb, "products.xlsx");
   };
 
-  // Print
   const printTable = () => {
-    const content = document.getElementById("print-area").innerHTML;
-    const win = window.open("", "", "width=900,height=600");
-    win.document.write(`
-      <html>
-      <head>
-        <style>
-          table { width: 100%; border-collapse: collapse; }
-          th, td { border: 1px solid #000; padding: 8px; }
-          th { background: #eee; }
-        </style>
-      </head>
-      <body>${content}</body>
-      </html>
-    `);
-    win.document.close();
-    win.print();
-  };
+  const content = document.getElementById("print-area").innerHTML;
+  const win = window.open("", "", "width=900,height=600");
+  win.document.write(`
+    <html>
+    <head>
+      <style>
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #000; padding: 8px; }
+        th { background: #eee; }
+
+        /* Hide Save column + button only in print */
+        th:nth-child(4), 
+        td:nth-child(4),
+        button {
+          display: none !important;
+        }
+
+        /* Remove input border in print */
+        input {
+          border: none !important;
+          outline: none !important;
+        }
+      </style>
+    </head>
+    <body>${content}</body>
+    </html>
+  `);
+  win.document.close();
+  win.print();
+};
 
   return (
     <div className="flex">
