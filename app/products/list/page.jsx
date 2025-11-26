@@ -150,7 +150,15 @@ function ProductListPage() {
   };
 
   const printTable = () => {
-  const content = document.getElementById("print-area").innerHTML;
+  // Clone table HTML first
+  let content = document.getElementById("print-area").innerHTML;
+
+  // Replace input fields with plain text for printing
+  content = content.replace(
+    /<input[^>]*value="([^"]*)"[^>]*>/g,
+    "$1"
+  );
+
   const win = window.open("", "", "width=900,height=600");
   win.document.write(`
     <html>
@@ -160,21 +168,37 @@ function ProductListPage() {
         th, td { border: 1px solid #000; padding: 8px; }
         th { background: #eee; }
 
-        /* Hide Save column + button only in print */
-        th:nth-child(4), 
-        td:nth-child(4),
-        button {
+        /* Hide regular Save column */
+        th:nth-child(4),
+        td:nth-child(4) {
           display: none !important;
         }
 
-        /* Remove input border in print */
+        /* Remove input border */
         input {
           border: none !important;
           outline: none !important;
         }
       </style>
     </head>
-    <body>${content}</body>
+    <body>
+
+      <table>
+        <thead>
+          <tr>
+            <th>SL</th>
+            <th>Product Name</th>
+            <th>Regular Price</th>
+            <th>Updated Price</th> <!-- Only Print Column -->
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${content}
+        </tbody>
+      </table>
+
+    </body>
     </html>
   `);
   win.document.close();
