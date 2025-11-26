@@ -150,10 +150,10 @@ function ProductListPage() {
   };
 
   const printTable = () => {
-  // Clone table HTML first
+  // Get table HTML
   let content = document.getElementById("print-area").innerHTML;
 
-  // Replace input fields with plain text for printing
+  // Convert inputs → plain text (remove border)
   content = content.replace(
     /<input[^>]*value="([^"]*)"[^>]*>/g,
     "$1"
@@ -164,23 +164,24 @@ function ProductListPage() {
     <html>
     <head>
       <style>
-        table { width: 100%; border-collapse: collapse; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
         th, td { border: 1px solid #000; padding: 8px; }
         th { background: #eee; }
 
-        /* Hide regular Save column */
+        /* Hide Save column (4th column) */
         th:nth-child(4),
         td:nth-child(4) {
           display: none !important;
         }
 
-        /* Remove input border */
+        /* Remove input borders in print */
         input {
           border: none !important;
           outline: none !important;
         }
       </style>
     </head>
+
     <body>
 
       <table>
@@ -189,10 +190,11 @@ function ProductListPage() {
             <th>SL</th>
             <th>Product Name</th>
             <th>Regular Price</th>
-            <th>Updated Price</th> <!-- Only Print Column -->
+            <th>Update Price</th> <!-- PRINT ONLY COLUMN -->
             <th>Remarks</th>
           </tr>
         </thead>
+
         <tbody>
           ${content}
         </tbody>
@@ -201,10 +203,10 @@ function ProductListPage() {
     </body>
     </html>
   `);
+
   win.document.close();
   win.print();
 };
-
   return (
     <div className="flex">
       {/* Sidebar Toggle */}
