@@ -150,14 +150,31 @@ function ProductListPage() {
   };
 
   const printTable = () => {
-  // Get table HTML
-  let content = document.getElementById("print-area").innerHTML;
-
-  // Convert inputs → plain text (remove border)
-  content = content.replace(
-    /<input[^>]*value="([^"]*)"[^>]*>/g,
-    "$1"
+  const rows = Array.from(
+    document.querySelectorAll("#print-area table tbody tr")
   );
+
+  let tableRows = "";
+
+  rows.forEach((row, index) => {
+    const cells = row.querySelectorAll("td");
+
+    const sl = cells[0]?.innerText || "";
+    const name = cells[1]?.innerText || "";
+    const priceInput = cells[2]?.querySelector("input");
+    const regularPrice = priceInput ? priceInput.value : cells[2]?.innerText;
+    const remarks = cells[4]?.innerText || "";
+
+    tableRows += `
+      <tr>
+        <td>${sl}</td>
+        <td>${name}</td>
+        <td>${regularPrice}</td>
+        <td>${regularPrice}</td> <!-- Update Price column -->
+        <td>${remarks}</td>
+      </tr>
+    `;
+  });
 
   const win = window.open("", "", "width=900,height=600");
   win.document.write(`
@@ -165,24 +182,13 @@ function ProductListPage() {
     <head>
       <style>
         table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th, td { border: 1px solid #000; padding: 8px; }
+        th, td { border: 1px solid #000; padding: 8px; text-align: left; }
         th { background: #eee; }
-
-        /* Hide Save column (4th column) */
-        th:nth-child(4),
-        td:nth-child(4) {
-          display: none !important;
-        }
-
-        /* Remove input borders in print */
-        input {
-          border: none !important;
-          outline: none !important;
-        }
       </style>
     </head>
-
     <body>
+
+      <h3 style="text-align:center;margin-bottom:10px;">Product Price List</h3>
 
       <table>
         <thead>
@@ -190,13 +196,12 @@ function ProductListPage() {
             <th>SL</th>
             <th>Product Name</th>
             <th>Regular Price</th>
-            <th>Update Price</th> <!-- PRINT ONLY COLUMN -->
+            <th>Update Price</th>
             <th>Remarks</th>
           </tr>
         </thead>
-
         <tbody>
-          ${content}
+          ${tableRows}
         </tbody>
       </table>
 
