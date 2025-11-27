@@ -34,9 +34,12 @@ export default function InvestPage() {
     if (!form.name || !form.investType || !form.amount) return;
 
     if (editId) {
-      dispatch(updateInvest({ ...form, _id: editId }));
+      dispatch(updateInvest({ ...form, _id: editId });
+setOpen(false);
+);
     } else {
       dispatch(addInvest(form));
+setOpen(false);
     }
 
     setForm({ name: "", investType: "", amount: "" });
@@ -87,9 +90,9 @@ export default function InvestPage() {
             onChange={(e) => dispatch(setFilterType(e.target.value))}
           >
             <option value="all">All</option>
-            <option value="dukaner-malamal">Dukaner Malamal</option>
+            <option value="dukaner-malamal">Malamal</option>
             <option value="tools">Tools</option>
-            <option value="cash">Cash</option>
+         
           </select>
 
           <p className="text-lg">
