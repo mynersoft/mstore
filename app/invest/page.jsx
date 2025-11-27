@@ -35,11 +35,11 @@ export default function InvestPage() {
 
     if (editId) {
       dispatch(updateInvest({ ...form, _id: editId }),
-setOpen(false);
+setOpen(false)
 );
     } else {
       dispatch(addInvest(form)),
-setOpen(false);
+setOpen(false)
     }
 
     setForm({ name: "", investType: "", amount: "" });
