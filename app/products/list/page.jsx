@@ -150,11 +150,14 @@ function ProductListPage() {
   };
 
   const printTable = () => {
-  const colSize = Math.ceil(shownProducts.length / 2); // two columns
+  const colSize = Math.ceil(shownProducts.length / 2);
+
+  // Split into 2 columns
   const leftCol = shownProducts.slice(0, colSize);
   const rightCol = shownProducts.slice(colSize);
 
-  const makeTable = (list) => `
+  // Function to generate table HTML with correct SL start
+  const makeTable = (list, startIndex) => `
       <table>
         <thead>
           <tr>
@@ -163,14 +166,14 @@ function ProductListPage() {
             <th>Regular Price</th>
             <th>Update Price</th>
             <th>Remarks</th>
-         </tr>
+          </tr>
         </thead>
         <tbody>
           ${list
             .map(
               (p, i) => `
               <tr>
-                <td>${i + 1}</td>
+                <td>${startIndex + i}</td>
                 <td>${p.name}</td>
                 <td>${p.regularPrice ?? ""}</td>
                 <td></td>
@@ -193,18 +196,15 @@ function ProductListPage() {
           padding: 20px;
           font-family: Arial;
         }
-
         table { 
           width: 100%; 
           border-collapse: collapse; 
         }
-
         th, td { 
           border: 1px solid #000; 
           padding: 6px; 
           font-size: 12px;
         }
-
         .col {
           width: 50%;
         }
@@ -212,8 +212,8 @@ function ProductListPage() {
     </head>
 
     <body>
-      <div class="col">${makeTable(leftCol)}</div>
-      <div class="col">${makeTable(rightCol)}</div>
+      <div class="col">${makeTable(leftCol, 1)}</div>
+      <div class="col">${makeTable(rightCol, colSize + 1)}</div>
     </body>
     </html>
   `);
@@ -221,8 +221,6 @@ function ProductListPage() {
   win.document.close();
   win.print();
 };
-
-
 
 
 
