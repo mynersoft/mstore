@@ -14,6 +14,8 @@ export default function InvestPage() {
   const dispatch = useDispatch();
   const { list, filterType } = useSelector((state) => state.invest);
 
+  const [open, setOpen] = useState(false);
+
   const [form, setForm] = useState({
     name: "",
     investType: "",
@@ -31,12 +33,23 @@ export default function InvestPage() {
 
     if (editId) {
       dispatch(updateInvest({ ...form, _id: editId }));
-      setEditId(null);
     } else {
       dispatch(addInvest(form));
     }
 
     setForm({ name: "", investType: "", amount: "" });
+    setEditId(null);
+    setOpen(false);
+  };
+
+  const startEdit = (item) => {
+    setEditId(item._id);
+    setForm({
+      name: item.name,
+      investType: item.investType,
+      amount: item.amount,
+    });
+    setOpen(true);
   };
 
   const filteredList =
@@ -49,92 +62,149 @@ export default function InvestPage() {
     0
   );
 
-  const startEdit = (item) => {
-    setEditId(item._id);
-    setForm({
-      name: item.name,
-      investType: item.investType,
-      amount: item.amount,
-    });
-  };
-
   return (
-    <div className="p-6 max-w-xl mx-auto">
+    <div className="min-h-screen bg-[#0f172a] text-white p-6">
+      <div className="max-w-5xl mx-auto">
 
-      <h2 className="text-2xl font-bold mb-4">
-        {editId ? "Edit Investment" : "Add Investment"}
-      </h2>
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-bold">Investments</h2>
+          <button
+            onClick={() => setOpen(true)}
+            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition"
+          >
+            + Add Invest
+          </button>
+        </div>
 
-      <input
-        className="border p-2 w-full mb-3"
-        placeholder="Name"
-        value={form.name}
-        onChange={(e) => setForm({ ...form, name: e.target.value })}
-      />
+        {/* Filter */}
+        <div className="flex gap-4 items-center mb-4">
+          <select
+            className="bg-gray-800 border border-gray-700 p-2 rounded"
+            value={filterType}
+            onChange={(e) => dispatch(setFilterType(e.target.value))}
+          >
+            <option value="all">All</option>
+            <option value="dukaner-malamal">Dukaner Malamal</option>
+            <option value="tools">Tools</option>
+            <option value="cash">Cash</option>
+          </select>
 
-      <select
-        className="border p-2 w-full mb-3"
-        value={form.investType}
-        onChange={(e) => setForm({ ...form, investType: e.target.value })}
-      >
-        <option value="">Select Type</option>
-        <option value="dukaner-malamal">Dukaner Malamal</option>
-        <option value="tools">Tools</option>
-        <option value="cash">Cash</option>
-      </select>
+          <p className="text-lg">
+            <b>Total:</b> {totalAmount} Tk
+          </p>
+        </div>
 
-      <input
-        type="number"
-        className="border p-2 w-full mb-3"
-        placeholder="Amount"
-        value={form.amount}
-        onChange={(e) => setForm({ ...form, amount: e.target.value })}
-      />
+        {/* Table */}
+        <div className="overflow-x-auto shadow-lg border border-gray-700 rounded-lg">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-gray-800 text-gray-300">
+              <tr>
+                <th className="p-3 border-b border-gray-700">Name</th>
+                <th className="p-3 border-b border-gray-700">Type</th>
+                <th className="p-3 border-b border-gray-700">Amount</th>
+                <th className="p-3 border-b border-gray-700 w-40">Action</th>
+              </tr>
+            </thead>
 
-      <button onClick={submit} className="bg-blue-600 text-white px-4 py-2 rounded">
-        {editId ? "Update" : "Add"}
-      </button>
+            <tbody>
+              {filteredList.map((item) => (
+                <tr
+                  key={item._id}
+                  className="hover:bg-gray-800 transition border-b border-gray-800"
+                >
+                  <td className="p-3">{item.name}</td>
+                  <td className="p-3 capitalize">{item.investType}</td>
+                  <td className="p-3">{item.amount}</td>
+                  <td className="p-3 flex gap-2">
+                    <button
+                      onClick={() => startEdit(item)}
+                      className="px-3 py-1 bg-green-600 rounded hover:bg-green-700"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => dispatch(deleteInvest(item._id))}
+                      className="px-3 py-1 bg-red-600 rounded hover:bg-red-700"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
 
-      <h3 className="text-xl font-semibold mt-6">Filter</h3>
+              {filteredList.length === 0 && (
+                <tr>
+                  <td className="p-4 text-center text-gray-400" colSpan={4}>
+                    No data found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      <select
-        className="border p-2 w-full mb-4"
-        value={filterType}
-        onChange={(e) => dispatch(setFilterType(e.target.value))}
-      >
-        <option value="all">All</option>
-        <option value="dukaner-malamal">Dukaner Malamal</option>
-        <option value="tools">Tools</option>
-        <option value="cash">Cash</option>
-      </select>
+        {/* Modal */}
+        {open && (
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center">
+            <div className="bg-gray-900 p-6 rounded-lg w-96 shadow-xl border border-gray-700">
+              <h3 className="text-xl font-bold mb-4">
+                {editId ? "Edit Investment" : "Add Investment"}
+              </h3>
 
-      <h3 className="text-xl font-semibold">Total: {totalAmount} Tk</h3>
+              <input
+                className="bg-gray-800 border border-gray-700 p-2 rounded w-full mb-3"
+                placeholder="Name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
 
-      <div className="mt-4 space-y-3">
-        {filteredList.map((item) => (
-          <div key={item._id} className="border p-3 rounded bg-gray-50">
-            <p><b>{item.name}</b></p>
-            <p>Type: {item.investType}</p>
-            <p>Amount: {item.amount}</p>
-
-            <div className="flex gap-3 mt-2">
-              <button
-                className="bg-green-600 text-white px-3 py-1 rounded"
-                onClick={() => startEdit(item)}
+              <select
+                className="bg-gray-800 border border-gray-700 p-2 rounded w-full mb-3"
+                value={form.investType}
+                onChange={(e) =>
+                  setForm({ ...form, investType: e.target.value })
+                }
               >
-                Edit
-              </button>
-              <button
-                className="bg-red-600 text-white px-3 py-1 rounded"
-                onClick={() => dispatch(deleteInvest(item._id))}
-              >
-                Delete
-              </button>
+                <option value="">Select Type</option>
+                <option value="dukaner-malamal">Dukaner Malamal</option>
+                <option value="tools">Tools</option>
+                <option value="cash">Cash</option>
+              </select>
+
+              <input
+                type="number"
+                className="bg-gray-800 border border-gray-700 p-2 rounded w-full mb-4"
+                placeholder="Amount"
+                value={form.amount}
+                onChange={(e) =>
+                  setForm({ ...form, amount: e.target.value })
+                }
+              />
+
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    setEditId(null);
+                    setForm({ name: "", investType: "", amount: "" });
+                  }}
+                  className="px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={submit}
+                  className="px-3 py-2 bg-blue-600 rounded hover:bg-blue-700"
+                >
+                  {editId ? "Update" : "Add"}
+                </button>
+              </div>
             </div>
           </div>
-        ))}
+        )}
       </div>
-
     </div>
   );
 }
