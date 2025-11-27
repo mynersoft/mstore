@@ -137,65 +137,50 @@ console.log(finalImage);
 // ================== PUT ===================
 
 
+
+
 export async function PUT(request) {
   try {
     await connectDB();
 
-    const form = await request.formData();
-    const id = form.get("_id");   // ← Important!
+    const formData = await request.formData(); // ✅ FormData support
 
-    if (!id) {
+    const _id = formData.get("_id");
+    if (!_id) {
       return NextResponse.json({ error: "Product ID missing" }, { status: 400 });
     }
 
-    const updates = {};
+    let updateFields = {};
 
-    // Collect all fields
-    form.forEach((value, key) => {
-      if (key !== "image" && key !== "_id") {
-        updates[key] = value;
-      }
+    formData.forEach((value, key) => {
+      if (key !== "image") updateFields[key] = value;
     });
 
-    // If new image uploaded → upload to Cloudinary
-    const file = form.get("image");
+    // 🔹 If image file is uploaded
+    const imageFile = formData.get("image");
+    if (imageFile && typeof imageFile !== "string") {
+      const arrayBuffer = await imageFile.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
 
-    if (file && typeof file === "object") {
-      const buffer = Buffer.from(await file.arrayBuffer());
-
-      const upload = await cloudinary.uploader.upload_stream(
+      const uploadRes = await cloudinary.uploader.upload_stream(
         { folder: "products" },
         (error, result) => {
-          if (error) console.error(error);
+          if (error) throw error;
+          updateFields.image = result.secure_url;
         }
       );
 
-      await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: "products" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        stream.end(buffer);
-      }).then((result) => {
-        updates.image = result.secure_url;
-      });
+      uploadRes.end(buffer);
     }
 
-    // Update DB
-    const updated = await Product.findByIdAndUpdate(id, updates, {
+    const updated = await Product.findByIdAndUpdate(_id, updateFields, {
       new: true,
     });
 
-    return NextResponse.json({ product: updated });
+    return NextResponse.json({ product: updated }, { status: 200 });
   } catch (err) {
-    console.error("PUT Error:", err);
-    return NextResponse.json(
-      { error: "Failed to update product" },
-      { status: 500 }
-    );
+    console.error("PUT ERROR:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
