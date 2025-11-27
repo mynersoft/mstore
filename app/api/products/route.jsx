@@ -135,15 +135,68 @@ console.log(finalImage);
 
 
 // ================== PUT ===================
+
+
 export async function PUT(request) {
-  await connectDB();
-  const body = await request.json();
+  try {
+    await connectDB();
 
-  const updated = await Product.findByIdAndUpdate(body._id, body, {
-    new: true,
-  });
+    const form = await request.formData();
+    const id = form.get("_id");   // ← Important!
 
-  return NextResponse.json(updated);
+    if (!id) {
+      return NextResponse.json({ error: "Product ID missing" }, { status: 400 });
+    }
+
+    const updates = {};
+
+    // Collect all fields
+    form.forEach((value, key) => {
+      if (key !== "image" && key !== "_id") {
+        updates[key] = value;
+      }
+    });
+
+    // If new image uploaded → upload to Cloudinary
+    const file = form.get("image");
+
+    if (file && typeof file === "object") {
+      const buffer = Buffer.from(await file.arrayBuffer());
+
+      const upload = await cloudinary.uploader.upload_stream(
+        { folder: "products" },
+        (error, result) => {
+          if (error) console.error(error);
+        }
+      );
+
+      await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "products" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(buffer);
+      }).then((result) => {
+        updates.image = result.secure_url;
+      });
+    }
+
+    // Update DB
+    const updated = await Product.findByIdAndUpdate(id, updates, {
+      new: true,
+    });
+
+    return NextResponse.json({ product: updated });
+  } catch (err) {
+    console.error("PUT Error:", err);
+    return NextResponse.json(
+      { error: "Failed to update product" },
+      { status: 500 }
+    );
+  }
 }
 
 // ================== DELETE ===================
