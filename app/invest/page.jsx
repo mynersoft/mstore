@@ -28,22 +28,27 @@ export default function InvestPage() {
 
   useEffect(() => {
     dispatch(fetchInvests());
-  }, []);
+  }, [dispatch]);
 
-  const submit = () => {
+  // make submit async and await dispatch so we can reliably close modal after action
+  const submit = async () => {
     if (!form.name || !form.investType || !form.amount) return;
 
-    if (editId) {
-      dispatch(updateInvest({ ...form, _id: editId }),
-setOpen(false)
-);
-    } else {
-      dispatch(addInvest(form)),
-setOpen(false)
-    }
+    try {
+      if (editId) {
+        await dispatch(updateInvest({ ...form, _id: editId }));
+      } else {
+        await dispatch(addInvest(form));
+      }
 
-    setForm({ name: "", investType: "", amount: "" });
-    setEditId(null);
+      // reset & close after successful dispatch
+      setForm({ name: "", investType: "", amount: "" });
+      setEditId(null);
+      setOpen(false);
+    } catch (err) {
+      // optional: handle error (toast/log)
+      console.error("Submit error:", err);
+    }
   };
 
   const startEdit = (item) => {
@@ -56,13 +61,23 @@ setOpen(false)
     setOpen(true);
   };
 
+  const handleDelete = async (id) => {
+    const ok = confirm("Are you sure you want to delete this item?");
+    if (!ok) return;
+    try {
+      await dispatch(deleteInvest(id));
+    } catch (err) {
+      console.error("Delete error:", err);
+    }
+  };
+
   const filteredList =
     filterType === "all"
       ? list
       : list.filter((i) => i.investType === filterType);
 
   const totalAmount = filteredList.reduce(
-    (sum, item) => sum + Number(item.amount),
+    (sum, item) => sum + Number(item.amount || 0),
     0
   );
 
@@ -75,7 +90,11 @@ setOpen(false)
           <h2 className="text-3xl font-bold">Investments</h2>
 
           <button
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              setEditId(null);
+              setForm({ name: "", investType: "", amount: "" });
+              setOpen(true);
+            }}
             className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition"
           >
             + Add Invest
@@ -92,7 +111,6 @@ setOpen(false)
             <option value="all">All</option>
             <option value="dukaner-malamal">Malamal</option>
             <option value="tools">Tools</option>
-         
           </select>
 
           <p className="text-lg">
@@ -134,13 +152,16 @@ setOpen(false)
                       <button
                         onClick={() => startEdit(item)}
                         className="px-3 py-1 bg-green-600 rounded hover:bg-green-700"
+                        disabled={actionLoading}
                       >
+                        {/* if an async action is running show loader text */}
                         {actionLoading && editId === item._id ? "..." : "Edit"}
                       </button>
 
                       <button
-                        onClick={() => dispatch(deleteInvest(item._id))}
+                        onClick={() => handleDelete(item._id)}
                         className="px-3 py-1 bg-red-600 rounded hover:bg-red-700"
+                        disabled={actionLoading}
                       >
                         {actionLoading ? "Deleting..." : "Delete"}
                       </button>
@@ -162,7 +183,7 @@ setOpen(false)
 
         {/* Modal */}
         {open && (
-          <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center">
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
             <div className="bg-gray-900 p-6 rounded-lg w-96 shadow-xl border border-gray-700">
               <h3 className="text-xl font-bold mb-4">
                 {editId ? "Edit Investment" : "Add Investment"}
@@ -206,6 +227,7 @@ setOpen(false)
                     setForm({ name: "", investType: "", amount: "" });
                   }}
                   className="px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
+                  disabled={actionLoading}
                 >
                   Cancel
                 </button>
@@ -213,6 +235,7 @@ setOpen(false)
                 <button
                   onClick={submit}
                   className="px-3 py-2 bg-blue-600 rounded hover:bg-blue-700"
+                  disabled={actionLoading}
                 >
                   {actionLoading ? "Saving..." : editId ? "Update" : "Add"}
                 </button>
