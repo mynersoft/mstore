@@ -178,15 +178,7 @@ function ProductListPage() {
             <th>Regular Price</th>
             <th>Update Price</th>
             <th>Remarks</th>
-          </tr>
-  <tr>
-            <th>SL</th>
-            <th>Product Name</th>
-            <th>Regular Price</th>
-            <th>Update Price</th>
-            <th>Remarks</th>
-          </tr>
-
+         </tr>
         </thead>
         <tbody>
           ${shownProducts
