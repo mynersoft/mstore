@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import productReducer from "./productSlice";
+import investReducer from "./investSlice";
 import dueReducer from "./duesSlice";
 import saleReducer from "./saleSlice";
 import serviceReducer from "./serviceSlice";
@@ -16,5 +17,10 @@ export const store = configureStore({
 		dues: dueReducer,
 		sales: saleReducer,
 		saleprofit: saleprofitReducer,
+invest: investReducer,
 	},
 });
+
+
+
+
