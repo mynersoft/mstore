@@ -12,7 +12,9 @@ import {
 
 export default function InvestPage() {
   const dispatch = useDispatch();
-  const { list, filterType } = useSelector((state) => state.invest);
+  const { list, loading, actionLoading, filterType } = useSelector(
+    (state) => state.invest
+  );
 
   const [open, setOpen] = useState(false);
 
@@ -39,7 +41,6 @@ export default function InvestPage() {
 
     setForm({ name: "", investType: "", amount: "" });
     setEditId(null);
-    setOpen(false);
   };
 
   const startEdit = (item) => {
@@ -69,6 +70,7 @@ export default function InvestPage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-bold">Investments</h2>
+
           <button
             onClick={() => setOpen(true)}
             className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition"
@@ -95,54 +97,65 @@ export default function InvestPage() {
           </p>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto shadow-lg border border-gray-700 rounded-lg">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-800 text-gray-300">
-              <tr>
-                <th className="p-3 border-b border-gray-700">Name</th>
-                <th className="p-3 border-b border-gray-700">Type</th>
-                <th className="p-3 border-b border-gray-700">Amount</th>
-                <th className="p-3 border-b border-gray-700 w-40">Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredList.map((item) => (
-                <tr
-                  key={item._id}
-                  className="hover:bg-gray-800 transition border-b border-gray-800"
-                >
-                  <td className="p-3">{item.name}</td>
-                  <td className="p-3 capitalize">{item.investType}</td>
-                  <td className="p-3">{item.amount}</td>
-                  <td className="p-3 flex gap-2">
-                    <button
-                      onClick={() => startEdit(item)}
-                      className="px-3 py-1 bg-green-600 rounded hover:bg-green-700"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => dispatch(deleteInvest(item._id))}
-                      className="px-3 py-1 bg-red-600 rounded hover:bg-red-700"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-
-              {filteredList.length === 0 && (
+        {/* Table Skeleton Loader */}
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-gray-800 animate-pulse h-14 rounded"></div>
+            ))}
+          </div>
+        ) : (
+          /* Table */
+          <div className="overflow-x-auto shadow-lg border border-gray-700 rounded-lg">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-gray-800 text-gray-300">
                 <tr>
-                  <td className="p-4 text-center text-gray-400" colSpan={4}>
-                    No data found
-                  </td>
+                  <th className="p-3 border-b border-gray-700">Name</th>
+                  <th className="p-3 border-b border-gray-700">Type</th>
+                  <th className="p-3 border-b border-gray-700">Amount</th>
+                  <th className="p-3 border-b border-gray-700 w-40">Action</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+
+              <tbody>
+                {filteredList.map((item) => (
+                  <tr
+                    key={item._id}
+                    className="hover:bg-gray-800 transition border-b border-gray-800"
+                  >
+                    <td className="p-3">{item.name}</td>
+                    <td className="p-3 capitalize">{item.investType}</td>
+                    <td className="p-3">{item.amount}</td>
+
+                    <td className="p-3 flex gap-2">
+                      <button
+                        onClick={() => startEdit(item)}
+                        className="px-3 py-1 bg-green-600 rounded hover:bg-green-700"
+                      >
+                        {actionLoading && editId === item._id ? "..." : "Edit"}
+                      </button>
+
+                      <button
+                        onClick={() => dispatch(deleteInvest(item._id))}
+                        className="px-3 py-1 bg-red-600 rounded hover:bg-red-700"
+                      >
+                        {actionLoading ? "Deleting..." : "Delete"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+
+                {filteredList.length === 0 && (
+                  <tr>
+                    <td className="p-4 text-center text-gray-400" colSpan={4}>
+                      No data found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Modal */}
         {open && (
@@ -198,7 +211,7 @@ export default function InvestPage() {
                   onClick={submit}
                   className="px-3 py-2 bg-blue-600 rounded hover:bg-blue-700"
                 >
-                  {editId ? "Update" : "Add"}
+                  {actionLoading ? "Saving..." : editId ? "Update" : "Add"}
                 </button>
               </div>
             </div>
