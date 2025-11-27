@@ -150,26 +150,11 @@ function ProductListPage() {
   };
 
   const printTable = () => {
-  const content = document.getElementById("print-area").innerHTML;
-  const win = window.open("", "", "width=900,height=600");
-  win.document.write(`
-    <html>
-    <head>
-      <style>
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #000; padding: 8px; }
+  const colSize = Math.ceil(shownProducts.length / 2); // two columns
+  const leftCol = shownProducts.slice(0, colSize);
+  const rightCol = shownProducts.slice(colSize);
 
-        /* hide Save column */
-        .no-print { display: none; }
-
-        /* input becomes plain text */
-        input { 
-          border: none; 
-          outline: none; 
-        }
-      </style>
-    </head>
-    <body>
+  const makeTable = (list) => `
       <table>
         <thead>
           <tr>
@@ -181,26 +166,66 @@ function ProductListPage() {
          </tr>
         </thead>
         <tbody>
-          ${shownProducts
+          ${list
             .map(
               (p, i) => `
               <tr>
                 <td>${i + 1}</td>
                 <td>${p.name}</td>
                 <td>${p.regularPrice ?? ""}</td>
-                <td></td> <!-- ALWAYS EMPTY UPDATE PRICE -->
+                <td></td>
                 <td>${p.remarks ?? ""}</td>
               </tr>`
             )
             .join("")}
         </tbody>
       </table>
+  `;
+
+  const win = window.open("", "", "width=900,height=600");
+  win.document.write(`
+    <html>
+    <head>
+      <style>
+        body {
+          display: flex;
+          gap: 20px;
+          padding: 20px;
+          font-family: Arial;
+        }
+
+        table { 
+          width: 100%; 
+          border-collapse: collapse; 
+        }
+
+        th, td { 
+          border: 1px solid #000; 
+          padding: 6px; 
+          font-size: 12px;
+        }
+
+        .col {
+          width: 50%;
+        }
+      </style>
+    </head>
+
+    <body>
+      <div class="col">${makeTable(leftCol)}</div>
+      <div class="col">${makeTable(rightCol)}</div>
     </body>
     </html>
   `);
+
   win.document.close();
   win.print();
 };
+
+
+
+
+
   return (
     <div className="flex">
       {/* Sidebar Toggle */}
