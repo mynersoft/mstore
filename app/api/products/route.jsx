@@ -143,7 +143,7 @@ export async function PUT(request) {
   try {
     await connectDB();
 
-    const formData = await request.formData(); // ✅ FormData support
+    const formData = await request.formData();
 
     const _id = formData.get("_id");
     if (!_id) {
@@ -152,25 +152,33 @@ export async function PUT(request) {
 
     let updateFields = {};
 
+    // collect non-image fields
     formData.forEach((value, key) => {
       if (key !== "image") updateFields[key] = value;
     });
 
-    // 🔹 If image file is uploaded
+    // handle image upload if file selected
     const imageFile = formData.get("image");
+
     if (imageFile && typeof imageFile !== "string") {
       const arrayBuffer = await imageFile.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      const uploadRes = await cloudinary.uploader.upload_stream(
-        { folder: "products" },
-        (error, result) => {
-          if (error) throw error;
-          updateFields.image = result.secure_url;
-        }
-      );
+      // ---- FIX: convert upload_stream to promise ----
+      const uploadToCloudinary = () =>
+        new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "products" },
+            (err, result) => {
+              if (err) reject(err);
+              else resolve(result);
+            }
+          );
+          stream.end(buffer);
+        });
 
-      uploadRes.end(buffer);
+      const result = await uploadToCloudinary();
+      updateFields.image = result.secure_url;
     }
 
     const updated = await Product.findByIdAndUpdate(_id, updateFields, {
