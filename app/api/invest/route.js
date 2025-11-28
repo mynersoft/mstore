@@ -3,13 +3,30 @@ import { connectDB } from "@/lib/dbConnect";
 import Invest from "@/models/Invest";
 
 export async function GET() {
-  try {
-    await connectDB();
-    const all = await Invest.find().sort({ createdAt: -1 });
-    return NextResponse.json(all);
-  } catch (e) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
-  }
+	try {
+		await connectDB();
+
+		const all = await Invest.find().sort({ createdAt: -1 });
+
+		// Calculate total amount for tools
+		const totalToolsInvest = all
+			.filter((item) => item.investType === "tools")
+			.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+		// Calculate total amount for malamal
+		const totalMalamalInvest = all
+			.filter((item) => item.investType === "malamal")
+			.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+		return NextResponse.json({ 
+			success: true,
+			items: all,
+			toolsAmount:totalToolsInvest,
+			malamalsAmount:totalMalamalInvest,
+		});
+	} catch (e) {
+		return NextResponse.json({ error: e.message }, { status: 500 });
+	}
 }
 
 export async function POST(request) {
