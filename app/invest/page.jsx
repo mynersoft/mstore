@@ -16,6 +16,15 @@ export default function InvestPage() {
     (state) => state.invest
   );
 
+
+
+const totalAmount =12;
+ console.log(list);
+
+
+
+
+
   const [open, setOpen] = useState(false);
 
   const [form, setForm] = useState({
@@ -76,10 +85,7 @@ export default function InvestPage() {
       ? list
       : list.filter((i) => i.investType === filterType);
 
-  const totalAmount = filteredList.reduce(
-    (sum, item) => sum + Number(item.amount || 0),
-    0
-  );
+  
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white p-6">
