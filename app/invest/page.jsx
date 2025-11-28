@@ -18,8 +18,7 @@ export default function InvestPage() {
 
 
 
-const totalAmount =12;
- console.log(list);
+
 
 
 
@@ -120,7 +119,7 @@ const totalAmount =12;
           </select>
 
           <p className="text-lg">
-            <b>Total:</b> {totalAmount} Tk
+            <b>Total:</b> {list?.toolsAmount} Tk
           </p>
         </div>
 
@@ -145,7 +144,7 @@ const totalAmount =12;
               </thead>
 
               <tbody>
-                {filteredList.map((item) => (
+                {filteredList.length > 0 && filteredList.map((item) => (
                   <tr
                     key={item._id}
                     className="hover:bg-gray-800 transition border-b border-gray-800"
