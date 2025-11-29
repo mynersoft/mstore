@@ -8,8 +8,10 @@ export async function GET() {
 		await connectDB();
 
 		const now = new Date();
-		const start = new Date(now.getFullYear(), now.getMonth(), 1);
-		const end = new Date(
+
+		// === Current Month Range ===
+		const currentStart = new Date(now.getFullYear(), now.getMonth(), 1);
+		const currentEnd = new Date(
 			now.getFullYear(),
 			now.getMonth() + 1,
 			0,
@@ -18,17 +20,57 @@ export async function GET() {
 			59
 		);
 
-		const sales = await SaleProfit.find({
-			createdAt: { $gte: start, $lte: end },
+		// === Previous Month Range ===
+		const prevMonth = now.getMonth() - 1;
+		const prevYear =
+			prevMonth < 0 ? now.getFullYear() - 1 : now.getFullYear();
+		const correctedPrevMonth = (prevMonth + 12) % 12;
+
+		const prevStart = new Date(prevYear, correctedPrevMonth, 1);
+		const prevEnd = new Date(
+			prevYear,
+			correctedPrevMonth + 1,
+			0,
+			23,
+			59,
+			59
+		);
+
+		// === Fetch Data ===
+		const currentSales = await SaleProfit.find({
+			createdAt: { $gte: currentStart, $lte: currentEnd },
 		});
 
-		const monthlySale = sales.reduce((sum, s) => sum + s.totalSale, 0);
-		const monthlyProfit = sales.reduce((sum, s) => sum + s.profit, 0);
+		const previousSales = await SaleProfit.find({
+			createdAt: { $gte: prevStart, $lte: prevEnd },
+		});
+
+		// === Current Month Stats ===
+		const monthlySale = currentSales.reduce(
+			(sum, s) => sum + s.totalSale,
+			0
+		);
+		const monthlyProfit = currentSales.reduce(
+			(sum, s) => sum + s.profit,
+			0
+		);
+
+		// === Previous Month Stats ===
+		const prevMonthlySale = previousSales.reduce(
+			(sum, s) => sum + s.totalSale,
+			0
+		);
+		const prevMonthlyProfit = previousSales.reduce(
+			(sum, s) => sum + s.profit,
+			0
+		);
 
 		return NextResponse.json({
 			success: true,
 			monthlySale,
 			monthlyProfit,
+			prevMonthlySale,
+			prevMonthlyProfit,
 		});
 	} catch (err) {
 		console.log(err);

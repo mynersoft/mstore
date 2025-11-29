@@ -25,71 +25,96 @@ export const updateInvest = createAsyncThunk("invest/update", async (data) => {
 });
 
 // Delete
-export const deleteInvest = createAsyncThunk("invest/delete", async (id) => {
-  const res = await fetch("/api/invest?id=" + id, {
-    method: "DELETE",
-  });
-  return res.json();
-});
+
+export const deleteInvest = createAsyncThunk(
+  "invest/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await fetch("/api/invest?id=" + id, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return rejectWithValue(data.error || "Delete failed");
+      }
+      return id; // return the deleted id to remove from state
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
 
 const investSlice = createSlice({
-  name: "invest",
-  initialState: {
-    list: [],
-    loading: false,
-    actionLoading: false, // add/edit/delete
-    filterType: "all",
-  },
-  reducers: {
-    setFilterType: (state, action) => {
-      state.filterType = action.payload;
-    },
-  },
+	name: "invest",
+	initialState: {
+			list: [],
+			loading: false,
+			actionLoading: false,
+			filterType: "all",
+			toolsAmount: 0,
+			malamalAmount: 0,
+		
+	},
+	reducers: {
+		setFilterType: (state, action) => {
+			state.filterType = action.payload;
+		},
+	},
 
-  extraReducers: (builder) => {
-    // Load List
-    builder
-      .addCase(fetchInvests.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(fetchInvests.fulfilled, (state, action) => {
-        state.loading = false;
-        state.list = action.payload;
-      });
+	extraReducers: (builder) => {
+		// Load List
+		builder
+			.addCase(fetchInvests.pending, (state) => {
+				state.loading = true;
+			})
+			.addCase(fetchInvests.fulfilled, (state, action) => {
+				state.loading = false;
 
-    // Add
-    builder
-      .addCase(addInvest.pending, (state) => {
-        state.actionLoading = true;
-      })
-      .addCase(addInvest.fulfilled, (state, action) => {
-        state.actionLoading = false;
-        state.list.unshift(action.payload.data);
-      });
+				const payload = action.payload;
 
-    // Update
-    builder
-      .addCase(updateInvest.pending, (state) => {
-        state.actionLoading = true;
-      })
-      .addCase(updateInvest.fulfilled, (state, action) => {
-        state.actionLoading = false;
-        const updated = action.payload.updated;
-        state.list = state.list.map((i) =>
-          i._id === updated._id ? updated : i
-        );
-      });
+				state.list = payload.items || [];
 
-    // Delete
-    builder
-      .addCase(deleteInvest.pending, (state) => {
-        state.actionLoading = true;
-      })
-      .addCase(deleteInvest.fulfilled, (state, action) => {
-        state.actionLoading = false;
-        state.list = state.list.filter((i) => i._id !== action.meta.arg);
-      });
-  },
+				// Optional: Tools/Malamal totals save করতে চাইলে:
+				state.toolsAmount = payload.toolsAmount || 0;
+				state.malamalAmount = payload.malamalsAmount || 0;
+			});
+
+		// Add
+		builder
+			.addCase(addInvest.pending, (state) => {
+				state.actionLoading = true;
+			})
+			.addCase(addInvest.fulfilled, (state, action) => {
+				state.actionLoading = false;
+				state.list.unshift(action.payload.data);
+			});
+
+		// Update
+		builder
+			.addCase(updateInvest.pending, (state) => {
+				state.actionLoading = true;
+			})
+			.addCase(updateInvest.fulfilled, (state, action) => {
+				state.actionLoading = false;
+				const updated = action.payload.updated;
+				state.list = state.list.map((i) =>
+					i._id === updated._id ? updated : i
+				);
+			});
+
+		// Delete
+		builder
+			.addCase(deleteInvest.pending, (state) => {
+				state.actionLoading = true;
+			})
+			.addCase(deleteInvest.fulfilled, (state, action) => {
+				state.actionLoading = false;
+				state.list = state.list.filter(
+					(i) => i._id !== action.meta.arg
+				);
+			});
+	},
 });
 
 export const { setFilterType } = investSlice.actions;

@@ -6,16 +6,18 @@ import { fetchDues, addDue, payDue, deleteDue } from "@/redux/duesSlice";
 
 export default function DuesPage() {
 	const dispatch = useDispatch();
+	const [deleteModal, setDeleteModal] = useState({ open: false, id: null });
 	const { items: dues, loading } = useSelector((state) => state.dues);
 
 	const [openModal, setOpenModal] = useState(false);
-
+	const [payModal, setPayModal] = useState({ open: false, id: null });
 	const [form, setForm] = useState({
 		name: "",
 		phone: "",
 		amount: "",
 		note: "",
 	});
+	const [payAmount, setPayAmount] = useState("");
 
 	const handleAdd = async (e) => {
 		e.preventDefault();
@@ -38,17 +40,32 @@ export default function DuesPage() {
 		}
 	};
 
-	const handlePay = async (id) => {
-		const amount = prompt("Enter payment amount:", "0");
-		if (amount && !isNaN(amount)) {
-			await dispatch(payDue({ id, amount: Number(amount) }));
+	const openPayModal = (id, currentAmount) => {
+		setPayModal({ open: true, id });
+		setPayAmount(currentAmount);
+	};
+
+	const handlePay = async () => {
+		if (!payAmount || isNaN(payAmount) || Number(payAmount) <= 0) {
+			alert("Enter a valid amount");
+			return;
 		}
+
+		await dispatch(payDue({ id: payModal.id, amount: Number(payAmount) }));
+		setPayModal({ open: false, id: null });
+		setPayAmount("");
 	};
 
-	const handleDelete = async (id) => {
-		if (confirm("Delete this due record?")) dispatch(deleteDue(id));
-	};
+const confirmDelete = (id) => {
+	setDeleteModal({ open: true, id });
+};
 
+const handleDeleteConfirmed = async () => {
+	if (deleteModal.id) {
+		 dispatch(deleteDue(deleteModal.id));
+		setDeleteModal({ open: false, id: null });
+	}
+};
 	const totalDue = dues.reduce((sum, d) => sum + d.amount, 0);
 
 	useEffect(() => {
@@ -57,8 +74,8 @@ export default function DuesPage() {
 
 	return (
 		<div className="p-6 bg-gray-900 text-gray-600 dark:text-gray-300">
-			<h1 className="text-3xl font-bold mb-4">
-				💰 Customer Due Management
+			<h1 className="text-3xl text-gray-400 font-bold mb-4">
+				💰Customers due
 			</h1>
 
 			{/* Total Card */}
@@ -67,7 +84,6 @@ export default function DuesPage() {
 					Total Due:{" "}
 					<span className="text-yellow-400">৳{totalDue}</span>
 				</p>
-
 				<button
 					onClick={() => setOpenModal(true)}
 					className="bg-green-600 hover:bg-green-500 px-4 py-2 rounded">
@@ -75,15 +91,16 @@ export default function DuesPage() {
 				</button>
 			</div>
 
-			{/* Modal */}
+			{/* Add Due Modal */}
 			{openModal && (
 				<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
 					<div className="bg-gray-900 p-6 rounded-lg w-full max-w-lg border border-gray-700 shadow-lg">
 						<h2 className="text-xl font-bold mb-4 text-white">
 							Add Due
 						</h2>
-
-						<form onSubmit={handleAdd} className="flex flex-col gap-3">
+						<form
+							onSubmit={handleAdd}
+							className="flex flex-col gap-3">
 							<input
 								type="text"
 								placeholder="Customer Name"
@@ -122,7 +139,6 @@ export default function DuesPage() {
 								}
 								className="p-2 rounded bg-gray-700 text-white border border-gray-600"
 							/>
-
 							<div className="flex justify-end gap-3 mt-3">
 								<button
 									type="button"
@@ -137,6 +153,38 @@ export default function DuesPage() {
 								</button>
 							</div>
 						</form>
+					</div>
+				</div>
+			)}
+
+			{/* Pay Modal */}
+			{payModal.open && (
+				<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+					<div className="bg-gray-900 p-6 rounded-lg w-full max-w-sm border border-gray-700 shadow-lg">
+						<h2 className="text-xl font-bold mb-4 text-white">
+							Pay Due
+						</h2>
+						<input
+							type="number"
+							value={payAmount}
+							onChange={(e) => setPayAmount(e.target.value)}
+							className="p-2 rounded bg-gray-700 text-white border border-gray-600 w-full mb-4"
+							placeholder="Enter payment amount"
+						/>
+						<div className="flex justify-end gap-3">
+							<button
+								className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-500 text-white"
+								onClick={() =>
+									setPayModal({ open: false, id: null })
+								}>
+								Cancel
+							</button>
+							<button
+								className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500 text-white"
+								onClick={handlePay}>
+								Pay
+							</button>
+						</div>
 					</div>
 				</div>
 			)}
@@ -174,13 +222,18 @@ export default function DuesPage() {
 									<td className="p-3 flex gap-2 justify-center">
 										{d.status === "due" && (
 											<button
-												onClick={() => handlePay(d._id)}
+												onClick={() =>
+													openPayModal(
+														d._id,
+														d.amount
+													)
+												}
 												className="bg-blue-600 px-3 py-1 rounded hover:bg-blue-500">
 												💸 Pay
 											</button>
 										)}
 										<button
-											onClick={() => handleDelete(d._id)}
+											onClick={() => confirmDelete(d._id)}
 											className="bg-red-600 px-3 py-1 rounded hover:bg-red-500">
 											❌ Delete
 										</button>
@@ -198,6 +251,34 @@ export default function DuesPage() {
 							)}
 						</tbody>
 					</table>
+				</div>
+			)}
+			{/* Delete Confirmation Modal */}
+			{deleteModal.open && (
+				<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+					<div className="bg-gray-900 p-6 rounded-lg w-full max-w-sm border border-gray-700 shadow-lg">
+						<h2 className="text-xl font-bold mb-4 text-white">
+							Confirm Delete
+						</h2>
+						<p className="text-gray-300 mb-4">
+							Are you sure you want to delete this due record?
+							This action cannot be undone.
+						</p>
+						<div className="flex justify-end gap-3">
+							<button
+								onClick={() =>
+									setDeleteModal({ open: false, id: null })
+								}
+								className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-500 text-white">
+								Cancel
+							</button>
+							<button
+								onClick={handleDeleteConfirmed}
+								className="px-4 py-2 rounded bg-red-600 hover:bg-red-500 text-white">
+								Delete
+							</button>
+						</div>
+					</div>
 				</div>
 			)}
 		</div>

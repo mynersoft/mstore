@@ -10,12 +10,17 @@ export default function DashboardPage() {
 	const bestSelling = useSelector((state) => state.products.bestSelling);
 	const products = useSelector((state) => state?.products?.items || []);
 	const dues = useSelector((state) => state?.dues?.items || []);
-	const { daily, monthly, breakdown, loading } = useSelector(
+	const { daily, monthly, prevMonthly } = useSelector(
 		(state) => state.saleprofit
 	);
-	const { list } = useSelector(
+	
+	
+	const { toolsAmount } = useSelector(
 		(state) => state.invest
 	);
+
+
+
 	const { totalAmount } = useSelector((state) => state.products);
 
 	
@@ -28,18 +33,7 @@ export default function DashboardPage() {
 	const [totalDue, setTotalDue] = useState(0);
 	const [totalAmountProducts, setTotalAmountProducts] = useState(0);
 
-	// useEffect(() => {
-	// 	loadMonthly();
-	// }, []);
 
-	// const loadMonthly = async () => {
-	// 	const res = await axios.get(
-	// 		"/api/service/stats?type=monthly&year=2025&month=1"
-	// 	);
-	// 	const formatted = buildMonthlyTable(res.data.list, 2025, 1);
-	// 	setTableData(formatted);
-	// 	setMonthData(formatted);
-	// };
 
 	const [salesData] = useState([
 		{ date: "2025-10-01", sales: 300, profit: 100 },
@@ -79,12 +73,28 @@ export default function DashboardPage() {
 
 				<StatCard
 					title="Monthly Sale"
-					value={`${monthly.totalSale || 0} tk`}
+					value={
+						<>
+							<span className="!text-red-500">
+								{prevMonthly.totalSale || 0}
+							</span>
+							{" | "}
+							<span>{monthly.totalSale || 0} tk</span>
+						</>
+					}
 					color="red"
 				/>
 				<StatCard
 					title="Monthly Profit"
-					value={`${monthly.totalProfit || 0} tk`}
+					value={
+						<>
+							<span className="!text-red-500">
+								{prevMonthly.totalProfit || 0}
+							</span>
+							{" | "}
+							<span>{monthly.totalProfit || 0} tk</span>
+						</>
+					}
 					color="red"
 				/>
 
@@ -100,7 +110,7 @@ export default function DashboardPage() {
 				/>
 				<StatCard
 					title="Invest for tools"
-					value={`${list?.totalToolsInvest} tk`}
+					value={`${toolsAmount || 0} tk`}
 					color="green"
 				/>
 			</div>

@@ -12,6 +12,7 @@ export const fetchDailyStats = createAsyncThunk(
 	}
 );
 
+// monthly stats by filter
 export const fetchMonthlyStats = createAsyncThunk(
 	"saleprofit/fetchMonthly",
 	async ({ year, month } = {}) => {
@@ -24,6 +25,17 @@ export const fetchMonthlyStats = createAsyncThunk(
 	}
 );
 
+// === GET Monthly Sale Profit ===
+export const fetchMonthlySaleProfit = createAsyncThunk(
+	"saleProfit/fetchMonthly",
+	async () => {
+		const res = await fetch(`/api/saleprofit/monthly`);
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error || "Failed to fetch");
+		return data;
+	}
+);
+
 export const fetchMonthlyBreakdown = createAsyncThunk(
 	"saleprofit/fetchMonthlyBreakdown",
 	async ({ year, month } = {}) => {
@@ -31,7 +43,9 @@ export const fetchMonthlyBreakdown = createAsyncThunk(
 		if (year) params.push(`year=${year}`);
 		if (month) params.push(`month=${month}`);
 		const query = params.length ? `&${params.join("&")}` : "";
-		const res = await axios.get(`/api/saleprofit?type=monthlyBreakdown${query}`);
+		const res = await axios.get(
+			`/api/saleprofit?type=monthlyBreakdown${query}`
+		);
 		return res.data;
 	}
 );
@@ -44,9 +58,10 @@ const saleprofitSlice = createSlice({
 		monthly: {
 			totalSale: 0,
 			totalProfit: 0,
-			totalQty: 0,
-			year: null,
-			month: null,
+		},
+		prevMonthly: {
+			totalSale: 0,
+			totalProfit: 0,
 		},
 		breakdown: { year: null, month: null, data: [] },
 		error: null,
@@ -54,6 +69,23 @@ const saleprofitSlice = createSlice({
 	reducers: {},
 	extraReducers: (builder) => {
 		builder
+			.addCase(fetchMonthlySaleProfit.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(fetchMonthlySaleProfit.fulfilled, (state, action) => {
+				state.loading = false;
+				state.error = null;
+				state.monthly.totalProfit = action.payload.monthlyProfit;
+				state.monthly.totalSale = action.payload.monthlySale;
+				state.prevMonthly.totalProfit =
+					action.payload.prevMonthlyProfit;
+				state.prevMonthly.totalSale = action.payload.prevMonthlySale;
+			})
+			.addCase(fetchMonthlySaleProfit.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.error.message;
+			})
 			.addMatcher(
 				(action) =>
 					action.type.startsWith("saleprofit/") &&

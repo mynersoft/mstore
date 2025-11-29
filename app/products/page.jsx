@@ -8,26 +8,18 @@ import { useRouter } from "next/navigation";
 import ProductFormModal from "@/components/ProductFormModal";
 import CategoryForm from "@/components/CategoryForm";
 import Modal from "@/components/Modal";
+import { addCategory } from "@/redux/categorySlice";
 
 export default function ProductsPage() {
 	const dispatch = useDispatch();
-	const { items, total, page: reduxPage, limit } = useSelector(
-		(s) => s.products
-	);
+	const {
+		items,
+		total,
+		page: reduxPage,
+		limit,
+	} = useSelector((s) => s.products);
 
-
-
-
-
-
-  const router = useRouter();
-
-  
-  
- 
-
-
-
+	const router = useRouter();
 
 	const [pageLocal, setPageLocal] = useState(reduxPage || 1);
 	const [showModal, setShowModal] = useState(false);
@@ -67,18 +59,20 @@ export default function ProductsPage() {
 		setFilteredItems(result);
 	}, [items, search]);
 
-	const totalPages = Math.max(
-		1,
-		Math.ceil((total || 0) / (limit || 1))
-	);
+	const totalPages = Math.max(1, Math.ceil((total || 0) / (limit || 1)));
 
 	const handleCancel = () => {
 		setShowCatModal(false);
 	};
 
+	const handleCatSubmit = (payload) => {
+		dispatch(addCategory(payload));
+		setShowCatModal(false);
+		alert("Category added successfully!");
+	};
+
 	return (
 		<div className="p-4 min-h-screen bg-gray-950 text-gray-300">
-
 			{/* HEADER */}
 			<div className="flex flex-col md:flex-row justify-between items-center gap-3 mb-6">
 				<h1 className="text-2xl font-semibold">Products</h1>
@@ -98,23 +92,20 @@ export default function ProductsPage() {
 							setEditingProduct(null);
 							setShowModal(true);
 						}}
-						className="bg-green-600 px-4 py-2 rounded"
-					>
+						className="bg-green-600 px-4 py-2 rounded">
 						+ Add Product
 					</button>
 
 					<button
 						onClick={() => setShowCatModal(true)}
-						className="bg-green-600 px-4 py-2 rounded"
-					>
+						className="bg-green-600 px-4 py-2 rounded">
 						+ Add Category
 					</button>
-<button
-      onClick={() => router.push("/products/list")}
-      className="px-4 py-2 bg-blue-600 text-white rounded"
-    >
-     List
-    </button>
+					<button
+						onClick={() => router.push("/products/list")}
+						className="px-4 py-2 bg-blue-600 text-white rounded">
+						List
+					</button>
 				</div>
 			</div>
 
@@ -139,14 +130,15 @@ export default function ProductsPage() {
 							filteredItems.map((p) => (
 								<tr
 									key={p._id}
-									className="border-b border-gray-800 hover:bg-gray-800/40"
-								>
+									className="border-b border-gray-800 hover:bg-gray-800/40">
 									<td className="p-3">
-										<img
-											src={p.image}
-											alt={p.name}
-											className="w-10 h-10 object-cover rounded"
-										/>
+										{p.image && (
+											<img
+												src={p.image}
+												alt={p.name || ""}
+												className="w-10 h-10 object-cover rounded"
+											/>
+										)}
 									</td>
 									<td className="p-3">{p.name}</td>
 									<td className="p-3">{p.category}</td>
@@ -161,14 +153,12 @@ export default function ProductsPage() {
 												setEditingProduct(p);
 												setShowModal(true);
 											}}
-											className="bg-blue-600 px-3 py-1 rounded"
-										>
+											className="bg-blue-600 px-3 py-1 rounded">
 											Edit
 										</button>
 										<button
 											onClick={() => handleDelete(p._id)}
-											className="bg-red-600 px-3 py-1 rounded"
-										>
+											className="bg-red-600 px-3 py-1 rounded">
 											Delete
 										</button>
 									</td>
@@ -178,8 +168,7 @@ export default function ProductsPage() {
 							<tr>
 								<td
 									colSpan={8}
-									className="p-6 text-center text-gray-500"
-								>
+									className="p-6 text-center text-gray-500">
 									No products found
 								</td>
 							</tr>
@@ -194,13 +183,17 @@ export default function ProductsPage() {
 					filteredItems.map((p) => (
 						<div
 							key={p._id}
-							className="bg-gray-900 p-4 rounded-lg border border-gray-800"
-						>
+							className="bg-gray-900 p-4 rounded-lg border border-gray-800">
 							<div className="flex items-center gap-3">
-								<img
-									src={p.image}
-									className="w-14 h-14 rounded"
-								/>
+								
+								{p.image && (
+									<img
+										src={p.image}
+										alt={p.name || ""}
+										className="w-10 h-10 object-cover rounded"
+									/>
+								)}
+
 								<div>
 									<h2 className="font-semibold">{p.name}</h2>
 									<p className="text-gray-400 text-sm">
@@ -221,21 +214,21 @@ export default function ProductsPage() {
 										setEditingProduct(p);
 										setShowModal(true);
 									}}
-									className="bg-blue-600 px-3 py-1 rounded w-full"
-								>
+									className="bg-blue-600 px-3 py-1 rounded w-full">
 									Edit
 								</button>
 								<button
 									onClick={() => handleDelete(p._id)}
-									className="bg-red-600 px-3 py-1 rounded w-full"
-								>
+									className="bg-red-600 px-3 py-1 rounded w-full">
 									Delete
 								</button>
 							</div>
 						</div>
 					))
 				) : (
-					<p className="text-center text-gray-500">No products found</p>
+					<p className="text-center text-gray-500">
+						No products found
+					</p>
 				)}
 			</div>
 
@@ -249,8 +242,7 @@ export default function ProductsPage() {
 							pageLocal === i + 1
 								? "bg-green-600 text-white"
 								: "bg-gray-800 text-gray-400"
-						}`}
-					>
+						}`}>
 						{i + 1}
 					</button>
 				))}
@@ -275,7 +267,10 @@ export default function ProductsPage() {
 					Add Category
 				</h3>
 
-				<CategoryForm onCancel={handleCancel} />
+				<CategoryForm
+					onCancel={handleCancel}
+					onSubmit={handleCatSubmit}
+				/>
 			</Modal>
 		</div>
 	);

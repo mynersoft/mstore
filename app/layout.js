@@ -3,7 +3,7 @@
 import "./globals.css";
 import ReduxProvider from "@/app/providers/ReduxProvider";
 import { GlobalInitializer } from "@/components/fetch/GlobalInitializer";
-import Header from "@/components/Header";
+import Header from "@/components/header/Header";
 
 import { useEffect, useState } from "react";
 

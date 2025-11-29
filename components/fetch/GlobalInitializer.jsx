@@ -10,6 +10,7 @@ import { fetchServices } from "@/redux/serviceSlice";
 import {
 	fetchDailyStats,
 	fetchMonthlyBreakdown,
+	fetchMonthlySaleProfit,
 	fetchMonthlyStats,
 } from "@/redux/saleprofitSlice";
 import { fetchInvests } from "@/redux/investSlice";
@@ -18,11 +19,11 @@ export function GlobalInitializer({ year, month }) {
 	const dispatch = useDispatch();
 	useEffect(() => {
 		dispatch(fetchProducts());
-
 		dispatch(fetchInvests());
 		dispatch(fetchCategories());
 		dispatch(fetchDues());
 		dispatch(fetchDailyStats());
+		dispatch(fetchMonthlySaleProfit());
 		dispatch(fetchMonthlyStats({ year, month }));
 		dispatch(fetchMonthlyBreakdown({ year, month }));
 		dispatch(fetchBestSelling());

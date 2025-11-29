@@ -18,19 +18,11 @@ export async function GET() {
 			.filter((item) => item.investType === "malamal")
 			.reduce((sum, item) => sum + Number(item.amount || 0), 0);
 
-<<<<<<< HEAD
-		return NextResponse.json({
-			success: true,
-			items: all,
-			toolsAmount: totalToolsInvest,
-			malamalsAmount: totalMalamalInvest,
-=======
 		return NextResponse.json({ 
 			success: true,
 			items: all,
 			toolsAmount:totalToolsInvest,
 			malamalsAmount:totalMalamalInvest,
->>>>>>> 1af756cc7cf29f3685baf937318785147802e393
 		});
 	} catch (e) {
 		return NextResponse.json({ error: e.message }, { status: 500 });
@@ -64,7 +56,9 @@ export async function PUT(request) {
 export async function DELETE(request) {
 	try {
 		await connectDB();
-		const { id } = await request.json();
+		const { searchParams } = new URL(request.url);
+		const id = searchParams.get("id");
+
 		await Invest.findByIdAndDelete(id);
 		return NextResponse.json({ success: true });
 	} catch (e) {
