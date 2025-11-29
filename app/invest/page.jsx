@@ -11,10 +11,10 @@ import {
 } from "@/redux/investSlice";
 
 export default function InvestPage() {
-	const dispatch = useDispatch();
-	const { list, loading, actionLoading, filterType } = useSelector(
-		(state) => state.invest
-	);
+  const dispatch = useDispatch();
+  const { list, loading, actionLoading, filterType } = useSelector(
+    (state) => state.invest
+  );
 
 	const [open, setOpen] = useState(false);
 
@@ -76,10 +76,10 @@ export default function InvestPage() {
 			? list
 			: list.filter((i) => i.investType === filterType);
 
-	const totalAmount = filteredList.reduce(
-		(sum, item) => sum + Number(item.amount || 0),
-		0
-	);
+  const totalAmount = filteredList.reduce(
+    (sum, item) => sum + Number(item.amount || 0),
+    0
+  );
 
 	return (
 		<div className="min-h-screen bg-[#0f172a] text-white p-6">
@@ -112,10 +112,10 @@ export default function InvestPage() {
 						<option value="tools">Tools</option>
 					</select>
 
-					<p className="text-lg">
-						<b>Total:</b> {totalAmount} Tk
-					</p>
-				</div>
+          <p className="text-lg">
+            <b>Total:</b> {totalAmount} Tk
+          </p>
+        </div>
 
 				{/* Table Skeleton Loader */}
 				{loading ? (
@@ -147,16 +147,15 @@ export default function InvestPage() {
 								</tr>
 							</thead>
 
-							<tbody>
-								{filteredList.map((item) => (
-									<tr
-										key={item._id}
-										className="hover:bg-gray-800 transition border-b border-gray-800">
-										<td className="p-3">{item.name}</td>
-										<td className="p-3 capitalize">
-											{item.investType}
-										</td>
-										<td className="p-3">{item.amount}</td>
+              <tbody>
+                {filteredList.map((item) => (
+                  <tr
+                    key={item._id}
+                    className="hover:bg-gray-800 transition border-b border-gray-800"
+                  >
+                    <td className="p-3">{item.name}</td>
+                    <td className="p-3 capitalize">{item.investType}</td>
+                    <td className="p-3">{item.amount}</td>
 
 										<td className="p-3 flex gap-2">
 											<button
