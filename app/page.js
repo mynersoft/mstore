@@ -3,11 +3,8 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import StatCard from "@/components/StatCard";
-import SalesChart from "@/components/SalesChart";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { getTopProducts, getStockOutProducts } from "@/lib/dashboardUtils";
-import DailySaleProfit from "@/components/chart/DailySaleProfit";
-import axios from "axios";
 
 export default function DashboardPage() {
 	const bestSelling = useSelector((state) => state.products.bestSelling);
@@ -16,15 +13,15 @@ export default function DashboardPage() {
 	const { daily, monthly, breakdown, loading } = useSelector(
 		(state) => state.saleprofit
 	);
+	const { list } = useSelector(
+		(state) => state.invest
+	);
 	const { totalAmount } = useSelector((state) => state.products);
-	const [tableData, setTableData] = useState([]);
-	const [monthData, setMonthData] = useState([]);
 
+	
 
-
-// Stock out products only
-const stockOutProducts = products.filter((p) => Number(p.stock) === 0);
-
+	// Stock out products only
+	const stockOutProducts = products.filter((p) => Number(p.stock) === 0);
 
 	const [topProducts, setTopProducts] = useState([]);
 	const [stockOut, setStockOut] = useState([]);
@@ -101,6 +98,11 @@ const stockOutProducts = products.filter((p) => Number(p.stock) === 0);
 					value={`${totalAmountProducts} tk`}
 					color="green"
 				/>
+				<StatCard
+					title="Invest for tools"
+					value={`${list?.totalToolsInvest} tk`}
+					color="green"
+				/>
 			</div>
 
 			{/* best selling products  */}
@@ -131,15 +133,17 @@ const stockOutProducts = products.filter((p) => Number(p.stock) === 0);
 						<tbody>
 							<tr>
 								<td className="p-2 border border-gray-700">
-									{ bestSelling.image ? (
-								<Image
-										src={bestSelling.image}
-										alt={bestSelling.name}
-										width={60}
-										height={60}
-										className="rounded object-cover"
-									/>	
-								): "N/A"}
+									{bestSelling.image ? (
+										<Image
+											src={bestSelling.image}
+											alt={bestSelling.name}
+											width={60}
+											height={60}
+											className="rounded object-cover"
+										/>
+									) : (
+										"N/A"
+									)}
 								</td>
 								<td className="p-2 border border-gray-700">
 									{bestSelling.name}
@@ -162,15 +166,12 @@ const stockOutProducts = products.filter((p) => Number(p.stock) === 0);
 					⚠️ Stock Out Products
 				</h2>
 
-
 				{stockOutProducts?.map((p) => (
-  <div key={p._id}>
-    <h3>{p.name}</h3>
-    <p>Stock: {p.stock}</p>
-  </div>
-))}
-
-
+					<div key={p._id}>
+						<h3>{p.name}</h3>
+						<p>Stock: {p.stock}</p>
+					</div>
+				))}
 			</div>
 		</div>
 	);
