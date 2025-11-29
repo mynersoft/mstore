@@ -16,14 +16,6 @@ export default function InvestPage() {
     (state) => state.invest
   );
 
-
-
-
-
-
-
-
-
   const [open, setOpen] = useState(false);
 
   const [form, setForm] = useState({
@@ -84,7 +76,10 @@ export default function InvestPage() {
       ? list
       : list.filter((i) => i.investType === filterType);
 
-  
+  const totalAmount = filteredList.reduce(
+    (sum, item) => sum + Number(item.amount || 0),
+    0
+  );
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white p-6">
@@ -119,7 +114,7 @@ export default function InvestPage() {
           </select>
 
           <p className="text-lg">
-            <b>Total:</b> {list?.toolsAmount} Tk
+            <b>Total:</b> {totalAmount} Tk
           </p>
         </div>
 
@@ -144,7 +139,7 @@ export default function InvestPage() {
               </thead>
 
               <tbody>
-                {filteredList.length > 0 && filteredList.map((item) => (
+                {filteredList.map((item) => (
                   <tr
                     key={item._id}
                     className="hover:bg-gray-800 transition border-b border-gray-800"
