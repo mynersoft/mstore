@@ -76,7 +76,7 @@ export default function BillPage() {
     const payload = { name: form.name, amount: Number(form.amount), month: targetMonth };
 
     const exists = list.find((b) => b.name === payload.name && b.month === targetMonth);
-    if (!editId && exists) return toast.error("Bill already exists for this month");
+    if (!editId && exists) return toast.error("Already paid for this month ");
 
     try {
       if (editId) await dispatch(updateBill({ ...payload, _id: editId })).unwrap();
