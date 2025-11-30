@@ -47,24 +47,33 @@ export default function InvestPage() {
                 }, 0);
         }, [filterItems]);
 
-        // Current month
-        const currentMonth = dayjs().format("MMMM YYYY");
 
-        // Check if Dukan vara is paid this month
-        const currentMonthInvests = useMemo(() => {
-                return list
-                        .filter((i) => i.name === "Dukan vara")
-                        .map((i) => {
-                                const paidMonth = dayjs(i.createdAt).format("MMMM YYYY");
-                                return { ...i, paidThisMonth: paidMonth === currentMonth };
-                        });
-        }, [list, currentMonth]);
 
-        // Hardcoded WiFi & Electricity (Biddut) bills
-        const bills = [
-                { name: "WiFi", amount: 800, paid: false },
-                { name: "Biddut (Electricity)", amount: 1200, paid: false },
-        ];
+
+        
+// Current month
+const currentMonth = dayjs().format("MMMM YYYY");
+
+// Payments for this month
+const paymentsThisMonth = useMemo(() => {
+    const names = ["Dukan vara", "Wifi", "Biddut"];
+    return names.map((name) => {
+        // Find any investment with this name in the current month
+        const found = list.find(
+            (i) => i.name === name && dayjs(i.createdAt).format("MMMM YYYY") === currentMonth
+        );
+        return {
+            name,
+            amount: found ? found.amount : 0,
+            paid: !!found,
+        };
+    });
+}, [list, currentMonth]);
+
+
+
+
+
 
         // Submit form (add or update)
         const submit = async () => {
