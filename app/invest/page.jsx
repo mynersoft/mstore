@@ -259,6 +259,11 @@ export default function InvestPage() {
 								<option value="">Select Type</option>
 								<option value="malamal">Malamal</option>
 								<option value="tools">Tools</option>
+
+		<option value="others">Others</option>
+
+
+
 							</select>
 
 							<input
