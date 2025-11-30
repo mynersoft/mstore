@@ -26,7 +26,7 @@ export default function DashboardPage() {
 	
 
 	// Stock out products only
-	const stockOutProducts = products.filter((p) => Number(p.stock) === 0);
+	const stockOutProducts = products.filter((p) => Number(p.stock) == 0);
 
 	const [topProducts, setTopProducts] = useState([]);
 	const [stockOut, setStockOut] = useState([]);
