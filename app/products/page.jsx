@@ -12,16 +12,17 @@ import { addCategory } from "@/redux/categorySlice";
 
 export default function ProductsPage() {
     const dispatch = useDispatch();
-    const { items, total, page: reduxPage, limit } = useSelector((s) => s.products);
     const router = useRouter();
     const searchParams = useSearchParams();
+
+    const { items, total, page: reduxPage, limit } = useSelector((s) => s.products);
 
     const [pageLocal, setPageLocal] = useState(reduxPage || 1);
     const [showModal, setShowModal] = useState(false);
     const [showCatModal, setShowCatModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
 
-    // Initialize search from query param if present
+    // Initialize search from URL query param `search` (or empty if none)
     const initialSearch = searchParams?.get("search") || "";
     const [search, setSearch] = useState(initialSearch);
     const [filteredItems, setFilteredItems] = useState([]);
@@ -38,7 +39,7 @@ export default function ProductsPage() {
         dispatch(fetchProducts({ page: pageLocal, limit }));
     };
 
-    // Filter products based on search
+    // Update filtered items when `items` or `search` changes
     useEffect(() => {
         if (!Array.isArray(items)) {
             setFilteredItems([]);
@@ -53,6 +54,18 @@ export default function ProductsPage() {
 
         setFilteredItems(result);
     }, [items, search]);
+
+    // Update URL query dynamically when search changes
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (search) {
+            params.set("search", search);
+        } else {
+            params.delete("search");
+        }
+        const queryString = params.toString();
+        router.replace(`/products${queryString ? `?${queryString}` : ""}`);
+    }, [search, router]);
 
     const totalPages = Math.max(1, Math.ceil((total || 0) / (limit || 1)));
 
