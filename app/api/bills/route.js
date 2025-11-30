@@ -8,14 +8,38 @@ export async function GET() {
     return NextResponse.json(bills);
 }
 
+
+
 export async function POST(req) {
     await dbConnect();
-    const data = await req.json();
-    if (!data.name || !data.amount) {
-        return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+
+    let data;
+    try {
+        data = await req.json();
+    } catch (err) {
+        return NextResponse.json(
+            { error: "Invalid JSON body" },
+            { status: 400 }
+        );
     }
-    const bill = await Bill.create(data);
-    return NextResponse.json(bill);
+
+    const { name, amount } = data;
+    if (!name || amount == null) {
+        return NextResponse.json(
+            { error: "Missing fields" },
+            { status: 400 }
+        );
+    }
+
+    try {
+        const bill = await Bill.create({ name, amount });
+        return NextResponse.json(bill, { status: 201 });
+    } catch (err) {
+        return NextResponse.json(
+            { error: "Database error: " + err.message },
+            { status: 500 }
+        );
+    }
 }
 
 export async function PUT(req) {
