@@ -1,6 +1,7 @@
 "use client";
 
-import "./globals.css";import InternetStatus from "@/components/InternetStatus";
+import "./globals.css";
+import InternetStatus from "@/components/InternetStatus";
 import ReduxProvider from "@/app/providers/ReduxProvider";
 import { GlobalInitializer } from "@/components/fetch/GlobalInitializer";
 import Header from "@/components/header/Header";
@@ -8,33 +9,42 @@ import Header from "@/components/header/Header";
 import { useEffect, useState } from "react";
 
 import ErudaLoader from "@/components/ErudaLoader";
-
 import Loader from "@/components/Loader";
-
-{
-	/* export const metadata = {
-  title: "Bismillah Telecom & Servicing",
-  description: "Admin dashboard for managing products and sales",
-}; */
-}
 
 export default function RootLayout({ children }) {
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		// সব কন্টেন্ট লোড হলে loader remove হবে
 		const timer = setTimeout(() => {
 			setLoading(false);
-		}, 1200); // smooth delay
+		}, 1200);
 
 		return () => clearTimeout(timer);
 	}, []);
 
 	return (
 		<html lang="en">
+			<head>
+				{/* ✅ Google Site Verification */}
+				<meta
+					name="google-site-verification"
+					content="u9LGEmn4ufs-VTxIl-EAjhoTrrsG4dPWts2Ek5TKpGU" // replace with Google Search Console code
+				/>
+
+				{/* You can add other SEO metas here */}
+				<meta charSet="UTF-8" />
+				<meta
+					name="viewport"
+					content="width=device-width, initial-scale=1"
+				/>
+				<title>Bismillah Telecom & Servicing</title>
+				<meta
+					name="description"
+					content="Admin dashboard for managing products and sales"
+				/>
+			</head>
+
 			<body className="dark bg-gray-900 text-gray-100">
-<InternetStatus />
-				{/* Loader */}
 				{loading && <Loader />}
 
 				{!loading && (
