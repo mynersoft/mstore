@@ -76,109 +76,150 @@ export default function BillPage() {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gray-950 text-white max-w-5xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold">Bills & Investments</h2>
-        <button
-          className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
-          onClick={() => {
-            setForm({ name: "", amount: "" });
-            setEditId(null);
-            setOpenModal(true);
-          }}
-        >
-          + Add Bill
-        </button>
-      </div>
+  <div className="min-h-screen p-6 bg-[#0D0D10] text-gray-200 max-w-6xl mx-auto">
 
-      {/* Bills Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full table-auto border-collapse border border-gray-700">
-          <thead>
-            <tr className="bg-gray-800 text-gray-300">
-              <th className="p-3 border border-gray-700">Name</th>
-              <th className="p-3 border border-gray-700">Current Month</th>
-              <th className="p-3 border border-gray-700">Last Month</th>
-              <th className="p-3 border border-gray-700 w-40">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {billsWithStatus.map((bill, idx) => (
-              <tr key={idx} className="hover:bg-gray-800">
-                <td className="p-3 border border-gray-700">{bill.name}</td>
-                <td className={`p-3 border border-gray-700 ${bill.current.paid ? "bg-green-700" : "bg-red-700"}`}>
-                  {bill.current.paid ? `✅ Paid (${bill.current.amount} Tk)` : "❌ Not Paid"}
-                </td>
-                <td className={`p-3 border border-gray-700 ${bill.last.paid ? "bg-green-700" : "bg-red-700"}`}>
-                  {bill.last.paid ? `✅ Paid (${bill.last.amount} Tk)` : "❌ Not Paid"}
-                </td>
-                <td className="p-3 border border-gray-700 flex gap-2">
-                  {bill.current._id && (
-                    <>
-                      <button
-                        onClick={() => startEdit({ _id: bill.current._id, name: bill.name, amount: bill.current.amount })}
-                        className="bg-blue-600 px-3 py-1 rounded hover:bg-blue-700"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(bill.current._id)}
-                        className="bg-red-600 px-3 py-1 rounded hover:bg-red-700"
-                      >
-                        Delete
-                      </button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    {/* Header */}
+    <div className="flex justify-between items-center mb-8">
+      <h2 className="text-3xl font-extrabold tracking-wide">💰 Monthly Bills</h2>
+      <button
+        className="bg-blue-600 px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition-all"
+        onClick={() => {
+          setForm({ name: "", amount: "" });
+          setEditId(null);
+          setOpenModal(true);
+        }}
+      >
+        + Add Bill
+      </button>
+    </div>
 
-      {/* Add/Edit Bill Modal */}
-      {openModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
-          <div className="bg-gray-900 p-6 rounded-lg w-96 shadow-xl border border-gray-700">
-            <h3 className="text-xl font-bold mb-4">{editId ? "Edit Bill" : "Add Bill"}</h3>
+    {/* Bills Table */}
+    <div className="overflow-x-auto shadow-lg rounded-xl border border-gray-800">
+      <table className="w-full table-auto rounded-xl overflow-hidden">
+        <thead>
+          <tr className="bg-[#1a1a22] text-gray-300 text-sm uppercase">
+            <th className="p-3 border-b border-gray-800 text-left">Bill Name</th>
+            <th className="p-3 border-b border-gray-800 text-left">Current Month</th>
+            <th className="p-3 border-b border-gray-800 text-left">Last Month</th>
+            <th className="p-3 border-b border-gray-800 w-32 text-center">Action</th>
+          </tr>
+        </thead>
 
-            <select
-              className="bg-gray-800 border border-gray-700 p-2 rounded w-full mb-3"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+        <tbody>
+          {billsWithStatus.map((bill, idx) => (
+            <tr
+              key={idx}
+              className="hover:bg-[#1b1b25] transition-all border-b border-gray-800"
             >
-              <option value="">Select Bill</option>
-              <option value="Dukan vara">Dukan vara</option>
-              <option value="WiFi">WiFi</option>
-              <option value="Biddut (Electricity)">Biddut (Electricity)</option>
-            </select>
+              <td className="p-3 font-medium">{bill.name}</td>
 
-            <input
-              type="number"
-              className="bg-gray-800 border border-gray-700 p-2 rounded w-full mb-3"
-              placeholder="Amount"
-              value={form.amount}
-              onChange={(e) => setForm({ ...form, amount: e.target.value })}
-            />
+              <td
+                className={`p-3 font-semibold rounded ${
+                  bill.current.paid
+                    ? "text-green-400"
+                    : "text-red-400"
+                }`}
+              >
+                {bill.current.paid
+                  ? `✔ Paid (${bill.current.amount} Tk)`
+                  : "✖ Not Paid"}
+              </td>
 
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => { setOpenModal(false); setEditId(null); setForm({ name: "", amount: "" }); }}
-                className="px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
+              <td
+                className={`p-3 font-semibold ${
+                  bill.last.paid
+                    ? "text-green-400"
+                    : "text-red-400"
+                }`}
               >
-                Cancel
-              </button>
-              <button
-                onClick={submitBill}
-                className="px-3 py-2 bg-blue-600 rounded hover:bg-blue-700"
-                disabled={actionLoading}
-              >
-                {actionLoading ? "Saving..." : editId ? "Update" : "Add"}
-              </button>
-            </div>
+                {bill.last.paid
+                  ? `✔ Paid (${bill.last.amount} Tk)`
+                  : "✖ Not Paid"}
+              </td>
+
+              <td className="p-3 text-center flex justify-center gap-2">
+                {bill.current._id && (
+                  <>
+                    <button
+                      onClick={() =>
+                        startEdit({
+                          _id: bill.current._id,
+                          name: bill.name,
+                          amount: bill.current.amount,
+                        })
+                      }
+                      className="px-3 py-1 bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(bill.current._id)}
+                      className="px-3 py-1 bg-red-600 rounded-lg hover:bg-red-700 transition-all shadow"
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    {/* Modal */}
+    {openModal && (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50">
+        <div className="bg-[#1a1a22] p-6 rounded-xl w-96 shadow-2xl border border-gray-700">
+
+          <h3 className="text-xl font-bold mb-4 text-gray-100">
+            {editId ? "✏ Update Bill" : "➕ Add Bill"}
+          </h3>
+
+          <select
+            className="bg-[#0f0f14] border border-gray-700 p-3 rounded-lg w-full mb-3 focus:ring-2 focus:ring-blue-600"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+          >
+            <option value="">Select Bill</option>
+            <option value="Dukan vara">Dukan vara</option>
+            <option value="WiFi">WiFi</option>
+            <option value="Biddut (Electricity)">Biddut (Electricity)</option>
+          </select>
+
+          <input
+            type="number"
+            className="bg-[#0f0f14] border border-gray-700 p-3 rounded-lg w-full mb-4 focus:ring-2 focus:ring-blue-600"
+            placeholder="Amount (Tk)"
+            value={form.amount}
+            onChange={(e) => setForm({ ...form, amount: e.target.value })}
+          />
+
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => {
+                setOpenModal(false);
+                setEditId(null);
+                setForm({ name: "", amount: "" });
+              }}
+              className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-all"
+            >
+              Cancel
+            </button>
+
+            <button
+              onClick={submitBill}
+              className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow"
+              disabled={actionLoading}
+            >
+              {actionLoading ? "Saving…" : editId ? "Update" : "Add"}
+            </button>
           </div>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    )}
+
+  </div>
+);
 }
