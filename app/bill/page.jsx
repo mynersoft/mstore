@@ -108,44 +108,54 @@ export default function BillPage() {
     });
   }, [list, selectedMonth]);
 
-  // Submit: add or update. Handles last-month update by setting createdAt.
-  const submitBill = async () => {
-    if (!form.name || !form.amount) {
-      toast.error("Fill all fields");
-      return;
-    }
 
-    const payload = {
-      name: form.name,
-      amount: Number(form.amount),
-    };
 
-    if (form.isLastMonthUpdate) {
-      // set createdAt to last month of selectedMonth
-      payload.createdAt = dayjs(selectedMonth + "-01").subtract(1, "month").toISOString();
+
+  import toast from "react-hot-toast";
+
+const submitBill = async () => {
+  if (!form.name || !form.amount) {
+    toast.error("Please fill all fields");
+    return;
+  }
+
+  const payload = { name: form.name, amount: Number(form.amount) };
+
+  // 🔥 Check if current month bill already exists
+  const exists = list.find(
+    (b) =>
+      b.name === payload.name &&
+      dayjs(b.createdAt).format("MMMM YYYY") === currentMonth
+  );
+
+  if (!editId && exists) {
+    toast.error("This bill is already paid for this month!");
+    return;
+  }
+
+  try {
+    if (editId) {
+      await dispatch(updateBill({ ...payload, _id: editId })).unwrap();
+      toast.success("Bill updated successfully!");
     } else {
-      // if user is editing and not last-month update, keep createdAt unspecified (server will set updatedAt)
+      await dispatch(addBill(payload)).unwrap();
+      toast.success("Bill added successfully!");
     }
 
-    try {
-      if (editId) {
-        await dispatch(updateBill({ ...payload, _id: editId })).unwrap();
-        toast.success("Bill updated");
-      } else {
-        await dispatch(addBill(payload)).unwrap();
-        toast.success("Bill added");
-      }
+    setForm({ name: "", amount: "" });
+    setEditId(null);
+    setOpenModal(false);
+  } catch (err) {
+    const msg = err?.message || err?.data?.error || "Operation failed";
+    toast.error(msg);
+  }
+};
 
-      // refresh list (we already updated optimistically in slice, but we ensure latest)
-      dispatch(fetchBills());
-      setForm({ name: "", amount: "", isLastMonthUpdate: false });
-      setEditId(null);
-      setOpenModal(false);
-    } catch (err) {
-      console.error("submitBill error:", err);
-      toast.error("Operation failed: " + (err?.message || err?.data?.error || "Unknown"));
-    }
-  };
+
+
+
+
+
 
   const startEdit = (item) => {
     setEditId(item._id);
