@@ -7,22 +7,21 @@ import dayjs from "dayjs";
 
 export default function BillPage() {
   const dispatch = useDispatch();
-  const billsState = useSelector((state) => state.bills) || {}; // safe fallback
+  const billsState = useSelector((state) => state.bills) || {};
   const { list = [], loading = false, actionLoading = false } = billsState;
 
-  const [open, setOpen] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
   const [form, setForm] = useState({ name: "", amount: "" });
   const [editId, setEditId] = useState(null);
 
   const currentMonth = dayjs().format("MMMM YYYY");
   const lastMonth = dayjs().subtract(1, "month").format("MMMM YYYY");
 
-  // Fetch bills
   useEffect(() => {
     dispatch(fetchBills());
   }, [dispatch]);
 
-  // Get status for each bill for current and last month
+  // Compute bill status for current and last month
   const billsWithStatus = useMemo(() => {
     const names = ["Dukan vara", "WiFi", "Biddut (Electricity)"];
     return names.map((name) => {
@@ -40,17 +39,20 @@ export default function BillPage() {
     });
   }, [list, currentMonth, lastMonth]);
 
-  // Add / Edit Bill
-  const submit = async () => {
+  // Add / Edit bill
+  const submitBill = async () => {
     if (!form.name || !form.amount) return alert("Please fill all fields");
     const payload = { name: form.name, amount: Number(form.amount) };
 
     try {
-      if (editId) await dispatch(updateBill({ ...payload, _id: editId })).unwrap();
-      else await dispatch(addBill(payload)).unwrap();
+      if (editId) {
+        await dispatch(updateBill({ ...payload, _id: editId })).unwrap();
+      } else {
+        await dispatch(addBill(payload)).unwrap();
+      }
       setForm({ name: "", amount: "" });
       setEditId(null);
-      setOpen(false);
+      setOpenModal(false);
     } catch (err) {
       alert("Operation failed: " + err);
     }
@@ -59,7 +61,7 @@ export default function BillPage() {
   const startEdit = (item) => {
     setEditId(item._id);
     setForm({ name: item.name, amount: item.amount });
-    setOpen(true);
+    setOpenModal(true);
   };
 
   const handleDelete = async (id) => {
@@ -73,9 +75,21 @@ export default function BillPage() {
 
   return (
     <div className="min-h-screen p-6 bg-gray-950 text-white max-w-5xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6">Bills & Investments</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold">Bills & Investments</h2>
+        <button
+          className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+          onClick={() => {
+            setForm({ name: "", amount: "" });
+            setEditId(null);
+            setOpenModal(true);
+          }}
+        >
+          + Add Bill
+        </button>
+      </div>
 
-      {/* Table */}
+      {/* Bills Table */}
       <div className="overflow-x-auto">
         <table className="w-full table-auto border-collapse border border-gray-700">
           <thead>
@@ -120,12 +134,12 @@ export default function BillPage() {
         </table>
       </div>
 
-      {/* Add/Edit Modal */}
-      {open && (
+      {/* Add/Edit Bill Modal */}
+      {openModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
           <div className="bg-gray-900 p-6 rounded-lg w-96 shadow-xl border border-gray-700">
             <h3 className="text-xl font-bold mb-4">{editId ? "Edit Bill" : "Add Bill"}</h3>
-            
+
             <select
               className="bg-gray-800 border border-gray-700 p-2 rounded w-full mb-3"
               value={form.name}
@@ -147,13 +161,13 @@ export default function BillPage() {
 
             <div className="flex justify-end gap-2">
               <button
-                onClick={() => { setOpen(false); setEditId(null); setForm({ name: "", amount: "" }); }}
+                onClick={() => { setOpenModal(false); setEditId(null); setForm({ name: "", amount: "" }); }}
                 className="px-3 py-2 bg-gray-700 rounded hover:bg-gray-600"
               >
                 Cancel
               </button>
               <button
-                onClick={submit}
+                onClick={submitBill}
                 className="px-3 py-2 bg-blue-600 rounded hover:bg-blue-700"
                 disabled={actionLoading}
               >
