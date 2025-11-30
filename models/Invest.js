@@ -5,7 +5,7 @@ const InvestSchema = new mongoose.Schema(
     name: { type: String, required: true },
     investType: {
       type: String,
-      enum: ["malamal", "tools"],
+      enum: ["malamal", "tools", " others"],
       required: true,
     },
     amount: { type: Number, required: true },
