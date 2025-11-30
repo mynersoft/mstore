@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addProduct, updateProduct, fetchProducts } from "@/redux/productSlice";
 import { fetchCategories } from "@/redux/categorySlice";
 import { showAddConfirm } from "./sweetalert/AddConfirm";
+import toast from "react-hot-toast";
 
 export default function ProductFormModal({
 	editingProduct,
@@ -63,7 +64,8 @@ export default function ProductFormModal({
 		e.preventDefault();
 
 		if (!form.name || !form.sellPrice || !form.regularPrice) {
-			return alert("Required fields missing!");
+			toast.error("Required fields missing!");
+			return;
 		}
 
 		setSaving(true);
@@ -71,12 +73,8 @@ export default function ProductFormModal({
 		try {
 			const formData = new FormData();
 
-			// Add image if selected
-			if (file) {
-				formData.append("image", file);
-			}
+			if (file) formData.append("image", file);
 
-			// Append all form fields
 			Object.keys(form).forEach((key) => {
 				if (key !== "image") formData.append(key, form[key]);
 			});
@@ -89,7 +87,7 @@ export default function ProductFormModal({
 			const data = await res.json();
 
 			if (!res.ok) {
-				alert(data.error || "Upload failed");
+				toast.error(data.error || "Upload failed");
 				setSaving(false);
 				return;
 			}
@@ -97,17 +95,17 @@ export default function ProductFormModal({
 			const payload = data.product;
 
 			if (editingProduct) {
-				await dispatch(updateProduct(payload)).unwrap();
+				dispatch(updateProduct(payload)).unwrap();
+				toast.success("Product updated successfully!");
 			} else {
-				showAddConfirm("product", () =>
-					dispatch(addProduct(payload)).unwrap()
-				);
+				dispatch(addProduct(payload)).unwrap();
+				toast.success("Product added successfully!");
 			}
 
 			dispatch(fetchProducts({ page: currentPage }));
 			onClose();
 		} catch (error) {
-			alert("Save failed: " + error.message);
+			toast.error("Save failed: " + error.message);
 		} finally {
 			setSaving(false);
 		}
@@ -119,7 +117,6 @@ export default function ProductFormModal({
 	return (
 		<div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-3 sm:p-4">
 			<div className="bg-gray-900 text-gray-100 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-xl">
-				{/* Header */}
 				<div className="flex justify-between items-center mb-4 sticky top-0 bg-gray-900 pb-3">
 					<h3 className="text-lg font-semibold">
 						{editingProduct ? "Edit Product" : "Add Product"}
@@ -133,7 +130,7 @@ export default function ProductFormModal({
 
 				{/* FORM */}
 				<form onSubmit={handleSubmit} className="grid gap-4">
-					{/* Product Name */}
+					{/* PRODUCT NAME */}
 					<div className="flex flex-col gap-1">
 						<label className="text-gray-300">Product Name</label>
 						<input
@@ -148,7 +145,7 @@ export default function ProductFormModal({
 						/>
 					</div>
 
-					{/* Category & Subcategory */}
+					{/* CATEGORY + SUBCATEGORY */}
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 						<div className="flex flex-col gap-1">
 							<label className="text-gray-300">Category</label>
@@ -195,7 +192,7 @@ export default function ProductFormModal({
 						</div>
 					</div>
 
-					{/* Brand & Stock */}
+					{/* BRAND + STOCK */}
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 						<div className="flex flex-col gap-1">
 							<label className="text-gray-300">Brand</label>
@@ -226,7 +223,7 @@ export default function ProductFormModal({
 						</div>
 					</div>
 
-					{/* Price */}
+					{/* PRICE */}
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 						<div className="flex flex-col gap-1">
 							<label className="text-gray-300">
@@ -263,7 +260,7 @@ export default function ProductFormModal({
 						</div>
 					</div>
 
-					{/* Warranty */}
+					{/* WARRANTY */}
 					<div className="flex flex-col gap-1">
 						<label className="text-gray-300">Warranty</label>
 						<input
@@ -276,18 +273,20 @@ export default function ProductFormModal({
 						/>
 					</div>
 
-					{/* Image Upload */}
+					{/* IMAGE UPLOAD */}
 					<div className="flex flex-col gap-1">
 						<label className="text-gray-300">Product Image</label>
 						<input
 							type="file"
 							accept="image/*"
-							onChange={(e) => setFile(e.target.files[0])}
+							onChange={(e) => {
+								setFile(e.target.files[0]);
+								toast.success("Image selected!");
+							}}
 							className="text-sm"
 						/>
 
 						<div className="flex gap-2 mt-2">
-							{/* Existing image */}
 							{form.image && !file && (
 								<img
 									src={form.image}
@@ -296,7 +295,6 @@ export default function ProductFormModal({
 								/>
 							)}
 
-							{/* Preview selected file */}
 							{file && (
 								<img
 									src={URL.createObjectURL(file)}
@@ -307,7 +305,7 @@ export default function ProductFormModal({
 						</div>
 					</div>
 
-					{/* Buttons */}
+					{/* BUTTONS */}
 					<div className="flex justify-end gap-3 mt-4">
 						<button
 							type="button"

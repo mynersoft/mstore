@@ -3,13 +3,14 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
-	fetchCategories,
 	addCategory,
 	updateCategory,
 	deleteCategory,
 } from "@/redux/categorySlice";
+
 import CategoryForm from "@/components/CategoryForm";
 import AddCategoryButton from "@/components/AddCategoryButton";
+import toast from "react-hot-toast";
 
 export default function CategoriesPage() {
 	const dispatch = useDispatch();
@@ -20,26 +21,45 @@ export default function CategoriesPage() {
 	const [editingCategory, setEditingCategory] = useState(null);
 	const [showModal, setShowModal] = useState(false);
 
-	const handleSubmit = (payload) => {
-		if (editingCategory) {
-			dispatch(updateCategory({ id: editingCategory._id, ...payload }));
-		} else {
-			dispatch(addCategory(payload));
+	// SUBMIT (Add / Update)
+	const handleSubmit = async (payload) => {
+		try {
+			if (editingCategory) {
+				await dispatch(
+					updateCategory({ id: editingCategory._id, ...payload })
+				).unwrap();
+				toast.success("Category updated successfully!");
+			} else {
+				await dispatch(addCategory(payload)).unwrap();
+				toast.success("Category added successfully!");
+			}
+
+			setEditingCategory(null);
+			setShowModal(false);
+		} catch (err) {
+			toast.error("Operation failed!");
 		}
-		setEditingCategory(null);
-		setShowModal(false);
 	};
 
-	const handleDelete = (id) => {
+	// DELETE
+	const handleDelete = async (id) => {
 		if (!confirm("Are you sure you want to delete this category?")) return;
-		dispatch(deleteCategory(id));
+
+		try {
+			await dispatch(deleteCategory(id)).unwrap();
+			toast.success("Category deleted!");
+		} catch (err) {
+			toast.error("Delete failed!");
+		}
 	};
 
+	// EDIT
 	const handleEdit = (cat) => {
 		setEditingCategory(cat);
 		setShowModal(true);
 	};
 
+	// ADD
 	const handleAddCategory = () => {
 		setEditingCategory(null);
 		setShowModal(true);
@@ -52,11 +72,8 @@ export default function CategoriesPage() {
 
 	return (
 		<div className="p-4 sm:p-6 space-y-6 bg-[#0c0c0f] min-h-screen text-gray-200">
-			
 			<h1 className="text-2xl font-bold flex justify-between items-center">
 				<span>📦 Manage Categories</span>
-
-				{/* Reusable Component */}
 				<AddCategoryButton onClick={handleAddCategory} />
 			</h1>
 
@@ -72,9 +89,15 @@ export default function CategoriesPage() {
 						<table className="w-full min-w-[500px] border-collapse">
 							<thead>
 								<tr className="bg-[#1a1a20] border-b border-gray-800">
-									<th className="p-3 text-left text-gray-300">Name</th>
-									<th className="p-3 text-left text-gray-300">Subcategories</th>
-									<th className="p-3 text-left text-gray-300">Actions</th>
+									<th className="p-3 text-left text-gray-300">
+										Name
+									</th>
+									<th className="p-3 text-left text-gray-300">
+										Subcategories
+									</th>
+									<th className="p-3 text-left text-gray-300">
+										Actions
+									</th>
 								</tr>
 							</thead>
 
@@ -82,24 +105,26 @@ export default function CategoriesPage() {
 								{categories.map((cat) => (
 									<tr
 										key={cat._id}
-										className="border-b border-gray-800 bg-[#0e0e11] hover:bg-[#16161c] transition-colors"
-									>
+										className="border-b border-gray-800 bg-[#0e0e11] hover:bg-[#16161c] transition-colors">
 										<td className="p-3">{cat.name}</td>
 										<td className="p-3 text-gray-400">
-											{(cat.subCategories || []).join(", ")}
+											{(cat.subCategories || []).join(
+												", "
+											)}
 										</td>
+
 										<td className="p-3 flex gap-2 flex-wrap">
 											<button
 												onClick={() => handleEdit(cat)}
-												className="px-3 py-1 rounded-md bg-yellow-600 text-white hover:bg-yellow-700 transition-all"
-											>
+												className="px-3 py-1 rounded-md bg-yellow-600 text-white hover:bg-yellow-700 transition-all">
 												Edit
 											</button>
 
 											<button
-												onClick={() => handleDelete(cat._id)}
-												className="px-3 py-1 rounded-md bg-red-600 text-white hover:bg-red-700 transition-all"
-											>
+												onClick={() =>
+													handleDelete(cat._id)
+												}
+												className="px-3 py-1 rounded-md bg-red-600 text-white hover:bg-red-700 transition-all">
 												Delete
 											</button>
 										</td>
@@ -111,6 +136,7 @@ export default function CategoriesPage() {
 				)}
 			</div>
 
+			{/* MODAL */}
 			{showModal && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
 					<div className="bg-[#1a1a1f] border border-gray-700 rounded-2xl w-full max-w-lg p-6 shadow-xl">

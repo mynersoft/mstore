@@ -5,6 +5,7 @@ import InternetStatus from "@/components/InternetStatus";
 import ReduxProvider from "@/app/providers/ReduxProvider";
 import { GlobalInitializer } from "@/components/fetch/GlobalInitializer";
 import Header from "@/components/header/Header";
+import { Toaster } from "react-hot-toast";
 
 import { useEffect, useState } from "react";
 
@@ -21,6 +22,7 @@ export default function RootLayout({ children }) {
 
 		return () => clearTimeout(timer);
 	}, []);
+
 
 	return (
 		<html lang="en">
@@ -49,8 +51,9 @@ export default function RootLayout({ children }) {
 
 				{!loading && (
 					<>
+						
+						<Toaster position="top-right" reverseOrder={false} />
 						<Header />
-
 						<ReduxProvider>
 							<GlobalInitializer />
 							{children}

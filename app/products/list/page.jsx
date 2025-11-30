@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { createSlice, configureStore } from "@reduxjs/toolkit";
 import { Provider } from "react-redux";
 import * as XLSX from "xlsx";
+import toast from "react-hot-toast";
 
 // Redux Slice
 const productSlice = createSlice({
@@ -66,7 +67,7 @@ function ProductListPage() {
 		searchText,
 	} = useSelector((state) => state.products);
 
-	const [localProducts, setLocalProducts] = useState([]); // for inline update
+	const [localProducts, setLocalProducts] = useState([]);
 
 	// Load API
 	const loadData = async () => {
@@ -78,7 +79,6 @@ function ProductListPage() {
 
 			let cats = data.categories || {};
 
-			// Sort categories alphabetically
 			const sortedCats = {};
 			Object.keys(cats)
 				.sort((a, b) => a.localeCompare(b))
@@ -103,46 +103,43 @@ function ProductListPage() {
 		(p.name ?? "").toLowerCase().includes((searchText ?? "").toLowerCase())
 	);
 
-	// Category Filter
 	const shownProducts =
 		activeCategory === null
 			? filteredProducts
 			: filteredProducts.filter((p) => p.category === activeCategory);
 
-	// Update Price (Only Price Updates)
-const updatePrice = async (id, newPrice) => {
-	try {
-		if (newPrice === "" || isNaN(newPrice)) {
-			alert("Enter a valid price");
-			return;
-		}
+	// Update Price
+	const updatePrice = async (id, newPrice) => {
+		try {
+			if (newPrice === "" || isNaN(newPrice)) {
+				alert("Enter a valid price");
+				return;
+			}
 
-		const formData = new FormData();
-		formData.append("regularPrice", newPrice);
+			const formData = new FormData();
+			formData.append("regularPrice", newPrice);
 
-		const res = await fetch(`/api/products/${id}/updateprice`, {
-			method: "PUT",
-			body: formData, // send FormData
-		});
+			const res = await fetch(`/api/products/${id}/updateprice`, {
+				method: "PUT",
+				body: formData,
+			});
 
-		if (!res.ok) {
+			if (!res.ok) {
+				alert("Price update failed");
+				return;
+			}
+
+			setLocalProducts((prev) =>
+				prev.map((p) =>
+					p._id === id ? { ...p, regularPrice: Number(newPrice) } : p
+				)
+			);
+
+			toast.success("Price updated successfully!");
+		} catch (err) {
 			alert("Price update failed");
-			return;
 		}
-
-		// Update local state without reloading entire list
-		setLocalProducts((prev) =>
-			prev.map((p) =>
-				p._id === id ? { ...p, regularPrice: Number(newPrice) } : p
-			)
-		);
-
-		alert("Price updated successfully!");
-	} catch (err) {
-		alert("Price update failed");
-	}
-};
-
+	};
 
 	// Export Excel
 	const exportToExcel = () => {
@@ -159,14 +156,12 @@ const updatePrice = async (id, newPrice) => {
 		XLSX.writeFile(wb, "products.xlsx");
 	};
 
+	// Print Table
 	const printTable = () => {
 		const colSize = Math.ceil(shownProducts.length / 2);
-
-		// Split into 2 columns
 		const leftCol = shownProducts.slice(0, colSize);
 		const rightCol = shownProducts.slice(colSize);
 
-		// Function to generate table HTML with correct SL start
 		const makeTable = (list, startIndex) => `
       <table>
         <thead>
@@ -193,7 +188,7 @@ const updatePrice = async (id, newPrice) => {
 				.join("")}
         </tbody>
       </table>
-  `;
+    `;
 
 		const win = window.open("", "", "width=900,height=600");
 		win.document.write(`
@@ -202,54 +197,46 @@ const updatePrice = async (id, newPrice) => {
       <style>
         body {
           display: flex;
-          gap: 20px;
+          gap: 15px;
           padding: 20px;
           font-family: Arial;
         }
-        table { 
-          width: 100%; 
-          border-collapse: collapse; 
+        table {
+          width: 100%;
+          border-collapse: collapse;
         }
-        th, td { 
-          border: 1px solid #000; 
-          padding: 6px; 
+        th, td {
+          border: 1px solid #000;
+          padding: 6px;
           font-size: 12px;
         }
-        .col {
-          width: 50%;
-        }
+        .col { width: 50%; }
       </style>
     </head>
-
     <body>
       <div class="col">${makeTable(leftCol, 1)}</div>
       <div class="col">${makeTable(rightCol, colSize + 1)}</div>
     </body>
     </html>
-  `);
+    `);
 
 		win.document.close();
 		win.print();
 	};
 
 	return (
-		<div className="flex">
-			{/* Sidebar Toggle */}
-			<button
-				className="absolute top-[60px] left-4 p-2 bg-black text-white rounded-md z-50"
-				onClick={() => dispatch(toggleSidebar())}>
-				{sidebarOpen ? "Hide" : "Show"}
-			</button>
-
+		<div className="flex min-h-screen bg-gray-100">
 			{/* Sidebar */}
 			{sidebarOpen && (
-				<aside className="w-64 bg-gray-200 p-4 min-h-screen">
-					<h2 className="font-bold text-lg mb-3">Categories</h2>
+				<aside className="w-72 bg-white shadow-md p-5 border-r">
+					<h2 className="font-bold text-xl mb-4">Categories</h2>
 
-					<ul className="space-y-1">
+					<ul className="space-y-2">
 						<li
-							className={`p-2 bg-white rounded shadow cursor-pointer ${
-								activeCategory === null ? "bg-blue-300" : ""
+							className={`p-2 rounded cursor-pointer ${
+								activeCategory === null
+									? "bg-blue-600 text-white"
+									: "bg-gray-100"
 							}`}
 							onClick={() => dispatch(setActiveCategory(null))}>
 							All Products ({allProducts.length})
@@ -258,8 +245,10 @@ const updatePrice = async (id, newPrice) => {
 						{Object.keys(categories).map((cat) => (
 							<li
 								key={cat}
-								className={`p-2 bg-white rounded shadow cursor-pointer ${
-									activeCategory === cat ? "bg-blue-300" : ""
+								className={`p-2 rounded cursor-pointer ${
+									activeCategory === cat
+										? "bg-blue-600 text-white"
+										: "bg-gray-100"
 								}`}
 								onClick={() =>
 									dispatch(setActiveCategory(cat))
@@ -271,9 +260,16 @@ const updatePrice = async (id, newPrice) => {
 				</aside>
 			)}
 
-			{/* Main Table */}
-			<main className="flex-1 p-6 ml-10">
-				<h1 className="text-2xl font-bold mb-4">
+			{/* Sidebar Toggle */}
+			<button
+				className="absolute top-4 left-4 bg-black text-white px-3 py-1 rounded shadow"
+				onClick={() => dispatch(toggleSidebar())}>
+				{sidebarOpen ? "Hide" : "Show"}
+			</button>
+
+			{/* Main */}
+			<main className="flex-1 p-8">
+				<h1 className="text-3xl font-bold mb-6">
 					{activeCategory === null ? "All Products" : activeCategory}
 				</h1>
 
@@ -281,100 +277,85 @@ const updatePrice = async (id, newPrice) => {
 				<input
 					type="text"
 					placeholder="Search product..."
-					className="border px-3 py-2 mb-4 w-72"
+					className="border px-4 py-2 rounded w-80 mb-6 shadow-sm"
 					value={searchText}
 					onChange={(e) => dispatch(setSearchText(e.target.value))}
 				/>
 
 				{/* Buttons */}
-				<div className="flex gap-4 mb-4">
+				<div className="flex gap-4 mb-6">
 					<button
 						onClick={exportToExcel}
-						className="bg-green-600 text-white px-4 py-2 rounded">
+						className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow">
 						Export Excel
 					</button>
+
 					<button
 						onClick={printTable}
-						className="bg-blue-600 text-white px-4 py-2 rounded">
+						className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow">
 						Print
 					</button>
 				</div>
 
 				{loading && <p>Loading...</p>}
 
-				{/* PRINT AREA */}
-				<div id="print-area">
-					{!loading && shownProducts.length > 0 && (
-						<table className="w-full border border-gray-300">
-							<thead className="bg-gray-100">
-								<tr>
-									<th className="border p-2">SL</th>
-									<th className="border p-2">Product Name</th>
-									<th className="border p-2">
-										Regular Price
-									</th>
-									<th className="border p-2">Save</th>
-									<th className="border p-2">Remarks</th>
-								</tr>
-							</thead>
+				{/* Table */}
+				<table className="w-full bg-white shadow rounded overflow-hidden">
+					<thead className="bg-gray-200">
+						<tr>
+							<th className="p-3 border">SL</th>
+							<th className="p-3 border">Product Name</th>
+							<th className="p-3 border">Regular Price</th>
+							<th className="p-3 border">Save</th>
+							<th className="p-3 border">Remarks</th>
+						</tr>
+					</thead>
 
-							<tbody>
-								{shownProducts.map((p, i) => (
-									<tr key={p._id}>
-										<td className="border p-2">{i + 1}</td>
-										<td className="border p-2">{p.name}</td>
+					<tbody>
+						{shownProducts.map((p, i) => (
+							<tr key={p._id} className="hover:bg-gray-50">
+								<td className="border p-2">{i + 1}</td>
+								<td className="border p-2">{p.name}</td>
 
-										{/* Inline Price Edit */}
-										<td className="border p-2">
-											<input
-												type="number"
-												value={p.regularPrice ?? ""}
-												onChange={(e) => {
-													const updatedProducts =
-														localProducts.map(
-															(prod) =>
-																prod._id ===
-																p._id
-																	? {
-																			...prod,
-																			regularPrice:
-																				e
-																					.target
-																					.value,
-																	  } // clone & update
-																	: prod
-														);
-													setLocalProducts(
-														updatedProducts
-													);
-												}}
-												className="border px-2 py-1 w-28"
-											/>
-										</td>
+								<td className="border p-2">
+									<input
+										type="number"
+										value={p.regularPrice ?? ""}
+										onChange={(e) => {
+											const updated = localProducts.map(
+												(prod) =>
+													prod._id === p._id
+														? {
+																...prod,
+																regularPrice:
+																	e.target
+																		.value,
+														  }
+														: prod
+											);
+											setLocalProducts(updated);
+										}}
+										className="border px-2 py-1 w-24 rounded"
+									/>
+								</td>
 
-										{/* Save Button */}
-										<td className="border p-2">
-											<button
-												onClick={() =>
-													updatePrice(
-														p._id,
-														p.regularPrice
-													)
-												}
-												className="bg-blue-500 text-white px-3 py-1 rounded">
-												Save
-											</button>
-										</td>
+								<td className="border p-2">
+									<button
+										onClick={() =>
+											updatePrice(p._id, p.regularPrice)
+										}
+										className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+										Save
+									</button>
+								</td>
 
-										<td className="border p-2">
-											{p.remarks || ""}
-										</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					)}
-				</div>
+								<td className="border p-2">
+									{p.remarks || ""}
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
 			</main>
 		</div>
 	);
