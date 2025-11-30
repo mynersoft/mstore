@@ -171,18 +171,52 @@ export default function DashboardPage() {
 			)}
 
 			{/* Stock Out */}
-			<div className="bg-gray-900 rounded-2xl shadow p-6 text-red-500">
-				<h2 className="text-xl font-semibold mb-4 text-red-400">
-					⚠️ Stock Out Products
-				</h2>
+	<div className="bg-gray-900 rounded-2xl shadow p-6 text-red-500">
+	<h2 className="text-xl font-semibold mb-4 text-red-400">
+		⚠️ Stock Out Products
+	</h2>
 
+	<div className="overflow-x-auto">
+		<table className="min-w-full bg-gray-900 text-gray-300 rounded-lg border border-gray-700">
+			<thead>
+				<tr className="bg-gray-800 text-gray-200">
+					<th className="p-3 text-left">Product Name</th>
+					<th className="p-3 text-left">Stock</th>
+					<th className="p-3 text-center">Action</th>
+				</tr>
+			</thead>
+
+			<tbody>
 				{stockOutProducts?.map((p) => (
-					<div key={p._id}>
-						<h3>{p.name}</h3>
-						<p>Stock: {p.stock}</p>
-					</div>
+					<tr
+						key={p._id}
+						className="border-b border-gray-700 hover:bg-gray-800 transition">
+						<td className="p-3">{p.name}</td>
+
+						<td className="p-3 text-red-400 font-bold">{p.stock}</td>
+
+						<td className="p-3 text-center">
+							<button
+								onClick={() => router.push(`/products}`)}
+								className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded">
+								✏️ Edit
+							</button>
+						</td>
+					</tr>
 				))}
-			</div>
-		</div>
+
+				{!stockOutProducts?.length && (
+					<tr>
+						<td
+							colSpan="3"
+							className="text-center text-gray-400 p-4">
+							No stock-out products found
+						</td>
+					</tr>
+				)}
+			</tbody>
+		</table>
+	</div>
+</div>
 	);
 }
