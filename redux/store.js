@@ -8,6 +8,8 @@ import categoryReducer from "./categorySlice";
 import brandReducer from "./brandsSlice";
 import saleprofitReducer from "./saleprofitSlice";
 
+import billReducer from "./billSlice";
+
 export const store = configureStore({
 	reducer: {
 		products: productReducer,
@@ -16,6 +18,7 @@ export const store = configureStore({
 		service: serviceReducer,
 		dues: dueReducer,
 		sales: saleReducer,
+bills: billReducer,
 		saleprofit: saleprofitReducer,
 invest: investReducer,
 	},
