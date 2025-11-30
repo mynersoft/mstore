@@ -111,8 +111,6 @@ export default function BillPage() {
 
 
 
-  import toast from "react-hot-toast";
-
 const submitBill = async () => {
   if (!form.name || !form.amount) {
     toast.error("Please fill all fields");
