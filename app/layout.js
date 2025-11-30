@@ -1,6 +1,6 @@
 "use client";
 
-import "./globals.css";
+import "./globals.css";import InternetStatus from "@/components/InternetStatus";
 import ReduxProvider from "@/app/providers/ReduxProvider";
 import { GlobalInitializer } from "@/components/fetch/GlobalInitializer";
 import Header from "@/components/header/Header";
@@ -33,6 +33,7 @@ export default function RootLayout({ children }) {
 	return (
 		<html lang="en">
 			<body className="dark bg-gray-900 text-gray-100">
+<InternetStatus />
 				{/* Loader */}
 				{loading && <Loader />}
 
