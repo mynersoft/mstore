@@ -6,13 +6,16 @@ export const fetchBills = createAsyncThunk("bills/fetch", async () => {
     return res.json();
 });
 
-// Add new bill
-export const addBill = createAsyncThunk("bills/add", async (payload) => {
+export const addBill = createAsyncThunk("bills/addBill", async (bill) => {
     const res = await fetch("/api/bills", {
         method: "POST",
-        body: JSON.stringify(payload),
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bill),
     });
+    if (!res.ok) {
+        const data = await res.json();
+        throw data; // This will be caught in catch(err)
+    }
     return res.json();
 });
 
