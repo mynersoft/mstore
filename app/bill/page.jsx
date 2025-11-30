@@ -117,18 +117,31 @@ const submitBill = async () => {
     return;
   }
 
+  // Determine which month we're saving for:
+  // - normal add -> selectedMonth (YYYY-MM)
+  // - last-month update -> selectedMonth - 1 month
+  const targetMonth = form.isLastMonthUpdate
+    ? dayjs(selectedMonth + "-01").subtract(1, "month").format("YYYY-MM")
+    : dayjs(selectedMonth + "-01").format("YYYY-MM");
+
   const payload = { name: form.name, amount: Number(form.amount) };
 
-  // 🔥 Check if current month bill already exists
+  // Duplicate check: if not editing, prevent adding a bill that already exists for the target month
   const exists = list.find(
     (b) =>
       b.name === payload.name &&
-      dayjs(b.createdAt).format("MMMM YYYY") === currentMonth
+      dayjs(b.createdAt).format("YYYY-MM") === targetMonth
   );
 
   if (!editId && exists) {
-    toast.error("This bill is already paid for this month!");
+    // If trying to add and a bill for that name already exists in targetMonth, block it
+    toast.error("This bill is already paid for the selected month!");
     return;
+  }
+
+  // If saving as last-month-due, set createdAt so backend will save it in that month
+  if (form.isLastMonthUpdate) {
+    payload.createdAt = dayjs(selectedMonth + "-01").subtract(1, "month").toISOString();
   }
 
   try {
@@ -140,10 +153,15 @@ const submitBill = async () => {
       toast.success("Bill added successfully!");
     }
 
-    setForm({ name: "", amount: "" });
+    // refresh bills to reflect newest data (optional but recommended)
+    dispatch(fetchBills());
+
+    // reset UI
+    setForm({ name: "", amount: "", isLastMonthUpdate: false });
     setEditId(null);
     setOpenModal(false);
   } catch (err) {
+    console.error("submitBill error:", err);
     const msg = err?.message || err?.data?.error || "Operation failed";
     toast.error(msg);
   }
