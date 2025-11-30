@@ -39,24 +39,26 @@ export default function BillPage() {
     });
   }, [list, currentMonth, lastMonth]);
 
-  // Add / Edit bill
   const submitBill = async () => {
     if (!form.name || !form.amount) return alert("Please fill all fields");
+
     const payload = { name: form.name, amount: Number(form.amount) };
 
     try {
-      if (editId) {
-        await dispatch(updateBill({ ...payload, _id: editId })).unwrap();
-      } else {
-        await dispatch(addBill(payload)).unwrap();
-      }
-      setForm({ name: "", amount: "" });
-      setEditId(null);
-      setOpenModal(false);
+        if (editId) {
+            await dispatch(updateBill({ ...payload, _id: editId })).unwrap();
+        } else {
+            await dispatch(addBill(payload)).unwrap();
+        }
+        setForm({ name: "", amount: "" });
+        setEditId(null);
+        setOpenModal(false);
     } catch (err) {
-      alert("Operation failed: " + err);
+        // Extract error message safely
+        const message = err?.message || err?.data?.error || JSON.stringify(err);
+        alert("Operation failed: " + message);
     }
-  };
+};
 
   const startEdit = (item) => {
     setEditId(item._id);
