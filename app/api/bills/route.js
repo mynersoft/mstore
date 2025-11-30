@@ -1,9 +1,9 @@
-import dbConnect from "@/lib/dbConnect";
+import { connectDB } from "@/lib/dbConnect";
 import Bill from "@/models/Bill";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-    await dbConnect();
+    await connectDB();
     const bills = await Bill.find().sort({ createdAt: -1 });
     return NextResponse.json(bills);
 }
@@ -11,7 +11,7 @@ export async function GET() {
 
 
 export async function POST(req) {
-    await dbConnect();
+    await connectDB();
 
     let data;
     try {
@@ -43,7 +43,7 @@ export async function POST(req) {
 }
 
 export async function PUT(req) {
-    await dbConnect();
+    await connectDB();
     const data = await req.json();
     if (!data._id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
     const updated = await Bill.findByIdAndUpdate(data._id, data, { new: true });
@@ -51,7 +51,7 @@ export async function PUT(req) {
 }
 
 export async function DELETE(req) {
-    await dbConnect();
+    await connectDB();
     const data = await req.json();
     if (!data._id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
     await Bill.findByIdAndDelete(data._id);
