@@ -171,7 +171,7 @@ export default function DashboardPage() {
 			)}
 
 			{/* Stock Out */}
-			<div className="bg-gray-900 rounded-2xl shadow p-6">
+			<div className="bg-gray-900 rounded-2xl shadow p-6 text-red-500">
 				<h2 className="text-xl font-semibold mb-4 text-red-400">
 					⚠️ Stock Out Products
 				</h2>
