@@ -164,7 +164,7 @@ export default function DashboardPage() {
                         <thead>
                             <tr className="bg-gray-800 text-gray-200">
                                 <th className="p-3 text-left">Product Name</th>
-                                <th className="p-3 text-left">Stock</th>
+                                
                                 <th className="p-3 text-center">Action</th>
                             </tr>
                         </thead>
@@ -177,14 +177,12 @@ export default function DashboardPage() {
                                 >
                                     <td className="p-3">{p.name}</td>
 
-                                    <td className="p-3 text-red-400 font-bold">
-                                        {p.stock}
-                                    </td>
+                                    
 
                                     <td className="p-3 text-center">
                                         <button
                                             onClick={() =>
-                                                router.push(`/products/edit/${p._id}`)
+                                                router.push(`/products`)
                                             }
                                             className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded"
                                         >
