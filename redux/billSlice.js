@@ -1,77 +1,79 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-// Fetch all bills
+// API base URL
+const BASE_URL = "/api/bills";
+
+// Thunks
 export const fetchBills = createAsyncThunk("bills/fetch", async () => {
-    const res = await fetch("/api/bills");
-    return res.json();
+  const res = await fetch(BASE_URL);
+  return res.json();
 });
 
-export const addBill = createAsyncThunk("bills/addBill", async (bill) => {
-    const res = await fetch("/api/bills", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bill),
-    });
-    if (!res.ok) {
-        const data = await res.json();
-        throw data; // This will be caught in catch(err)
-    }
-    return res.json();
+export const addBill = createAsyncThunk("bills/add", async (payload) => {
+  const res = await fetch(BASE_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw await res.json();
+  return res.json();
 });
 
-// Update bill
 export const updateBill = createAsyncThunk("bills/update", async (payload) => {
-    const res = await fetch("/api/bills", {
-        method: "PUT",
-        body: JSON.stringify(payload),
-        headers: { "Content-Type": "application/json" },
-    });
-    return res.json();
+  const res = await fetch(BASE_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw await res.json();
+  return res.json();
 });
 
-// Delete bill
 export const deleteBill = createAsyncThunk("bills/delete", async (_id) => {
-    const res = await fetch("/api/bills", {
-        method: "DELETE",
-        body: JSON.stringify({ _id }),
-        headers: { "Content-Type": "application/json" },
-    });
-    return _id;
+  const res = await fetch(BASE_URL, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ _id }),
+  });
+  if (!res.ok) throw await res.json();
+  return _id;
 });
 
+// Slice
 const billSlice = createSlice({
-    name: "bills",
-    initialState: { list: [], loading: false, actionLoading: false },
-    reducers: {},
-    extraReducers: (builder) => {
-        builder
-            .addCase(fetchBills.pending, (state) => { state.loading = true; })
-            .addCase(fetchBills.fulfilled, (state, action) => {
-                state.list = action.payload; state.loading = false;
-            })
-            .addCase(fetchBills.rejected, (state) => { state.loading = false; })
+  name: "bills",
+  initialState: {
+    list: [],
+    loading: false,
+    actionLoading: false,
+    error: null,
+  },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchBills.pending, (state) => { state.loading = true; })
+      .addCase(fetchBills.fulfilled, (state, action) => { state.loading = false; state.list = action.payload; })
+      .addCase(fetchBills.rejected, (state, action) => { state.loading = false; state.error = action.error; })
 
-            .addCase(addBill.pending, (state) => { state.actionLoading = true; })
-            .addCase(addBill.fulfilled, (state, action) => {
-                state.list.unshift(action.payload); state.actionLoading = false;
-            })
-            .addCase(addBill.rejected, (state) => { state.actionLoading = false; })
+      .addCase(addBill.pending, (state) => { state.actionLoading = true; })
+      .addCase(addBill.fulfilled, (state, action) => { state.actionLoading = false; state.list.unshift(action.payload); })
+      .addCase(addBill.rejected, (state, action) => { state.actionLoading = false; state.error = action.error; })
 
-            .addCase(updateBill.pending, (state) => { state.actionLoading = true; })
-            .addCase(updateBill.fulfilled, (state, action) => {
-                const idx = state.list.findIndex(b => b._id === action.payload._id);
-                if(idx !== -1) state.list[idx] = action.payload;
-                state.actionLoading = false;
-            })
-            .addCase(updateBill.rejected, (state) => { state.actionLoading = false; })
+      .addCase(updateBill.pending, (state) => { state.actionLoading = true; })
+      .addCase(updateBill.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        const idx = state.list.findIndex((b) => b._id === action.payload._id);
+        if (idx !== -1) state.list[idx] = action.payload;
+      })
+      .addCase(updateBill.rejected, (state, action) => { state.actionLoading = false; state.error = action.error; })
 
-            .addCase(deleteBill.pending, (state) => { state.actionLoading = true; })
-            .addCase(deleteBill.fulfilled, (state, action) => {
-                state.list = state.list.filter(b => b._id !== action.payload);
-                state.actionLoading = false;
-            })
-            .addCase(deleteBill.rejected, (state) => { state.actionLoading = false; });
-    },
+      .addCase(deleteBill.pending, (state) => { state.actionLoading = true; })
+      .addCase(deleteBill.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        state.list = state.list.filter((b) => b._id !== action.payload);
+      })
+      .addCase(deleteBill.rejected, (state, action) => { state.actionLoading = false; state.error = action.error; });
+  },
 });
 
 export default billSlice.reducer;
