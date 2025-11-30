@@ -179,7 +179,7 @@ export default function BillPage() {
                       className="bg-yellow-500 text-black px-2 py-1 rounded hover:bg-yellow-600"
                       onClick={() => { setForm({ name: bill.name, amount: "", isLastMonthUpdate: true }); setOpenModal(true); toast("Update last month due", { icon: "🕒" }); }}
                     >
-                      Update Due
+                      pay
                     </button>
                   )}
                 </td>
