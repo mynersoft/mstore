@@ -129,6 +129,9 @@ export default function InvestPage() {
 						<option value="all">All</option>
 						<option value="malamal">Malamal</option>
 						<option value="tools">Tools</option>
+
+	<option value="others">Others</option>
+
 					</select>
 
 					<p className="text-lg">
