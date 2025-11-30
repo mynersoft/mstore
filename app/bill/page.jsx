@@ -169,7 +169,7 @@ export default function BillPage() {
               <tr key={idx} className="hover:bg-[#1b1b25] transition-all border-b border-gray-800">
                 <td className="p-3 font-medium">{bill.name}</td>
                 <td className={`p-3 font-semibold ${bill.current.paid ? "text-green-400" : "text-red-400"}`}>
-                  {bill.current.paid ? `Paid (${bill.current.amount} Tk)` : "unpaid"}
+                  {bill.current.paid ? `${bill.current.amount} Tk` : "unpaid"}
                 </td>
                 <td className="p-3">
                   {bill.last.paid ? (
