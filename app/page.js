@@ -182,7 +182,7 @@ export default function DashboardPage() {
                                     <td className="p-3 text-center">
                                         <button
                                             onClick={() =>
-                                                router.push(`/products`)
+                                                router.push(`/products/${p.name}`)
                                             }
                                             className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded"
                                         >
