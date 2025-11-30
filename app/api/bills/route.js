@@ -2,83 +2,73 @@ import { connectDB } from "@/lib/dbConnect";
 import Bill from "@/models/Bill";
 import { NextResponse } from "next/server";
 
-// Utility: Send Error (Automatically logs + sends JSON)
-function sendError(error, status = 500) {
-    console.error("API ERROR:", error); // <-- Console log
-    return NextResponse.json(
-        { error: error?.message || error },
-        { status }
-    );
-}
-
-export async function GET() {
-    try {
-        await connectDB();
-        const bills = await Bill.find().sort({ createdAt: -1 });
-        return NextResponse.json(bills);
-    } catch (error) {
-        return sendError(error);
-    }
+export async function GET(req) {
+  try {
+    await connectDB();
+    const bills = await Bill.find().sort({ createdAt: -1 });
+    return NextResponse.json(bills);
+  } catch (err) {
+    console.error("GET /bills error:", err);
+    return NextResponse.json({ error: "Failed to fetch bills" }, { status: 500 });
+  }
 }
 
 export async function POST(req) {
-    try {
-        await connectDB();
+  try {
+    await connectDB();
+    const data = await req.json();
+    const { name, amount, month, status } = data;
 
-        let data;
-        try {
-            data = await req.json();
-        } catch (err) {
-            return sendError("Invalid JSON body", 400);
-        }
-
-        const { name, amount } = data;
-        if (!name || amount == null) {
-            return sendError("Missing required fields", 400);
-        }
-
-        const bill = await Bill.create({ name, amount });
-        return NextResponse.json(bill, { status: 201 });
-
-    } catch (error) {
-        return sendError(error);
+    if (!name || amount == null || !month) {
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
+
+    // Check duplicate for same month
+    const exists = await Bill.findOne({ name, month });
+    if (exists) {
+      return NextResponse.json({ error: "Bill already exists for this month" }, { status: 400 });
+    }
+
+    const bill = await Bill.create({ name, amount, month, status: status || "paid" });
+    return NextResponse.json(bill, { status: 201 });
+  } catch (err) {
+    console.error("POST /bills error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
 
 export async function PUT(req) {
-    try {
-        await connectDB();
+  try {
+    await connectDB();
+    const data = await req.json();
+    const { _id, name, amount, month, status } = data;
 
-        const data = await req.json();
-        if (!data._id) return sendError("Missing bill ID", 400);
+    if (!_id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
 
-        const updated = await Bill.findByIdAndUpdate(data._id, data, {
-            new: true,
-        });
+    const updated = await Bill.findByIdAndUpdate(
+      _id,
+      { name, amount, month, status },
+      { new: true }
+    );
 
-        if (!updated) return sendError("Bill not found", 404);
-
-        return NextResponse.json(updated);
-
-    } catch (error) {
-        return sendError(error);
-    }
+    return NextResponse.json(updated);
+  } catch (err) {
+    console.error("PUT /bills error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
 
 export async function DELETE(req) {
-    try {
-        await connectDB();
-        const data = await req.json();
+  try {
+    await connectDB();
+    const data = await req.json();
+    const { _id } = data;
+    if (!_id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
 
-        if (!data._id) return sendError("Missing bill ID", 400);
-
-        const deleted = await Bill.findByIdAndDelete(data._id);
-
-        if (!deleted) return sendError("Bill not found", 404);
-
-        return NextResponse.json({ success: true });
-
-    } catch (error) {
-        return sendError(error);
-    }
+    await Bill.findByIdAndDelete(_id);
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("DELETE /bills error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
