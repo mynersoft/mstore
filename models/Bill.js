@@ -1,9 +1,9 @@
-import connectDB from "@/utils/connectDB";
+import connectDB from "@/lib/dbConnect";
 import Bill from "@/models/Bill";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-    await connectDB();
+    await dbConnect();
     const bills = await Bill.find().sort({ createdAt: -1 });
     return NextResponse.json(bills);
 }
