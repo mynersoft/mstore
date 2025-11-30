@@ -28,7 +28,7 @@ export default function RootLayout({ children }) {
 				{/* ✅ Google Site Verification */}
 				<meta
 					name="google-site-verification"
-					content="u9LGEmn4ufs-VTxIl-EAjhoTrrsG4dPWts2Ek5TKpGU" // replace with Google Search Console code
+					content="OlqGBlfLEkJDmZZ3SppeQU1MDwI_CL6SEFXYSLv_DmA"
 				/>
 
 				{/* You can add other SEO metas here */}
