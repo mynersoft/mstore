@@ -143,40 +143,26 @@ const paymentsThisMonth = useMemo(() => {
                                         </button>
                                 </div>
 
-                                {/* Current Month Payments */}
-                                <div className="grid md:grid-cols-3 gap-4 mb-6">
-                                        {/* Dukan Vara */}
-                                        <div
-                                                className={`p-4 rounded-lg shadow-lg ${
-                                                        currentMonthInvests[0]?.paidThisMonth
-                                                                ? "bg-green-700"
-                                                                : "bg-red-700"
-                                                }`}>
-                                                <h3 className="font-bold text-lg">Dukan Vara</h3>
-                                                <p>
-                                                        Status:{" "}
-                                                        {currentMonthInvests[0]?.paidThisMonth
-                                                                ? "✅ Paid"
-                                                                : "❌ Not Paid"}
-                                                </p>
-                                                <p className="mt-1">
-                                                        Amount: {currentMonthInvests[0]?.amount || 0} Tk
-                                                </p>
-                                        </div>
 
-                                        {/* WiFi */}
-                                        {bills.map((bill, idx) => (
-                                                <div
-                                                        key={idx}
-                                                        className={`p-4 rounded-lg shadow-lg ${
-                                                                bill.paid ? "bg-green-700" : "bg-red-700"
-                                                        }`}>
-                                                        <h3 className="font-bold text-lg">{bill.name}</h3>
-                                                        <p>Status: {bill.paid ? "✅ Paid" : "❌ Not Paid"}</p>
-                                                        <p className="mt-1">Amount: {bill.amount} Tk</p>
-                                                </div>
-                                        ))}
-                                </div>
+
+
+                                {/* Current Month Payments */}
+<div className="grid md:grid-cols-3 gap-4 mb-6">
+    {paymentsThisMonth.map((item, idx) => (
+        <div
+            key={idx}
+            className={`p-4 rounded-lg shadow-lg ${
+                item.paid ? "bg-green-700" : "bg-red-700"
+            }`}>
+            <h3 className="font-bold text-lg">{item.name}</h3>
+            <p>Status: {item.paid ? "✅ Paid" : "❌ Not Paid"}</p>
+            <p className="mt-1">Amount: {item.amount} Tk</p>
+        </div>
+    ))}
+</div>
+
+
+
 
                                 {/* Filter */}
                                 <div className="flex gap-4 items-center mb-4">
