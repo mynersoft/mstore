@@ -89,6 +89,26 @@ export default function DashboardPage() {
                     color="red"
                 />
 
+
+
+<StatCard
+                    title="Monthly Service"
+                    value={
+                        <>
+                            <span className="!text-red-500">
+                                {prevMonthly.totalProfit || 0}
+                            </span>
+                            {" | "}
+                            <span>{monthly.totalProfit || 0} tk</span>
+                        </>
+                    }
+                    color="red"
+                />
+
+
+
+
+
                 <StatCard
                     title="Total Due"
                     value={`${totalDue} tk`}
