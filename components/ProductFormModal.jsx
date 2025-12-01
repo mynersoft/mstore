@@ -279,6 +279,7 @@ export default function ProductFormModal({
 						<input
 							type="file"
 							accept="image/*"
+capture="environment"
 							onChange={(e) => {
 								setFile(e.target.files[0]);
 								toast.success("Image selected!");
