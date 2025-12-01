@@ -27,7 +27,7 @@ export function GlobalInitializer({ year, month }) {
 		dispatch(fetchMonthlyStats({ year, month }));
 		dispatch(fetchMonthlyBreakdown({ year, month }));
 		dispatch(fetchBestSelling());
-		dispatch(fetchServices());
+		dispatch(fetchServices({ type: "daily" }));
 	}, [dispatch]);
 	return null;
 }

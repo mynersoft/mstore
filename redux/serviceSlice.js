@@ -5,7 +5,7 @@ export const fetchServices = createAsyncThunk(
 	"service/fetchServices",
 	async ({ type }) => {
 		const res = await axios.get(`/api/service?type=${type}`);
-		return res.data; // API response: { success, list, total, page, limit }
+		return res.data;
 	}
 );
 
@@ -37,7 +37,6 @@ export const addService = createAsyncThunk(
 	async (payload, { rejectWithValue }) => {
 		try {
 			const res = await axios.post("/api/service", payload);
-			// API response: { success: true, record: {...} }
 			return res.data;
 		} catch (err) {
 			return rejectWithValue(
@@ -52,7 +51,7 @@ export const updateService = createAsyncThunk(
 	async ({ id, payload }, { rejectWithValue }) => {
 		try {
 			const res = await axios.put(`/api/service/${id}`, payload);
-			return res.data; // backend থেকে return { success: true, record }
+			return res.data;
 		} catch (err) {
 			return rejectWithValue(
 				err.response?.data || { message: err.message }
@@ -72,32 +71,55 @@ const slice = createSlice({
 		stats: null,
 		page: 1,
 		limit: 50,
+
+		// ✅ NEW
+		lastMonth: {
+			totalServices: 0,
+			totalBill: 0,
+			dateRange: null,
+		},
 	},
+
 	reducers: {
 		clearCurrent(state) {
 			state.current = null;
 		},
 	},
+
 	extraReducers: (builder) => {
 		builder
-			// Fetch services
+
+			// FETCH SERVICES
 			.addCase(fetchServices.pending, (s) => {
 				s.loading = true;
 				s.error = null;
 			})
+
 			.addCase(fetchServices.fulfilled, (s, a) => {
 				s.loading = false;
 				s.list = a.payload.list || [];
 				s.total = a.payload.total || 0;
 				s.page = a.payload.page || 1;
 				s.limit = a.payload.limit || 50;
+
+				// ✅ LAST MONTH STATS SET
+				if (a.payload.lastMonth) {
+					s.lastMonth = a.payload.lastMonth;
+				}
 			})
+
 			.addCase(fetchServices.rejected, (s, a) => {
 				s.loading = false;
 				s.error = a.error?.message || a.payload?.message;
 			})
 
-			// Fetch stats
+			.addCase(addService.fulfilled, (s, a) => {
+				s.list.push(a.payload.record);
+				s.total += 1;
+				s.current = a.payload.record;
+			})
+
+			// FETCH STATS
 			.addCase(fetchServiceStats.pending, (s) => {
 				s.loading = true;
 			})
@@ -110,7 +132,7 @@ const slice = createSlice({
 				s.error = a.payload?.message || a.error?.message;
 			})
 
-			// Delete service
+			// DELETE
 			.addCase(deleteService.pending, (s) => {
 				s.loading = true;
 			})
@@ -123,6 +145,8 @@ const slice = createSlice({
 				s.loading = false;
 				s.error = a.payload?.message || a.error?.message;
 			})
+
+			// UPDATE
 			.addCase(updateService.pending, (s) => {
 				s.loading = true;
 			})

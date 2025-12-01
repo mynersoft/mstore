@@ -189,7 +189,7 @@ export default function ProductsPage() {
                                     <img
                                         src={p.image}
                                         alt={p.name || ""}
-                                        className="w-10 h-10 object-cover rounded"
+                                        className="w-10 h-10  object-cover rounded"
                                     />
                                 )}
                                 <div>

@@ -3,8 +3,14 @@
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { addService, updateService } from "@/redux/serviceSlice";
+import toast from "react-hot-toast";
 
-export default function ServiceFormModal({ open, onClose, mode, currentRecord }) {
+export default function ServiceFormModal({
+	open,
+	onClose,
+	mode,
+	currentRecord,
+}) {
 	if (!open) return null;
 
 	const dispatch = useDispatch();
@@ -48,13 +54,19 @@ export default function ServiceFormModal({ open, onClose, mode, currentRecord })
 			},
 		};
 
-		if (mode === "edit") {
-			dispatch(updateService({ id: currentRecord._id, data: payload }));
-		} else {
-			dispatch(addService(payload));
-		}
+		try {
+			if (mode === "edit") {
+				dispatch(updateService({ id: currentRecord._id, payload }));
+				toast.success("Service Updated Successfully");
+			} else {
+				dispatch(addService(payload));
+				toast.success("Service Added Successfully");
+			}
 
-		onClose();
+			onClose();
+		} catch (error) {
+			toast.error("Something went wrong!");
+		}
 	};
 
 	return (
@@ -70,7 +82,9 @@ export default function ServiceFormModal({ open, onClose, mode, currentRecord })
 						placeholder="Customer Name"
 						className="p-2 rounded bg-gray-700 text-white"
 						value={form.customerName}
-						onChange={(e) => setForm({ ...form, customerName: e.target.value })}
+						onChange={(e) =>
+							setForm({ ...form, customerName: e.target.value })
+						}
 						required
 					/>
 
@@ -79,16 +93,22 @@ export default function ServiceFormModal({ open, onClose, mode, currentRecord })
 						placeholder="Phone"
 						className="p-2 rounded bg-gray-700 text-white"
 						value={form.phone}
-						onChange={(e) => setForm({ ...form, phone: e.target.value })}
+						onChange={(e) =>
+							setForm({ ...form, phone: e.target.value })
+						}
 						required
 					/>
 
 					<select
 						value={form.servicingeDevice}
-						onChange={(e) => setForm({ ...form, servicingeDevice: e.target.value })}
+						onChange={(e) =>
+							setForm({
+								...form,
+								servicingeDevice: e.target.value,
+							})
+						}
 						className="p-2 rounded bg-gray-700 text-white"
-						required
-					>
+						required>
 						<option value="">Select Service</option>
 						<option value="Charging port">Charging port</option>
 						<option value="Keypad clean">Keypad clean</option>
@@ -108,7 +128,9 @@ export default function ServiceFormModal({ open, onClose, mode, currentRecord })
 						placeholder="Bill Amount"
 						className="p-2 rounded bg-gray-700 text-white"
 						value={form.billAmount}
-						onChange={(e) => setForm({ ...form, billAmount: e.target.value })}
+						onChange={(e) =>
+							setForm({ ...form, billAmount: e.target.value })
+						}
 						required
 					/>
 
@@ -116,7 +138,12 @@ export default function ServiceFormModal({ open, onClose, mode, currentRecord })
 						<input
 							type="checkbox"
 							checked={form.hasWarranty}
-							onChange={(e) => setForm({ ...form, hasWarranty: e.target.checked })}
+							onChange={(e) =>
+								setForm({
+									...form,
+									hasWarranty: e.target.checked,
+								})
+							}
 						/>
 						<label>Has Warranty?</label>
 					</div>
@@ -127,7 +154,12 @@ export default function ServiceFormModal({ open, onClose, mode, currentRecord })
 							placeholder="Warranty Months"
 							className="p-2 rounded bg-gray-700 text-white"
 							value={form.warrantyMonths}
-							onChange={(e) => setForm({ ...form, warrantyMonths: e.target.value })}
+							onChange={(e) =>
+								setForm({
+									...form,
+									warrantyMonths: e.target.value,
+								})
+							}
 						/>
 					)}
 
@@ -135,11 +167,16 @@ export default function ServiceFormModal({ open, onClose, mode, currentRecord })
 						placeholder="Notes"
 						className="p-2 rounded bg-gray-700 text-white"
 						value={form.notes}
-						onChange={(e) => setForm({ ...form, notes: e.target.value })}
+						onChange={(e) =>
+							setForm({ ...form, notes: e.target.value })
+						}
 					/>
 
 					<button className="bg-green-600 py-2 rounded">Save</button>
-					<button type="button" onClick={onClose} className="bg-red-600 py-2 rounded">
+					<button
+						type="button"
+						onClick={onClose}
+						className="bg-red-600 py-2 rounded">
 						Close
 					</button>
 				</form>
