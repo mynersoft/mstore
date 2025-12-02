@@ -6,133 +6,169 @@ import ServiceRecords from "@/models/ServiceRecords";
 /**
  * GET /api/service?type=daily|weekly|monthly&page=1&limit=20
  */
+import { NextResponse } from "next/server";
+import { connectDB } from "@/lib/dbConnect";
+import ServiceRecords from "@/models/ServiceRecords";
+
 export async function GET(req) {
-	await connectDB();
-	try {
-		const url = new URL(req.url);
-		const type = url.searchParams.get("type") || "daily";
-		const page = parseInt(url.searchParams.get("page")) || 1;
-		const limit = parseInt(url.searchParams.get("limit")) || 50;
-		const skip = (page - 1) * limit;
+    await connectDB();
 
-		const filter = {};
-		const now = new Date();
-		let start, end;
+    try {
+        const url = new URL(req.url);
+        const type = url.searchParams.get("type") || "daily";
+        const page = parseInt(url.searchParams.get("page")) || 1;
+        const limit = parseInt(url.searchParams.get("limit")) || 50;
+        const skip = (page - 1) * limit;
 
-		// --------- DAILY ----------
-		if (type === "daily") {
-			start = new Date(now);
-			start.setHours(0, 0, 0, 0);
-			end = new Date(now);
-			end.setHours(23, 59, 59, 999);
+        const filter = {};
+        const now = new Date();
+        let start, end;
 
-			filter.createdAt = { $gte: start, $lte: end };
-		}
+        // --------- DAILY ----------
+        if (type === "daily") {
+            start = new Date(now);
+            start.setHours(0, 0, 0, 0);
 
-		// --------- WEEKLY ----------
-		else if (type === "weekly") {
-			const day = now.getDay();
-			start = new Date(now);
-			start.setDate(now.getDate() - day);
-			start.setHours(0, 0, 0, 0);
+            end = new Date(now);
+            end.setHours(23, 59, 59, 999);
 
-			end = new Date(start);
-			end.setDate(start.getDate() + 6);
-			end.setHours(23, 59, 59, 999);
+            filter.createdAt = { $gte: start, $lte: end };
+        }
 
-			filter.createdAt = { $gte: start, $lte: end };
-		}
+        // --------- WEEKLY ----------
+        else if (type === "weekly") {
+            const day = now.getDay();
+            start = new Date(now);
+            start.setDate(now.getDate() - day);
+            start.setHours(0, 0, 0, 0);
 
-		// --------- MONTHLY ----------
-		else if (type === "monthly") {
-			start = new Date(now.getFullYear(), now.getMonth(), 1);
-			end = new Date(
-				now.getFullYear(),
-				now.getMonth() + 1,
-				0,
-				23,
-				59,
-				59,
-				999
-			);
+            end = new Date(start);
+            end.setDate(start.getDate() + 6);
+            end.setHours(23, 59, 59, 999);
 
-			filter.createdAt = { $gte: start, $lte: end };
-		}
+            filter.createdAt = { $gte: start, $lte: end };
+        }
 
-		// Fetch paginated data + Total Count
-		const [records, total] = await Promise.all([
-			ServiceRecords.find(filter)
-				.sort({ createdAt: -1 })
-				.skip(skip)
-				.limit(limit)
-				.lean(),
-			ServiceRecords.countDocuments(filter),
-		]);
+        // --------- MONTHLY ----------
+        else if (type === "monthly") {
+            start = new Date(now.getFullYear(), now.getMonth(), 1);
+            end = new Date(
+                now.getFullYear(),
+                now.getMonth() + 1,
+                0,
+                23,
+                59,
+                59,
+                999
+            );
 
-		// ------------------------------------------
-		// 🚀 LAST MONTH TOTAL SERVICE + TOTAL BILL
-		// ------------------------------------------
+            filter.createdAt = { $gte: start, $lte: end };
+        }
 
-		const lastMonthStart = new Date(
-			now.getFullYear(),
-			now.getMonth() - 1,
-			1
-		);
-		const lastMonthEnd = new Date(
-			now.getFullYear(),
-			now.getMonth(),
-			0,
-			23,
-			59,
-			59,
-			999
-		);
+        // ====================================================
+        //  🚀 FETCH PAGINATED DATA + TOTAL COUNT
+        // ====================================================
+        const [records, total] = await Promise.all([
+            ServiceRecords.find(filter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
 
-		const lastMonthFilter = {
-			createdAt: { $gte: lastMonthStart, $lte: lastMonthEnd },
-		};
+            ServiceRecords.countDocuments(filter),
+        ]);
 
-		const [lastMonthTotal, lastMonthBillSum] = await Promise.all([
-			ServiceRecords.countDocuments(lastMonthFilter),
-			ServiceRecords.aggregate([
-				{ $match: lastMonthFilter },
-				{ $group: { _id: null, totalBill: { $sum: "$billAmount" } } },
-			]),
-		]);
+        // ====================================================
+        // 🚀 CURRENT MONTH STATS
+        // ====================================================
+        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const currentMonthEnd = new Date(
+            now.getFullYear(),
+            now.getMonth() + 1,
+            0,
+            23,
+            59,
+            59,
+            999
+        );
 
-		const lastMonthBill = lastMonthBillSum[0]?.totalBill || 0;
+        const currentMonthFilter = {
+            createdAt: { $gte: currentMonthStart, $lte: currentMonthEnd },
+        };
 
-		// ------------------------------------------
-		// RETURN RESPONSE
-		// ------------------------------------------
+        const [currentMonthTotal, currentMonthBillSum] = await Promise.all([
+            ServiceRecords.countDocuments(currentMonthFilter),
+            ServiceRecords.aggregate([
+                { $match: currentMonthFilter },
+                { $group: { _id: null, totalBill: { $sum: "$billAmount" } } },
+            ]),
+        ]);
 
-		return NextResponse.json(
-			{
-				success: true,
-				list: records,
-				total,
-				page,
-				limit,
+        const currentMonthBill = currentMonthBillSum[0]?.totalBill || 0;
 
-				// 🚀 New stats added
-				lastMonth: {
-					totalServices: lastMonthTotal,
-					totalBill: lastMonthBill,
-					dateRange: {
-						start: lastMonthStart,
-						end: lastMonthEnd,
-					},
-				},
-			},
-			{ status: 200 }
-		);
-	} catch (err) {
-		console.error("GET /api/service error:", err);
-		return NextResponse.json(
-			{ success: false, message: err.message },
-			{ status: 500 }
-		);
-	}
+        // ====================================================
+        // 🚀 LAST MONTH STATS
+        // ====================================================
+        const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastMonthEnd = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            0,
+            23,
+            59,
+            59,
+            999
+        );
+
+        const lastMonthFilter = {
+            createdAt: { $gte: lastMonthStart, $lte: lastMonthEnd },
+        };
+
+        const [lastMonthTotal, lastMonthBillSum] = await Promise.all([
+            ServiceRecords.countDocuments(lastMonthFilter),
+            ServiceRecords.aggregate([
+                { $match: lastMonthFilter },
+                { $group: { _id: null, totalBill: { $sum: "$billAmount" } } },
+            ]),
+        ]);
+
+        const lastMonthBill = lastMonthBillSum[0]?.totalBill || 0;
+
+        // ====================================================
+        // 🚀 FINAL RESPONSE (As you requested)
+        // ====================================================
+
+        return NextResponse.json(
+            {
+                success: true,
+                list: records,
+
+                // NEW
+                totalServices: currentMonthTotal,
+                totalBill: currentMonthBill,
+
+                lastMonth: {
+                    totalServices: lastMonthTotal,
+                    totalBill: lastMonthBill,
+                    dateRange: {
+                        start: lastMonthStart,
+                        end: lastMonthEnd,
+                    },
+                },
+
+                page,
+                limit,
+                total,
+            },
+            { status: 200 }
+        );
+    } catch (err) {
+        console.error("GET /api/service error:", err);
+        return NextResponse.json(
+            { success: false, message: err.message },
+            { status: 500 }
+        );
+    }
 }
 
 export async function POST(req) {
