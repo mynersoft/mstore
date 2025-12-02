@@ -15,7 +15,6 @@ const productSlice = createSlice({
         allProducts: [],
         activeCategory: null,
         loading: false,
-        sidebarOpen: true,
         searchText: "",
     },
     reducers: {
@@ -31,9 +30,6 @@ const productSlice = createSlice({
         setLoading(state, action) {
             state.loading = action.payload;
         },
-        toggleSidebar(state) {
-            state.sidebarOpen = !state.sidebarOpen;
-        },
         setSearchText(state, action) {
             state.searchText = action.payload;
         },
@@ -45,7 +41,6 @@ const {
     setAllProducts,
     setActiveCategory,
     setLoading,
-    toggleSidebar,
     setSearchText,
 } = productSlice.actions;
 
@@ -62,12 +57,11 @@ function ProductListPage() {
         allProducts,
         activeCategory,
         loading,
-        sidebarOpen,
         searchText,
     } = useSelector((state) => state.products);
 
     const [localProducts, setLocalProducts] = useState([]);
-    const [changedRows, setChangedRows] = useState({}); // track changed rows
+    const [changedRows, setChangedRows] = useState({});
 
     const loadData = async () => {
         try {
@@ -77,7 +71,6 @@ function ProductListPage() {
             const data = await res.json();
 
             let cats = data.categories || {};
-
             const sortedCats = {};
             Object.keys(cats)
                 .sort((a, b) => a.localeCompare(b))
@@ -107,12 +100,13 @@ function ProductListPage() {
             ? filteredProducts
             : filteredProducts.filter((p) => p.category === activeCategory);
 
-    // Update Price & Sell Price
-    const updatePrice = async (id, regPrice, sellPrice) => {
+    // Update Price + Sell Price + Stock
+    const updateProductData = async (id, regPrice, sellPrice, stock) => {
         try {
             const formData = new FormData();
             formData.append("regularPrice", regPrice);
             formData.append("sellPrice", sellPrice);
+            formData.append("stock", stock);
 
             const res = await fetch(`/api/products/${id}/updateprice`, {
                 method: "PUT",
@@ -131,6 +125,7 @@ function ProductListPage() {
                               ...p,
                               regularPrice: Number(regPrice),
                               sellPrice: Number(sellPrice),
+                              stock: Number(stock),
                           }
                         : p
                 )
@@ -151,6 +146,7 @@ function ProductListPage() {
             Name: p.name,
             RegularPrice: p.regularPrice ?? "",
             SellPrice: p.sellPrice ?? "",
+            Stock: p.stock ?? "",
             Remarks: p.remarks ?? "",
         }));
 
@@ -160,56 +156,58 @@ function ProductListPage() {
         XLSX.writeFile(wb, "products.xlsx");
     };
 
-    // Print Table
+    // Print Table (same UI)
     const printTable = () => {
         const colSize = Math.ceil(shownProducts.length / 2);
         const leftCol = shownProducts.slice(0, colSize);
         const rightCol = shownProducts.slice(colSize);
 
         const makeTable = (list, startIndex) => `
-      <table>
-        <thead>
-          <tr>
-            <th>SL</th>
-            <th>Name</th>
-            <th>Regular Price</th>
-            <th>Sell Price</th>
-            <th>Remarks</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${list
-              .map(
-                  (p, i) => `
+          <table>
+            <thead>
               <tr>
-                <td>${startIndex + i}</td>
-                <td>${p.name}</td>
-                <td>${p.regularPrice ?? ""}</td>
-                <td>${p.sellPrice ?? ""}</td>
-                <td>${p.remarks ?? ""}</td>
-              </tr>`
-              )
-              .join("")}
-        </tbody>
-      </table>
-    `;
+                <th>SL</th>
+                <th>Name</th>
+                <th>Regular Price</th>
+                <th>Sell Price</th>
+                <th>Stock</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list
+                  .map(
+                      (p, i) => `
+                  <tr>
+                    <td>${startIndex + i}</td>
+                    <td>${p.name}</td>
+                    <td>${p.regularPrice ?? ""}</td>
+                    <td>${p.sellPrice ?? ""}</td>
+                    <td>${p.stock ?? ""}</td>
+                    <td>${p.remarks ?? ""}</td>
+                  </tr>`
+                  )
+                  .join("")}
+            </tbody>
+          </table>
+        `;
 
         const win = window.open("", "", "width=900,height=600");
         win.document.write(`
-        <html>
-        <head>
-          <style>
-            body { display: flex; gap: 15px; padding: 20px; font-family: Arial; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { border: 1px solid #000; padding: 6px; font-size: 12px; }
-            .col { width: 50%; }
-          </style>
-        </head>
-        <body>
-          <div class="col">${makeTable(leftCol, 1)}</div>
-          <div class="col">${makeTable(rightCol, colSize + 1)}</div>
-        </body>
-        </html>
+            <html>
+            <head>
+              <style>
+                body { display: flex; gap: 15px; padding: 20px; font-family: Arial; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { border: 1px solid #000; padding: 6px; font-size: 12px; }
+                .col { width: 50%; }
+              </style>
+            </head>
+            <body>
+              <div class="col">${makeTable(leftCol, 1)}</div>
+              <div class="col">${makeTable(rightCol, colSize + 1)}</div>
+            </body>
+            </html>
         `);
 
         win.document.close();
@@ -218,45 +216,40 @@ function ProductListPage() {
 
     return (
         <div className="flex min-h-screen bg-gray-100">
-            {/* Sidebar */}
-            {sidebarOpen && (
-                <aside className="w-72 bg-white shadow-md p-5 border-r">
-                    <h2 className="font-bold text-xl mb-4">Categories</h2>
 
-                    <ul className="space-y-2">
+            {/* Sidebar (always visible, hide option removed) */}
+            <aside className="w-72 bg-white shadow-md p-5 border-r">
+                <h2 className="font-bold text-xl mb-4">Categories</h2>
+
+                <ul className="space-y-2">
+                    <li
+                        className={`p-2 rounded cursor-pointer ${
+                            activeCategory === null
+                                ? "bg-blue-600 text-white"
+                                : "bg-gray-100"
+                        }`}
+                        onClick={() => dispatch(setActiveCategory(null))}
+                    >
+                        All Products ({allProducts.length})
+                    </li>
+
+                    {Object.keys(categories).map((cat) => (
                         <li
+                            key={cat}
                             className={`p-2 rounded cursor-pointer ${
-                                activeCategory === null ?
-                                "bg-blue-600 text-white" : "bg-gray-100"
+                                activeCategory === cat
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-gray-100"
                             }`}
-                            onClick={() => dispatch(setActiveCategory(null))}
+                            onClick={() => dispatch(setActiveCategory(cat))}
                         >
-                            All Products ({allProducts.length})
+                            {cat} ({categories[cat]?.length || 0})
                         </li>
+                    ))}
+                </ul>
+            </aside>
 
-                        {Object.keys(categories).map((cat) => (
-                            <li
-                                key={cat}
-                                className={`p-2 rounded cursor-pointer ${
-                                    activeCategory === cat ?
-                                    "bg-blue-600 text-white" : "bg-gray-100"
-                                }`}
-                                onClick={() => dispatch(setActiveCategory(cat))}
-                            >
-                                {cat} ({categories[cat]?.length || 0})
-                            </li>
-                        ))}
-                    </ul>
-                </aside>
-            )}
-
-            <button
-                className="absolute top-4 left-4 bg-black text-white px-3 py-1 rounded shadow"
-                onClick={() => dispatch(toggleSidebar())}
-            >
-                {sidebarOpen ? "Hide" : "Show"}
-            </button>
-
+            {/* Main Content */}
             <main className="flex-1 p-8">
                 <h1 className="text-3xl font-bold mb-6">
                     {activeCategory === null ? "All Products" : activeCategory}
@@ -295,6 +288,7 @@ function ProductListPage() {
                             <th className="p-3 border">Product Name</th>
                             <th className="p-3 border">Regular Price</th>
                             <th className="p-3 border">Sell Price</th>
+                            <th className="p-3 border">Stock</th>
                             <th className="p-3 border">Save</th>
                             <th className="p-3 border">Remarks</th>
                         </tr>
@@ -304,9 +298,9 @@ function ProductListPage() {
                         {shownProducts.map((p, i) => (
                             <tr key={p._id} className="hover:bg-gray-50">
                                 <td className="border p-2">{i + 1}</td>
-
                                 <td className="border p-2">{p.name}</td>
 
+                                {/* Regular Price */}
                                 <td className="border p-2">
                                     <input
                                         type="number"
@@ -332,6 +326,7 @@ function ProductListPage() {
                                     />
                                 </td>
 
+                                {/* Sell Price */}
                                 <td className="border p-2">
                                     <input
                                         type="number"
@@ -357,14 +352,42 @@ function ProductListPage() {
                                     />
                                 </td>
 
+                                {/* Stock */}
+                                <td className="border p-2">
+                                    <input
+                                        type="number"
+                                        value={p.stock ?? ""}
+                                        onChange={(e) => {
+                                            const updated = localProducts.map(
+                                                (prod) =>
+                                                    prod._id === p._id
+                                                        ? {
+                                                              ...prod,
+                                                              stock:
+                                                                  e.target.value,
+                                                          }
+                                                        : prod
+                                            );
+                                            setLocalProducts(updated);
+                                            setChangedRows((prev) => ({
+                                                ...prev,
+                                                [p._id]: true,
+                                            }));
+                                        }}
+                                        className="border px-2 py-1 w-20 rounded"
+                                    />
+                                </td>
+
+                                {/* Save Button */}
                                 <td className="border p-2">
                                     <button
                                         disabled={!changedRows[p._id]}
                                         onClick={() =>
-                                            updatePrice(
+                                            updateProductData(
                                                 p._id,
                                                 p.regularPrice,
-                                                p.sellPrice
+                                                p.sellPrice,
+                                                p.stock
                                             )
                                         }
                                         className={`px-3 py-1 rounded text-white ${
