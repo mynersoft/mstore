@@ -18,7 +18,7 @@ export default function SaleInvoice() {
 		return <div className="p-5 text-center">Loading...</div>;
 
 	return (
-		<div className="max-w-4xl mx-auto bg-gray-950 text-gray-100 p-10 rounded-lg mt-10 shadow-lg">
+		<div className="max-w-4xl mx-auto bg-gray-950 text-gray-500 p-10 rounded-lg mt-10 shadow-lg">
 			{/* Header Section */}
 			<div className="flex justify-between items-start border-b border-gray-700 pb-4 mb-6">
 				{/* Left Side */}
@@ -37,7 +37,7 @@ export default function SaleInvoice() {
 				</div>
 
 				{/* Right Side */}
-				<div className="text-right text-sm">
+				<div className="text-right text-sm mt-6">
 					<p>
 						<span className="text-gray-400">Customer:</span>{" "}
 						<span className="font-semibold">
