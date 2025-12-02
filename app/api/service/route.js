@@ -6,9 +6,7 @@ import ServiceRecords from "@/models/ServiceRecords";
 /**
  * GET /api/service?type=daily|weekly|monthly&page=1&limit=20
  */
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/dbConnect";
-import ServiceRecords from "@/models/ServiceRecords";
+
 
 export async function GET(req) {
     await connectDB();
