@@ -49,7 +49,6 @@ const {
     setSearchText,
 } = productSlice.actions;
 
-// Store
 const store = configureStore({
     reducer: {
         products: productSlice.reducer,
@@ -68,8 +67,8 @@ function ProductListPage() {
     } = useSelector((state) => state.products);
 
     const [localProducts, setLocalProducts] = useState([]);
+    const [changedRows, setChangedRows] = useState({}); // track changed rows
 
-    // Load API
     const loadData = async () => {
         try {
             dispatch(setLoading(true));
@@ -108,16 +107,11 @@ function ProductListPage() {
             ? filteredProducts
             : filteredProducts.filter((p) => p.category === activeCategory);
 
-    // Update both prices
-    const updatePrice = async (id, regularPrice, sellPrice) => {
+    // Update Price & Sell Price
+    const updatePrice = async (id, regPrice, sellPrice) => {
         try {
-            if (regularPrice === "" || isNaN(regularPrice) || sellPrice === "" || isNaN(sellPrice)) {
-                alert("Enter valid price values");
-                return;
-            }
-
             const formData = new FormData();
-            formData.append("regularPrice", regularPrice);
+            formData.append("regularPrice", regPrice);
             formData.append("sellPrice", sellPrice);
 
             const res = await fetch(`/api/products/${id}/updateprice`, {
@@ -126,25 +120,31 @@ function ProductListPage() {
             });
 
             if (!res.ok) {
-                alert("Price update failed");
+                toast.error("Update failed");
                 return;
             }
 
             setLocalProducts((prev) =>
                 prev.map((p) =>
                     p._id === id
-                        ? { ...p, regularPrice: Number(regularPrice), sellPrice: Number(sellPrice) }
+                        ? {
+                              ...p,
+                              regularPrice: Number(regPrice),
+                              sellPrice: Number(sellPrice),
+                          }
                         : p
                 )
             );
 
-            toast.success("Price updated successfully!");
+            setChangedRows((prev) => ({ ...prev, [id]: false }));
+
+            toast.success("Updated successfully!");
         } catch (err) {
-            alert("Price update failed");
+            toast.error("Update failed");
         }
     };
 
-    // Export Excel
+    // Excel Export
     const exportToExcel = () => {
         const excelData = shownProducts.map((p, i) => ({
             SL: i + 1,
@@ -160,7 +160,7 @@ function ProductListPage() {
         XLSX.writeFile(wb, "products.xlsx");
     };
 
-    // Print Table (UNCHANGED)
+    // Print Table
     const printTable = () => {
         const colSize = Math.ceil(shownProducts.length / 2);
         const leftCol = shownProducts.slice(0, colSize);
@@ -171,58 +171,46 @@ function ProductListPage() {
         <thead>
           <tr>
             <th>SL</th>
-            <th>Product Name</th>
+            <th>Name</th>
             <th>Regular Price</th>
-            <th>Update Price</th>
+            <th>Sell Price</th>
             <th>Remarks</th>
           </tr>
         </thead>
         <tbody>
           ${list
-                .map(
-                    (p, i) => `
+              .map(
+                  (p, i) => `
               <tr>
                 <td>${startIndex + i}</td>
                 <td>${p.name}</td>
                 <td>${p.regularPrice ?? ""}</td>
-                <td></td>
+                <td>${p.sellPrice ?? ""}</td>
                 <td>${p.remarks ?? ""}</td>
               </tr>`
-                )
-                .join("")}
+              )
+              .join("")}
         </tbody>
       </table>
     `;
 
         const win = window.open("", "", "width=900,height=600");
         win.document.write(`
-    <html>
-    <head>
-      <style>
-        body {
-          display: flex;
-          gap: 15px;
-          padding: 20px;
-          font-family: Arial;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-        th, td {
-          border: 1px solid #000;
-          padding: 6px;
-          font-size: 12px;
-        }
-        .col { width: 50%; }
-      </style>
-    </head>
-    <body>
-      <div class="col">${makeTable(leftCol, 1)}</div>
-      <div class="col">${makeTable(rightCol, colSize + 1)}</div>
-    </body>
-    </html>
-    `);
+        <html>
+        <head>
+          <style>
+            body { display: flex; gap: 15px; padding: 20px; font-family: Arial; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #000; padding: 6px; font-size: 12px; }
+            .col { width: 50%; }
+          </style>
+        </head>
+        <body>
+          <div class="col">${makeTable(leftCol, 1)}</div>
+          <div class="col">${makeTable(rightCol, colSize + 1)}</div>
+        </body>
+        </html>
+        `);
 
         win.document.close();
         win.print();
@@ -238,9 +226,8 @@ function ProductListPage() {
                     <ul className="space-y-2">
                         <li
                             className={`p-2 rounded cursor-pointer ${
-                                activeCategory === null
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-gray-100"
+                                activeCategory === null ?
+                                "bg-blue-600 text-white" : "bg-gray-100"
                             }`}
                             onClick={() => dispatch(setActiveCategory(null))}
                         >
@@ -251,9 +238,8 @@ function ProductListPage() {
                             <li
                                 key={cat}
                                 className={`p-2 rounded cursor-pointer ${
-                                    activeCategory === cat
-                                        ? "bg-blue-600 text-white"
-                                        : "bg-gray-100"
+                                    activeCategory === cat ?
+                                    "bg-blue-600 text-white" : "bg-gray-100"
                                 }`}
                                 onClick={() => dispatch(setActiveCategory(cat))}
                             >
@@ -264,7 +250,6 @@ function ProductListPage() {
                 </aside>
             )}
 
-            {/* Sidebar Toggle */}
             <button
                 className="absolute top-4 left-4 bg-black text-white px-3 py-1 rounded shadow"
                 onClick={() => dispatch(toggleSidebar())}
@@ -272,13 +257,11 @@ function ProductListPage() {
                 {sidebarOpen ? "Hide" : "Show"}
             </button>
 
-            {/* Main */}
             <main className="flex-1 p-8">
                 <h1 className="text-3xl font-bold mb-6">
                     {activeCategory === null ? "All Products" : activeCategory}
                 </h1>
 
-                {/* Search */}
                 <input
                     type="text"
                     placeholder="Search product..."
@@ -287,7 +270,6 @@ function ProductListPage() {
                     onChange={(e) => dispatch(setSearchText(e.target.value))}
                 />
 
-                {/* Buttons */}
                 <div className="flex gap-4 mb-6">
                     <button
                         onClick={exportToExcel}
@@ -306,7 +288,6 @@ function ProductListPage() {
 
                 {loading && <p>Loading...</p>}
 
-                {/* Table */}
                 <table className="w-full bg-white shadow rounded overflow-hidden">
                     <thead className="bg-gray-200">
                         <tr>
@@ -323,9 +304,9 @@ function ProductListPage() {
                         {shownProducts.map((p, i) => (
                             <tr key={p._id} className="hover:bg-gray-50">
                                 <td className="border p-2">{i + 1}</td>
+
                                 <td className="border p-2">{p.name}</td>
 
-                                {/* Regular Price */}
                                 <td className="border p-2">
                                     <input
                                         type="number"
@@ -336,17 +317,21 @@ function ProductListPage() {
                                                     prod._id === p._id
                                                         ? {
                                                               ...prod,
-                                                              regularPrice: e.target.value,
+                                                              regularPrice:
+                                                                  e.target.value,
                                                           }
                                                         : prod
                                             );
                                             setLocalProducts(updated);
+                                            setChangedRows((prev) => ({
+                                                ...prev,
+                                                [p._id]: true,
+                                            }));
                                         }}
                                         className="border px-2 py-1 w-24 rounded"
                                     />
                                 </td>
 
-                                {/* Sell Price */}
                                 <td className="border p-2">
                                     <input
                                         type="number"
@@ -357,19 +342,24 @@ function ProductListPage() {
                                                     prod._id === p._id
                                                         ? {
                                                               ...prod,
-                                                              sellPrice: e.target.value,
+                                                              sellPrice:
+                                                                  e.target.value,
                                                           }
                                                         : prod
                                             );
                                             setLocalProducts(updated);
+                                            setChangedRows((prev) => ({
+                                                ...prev,
+                                                [p._id]: true,
+                                            }));
                                         }}
                                         className="border px-2 py-1 w-24 rounded"
                                     />
                                 </td>
 
-                                {/* Save both */}
                                 <td className="border p-2">
                                     <button
+                                        disabled={!changedRows[p._id]}
                                         onClick={() =>
                                             updatePrice(
                                                 p._id,
@@ -377,13 +367,19 @@ function ProductListPage() {
                                                 p.sellPrice
                                             )
                                         }
-                                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                                        className={`px-3 py-1 rounded text-white ${
+                                            changedRows[p._id]
+                                                ? "bg-blue-500 hover:bg-blue-600"
+                                                : "bg-gray-400 cursor-not-allowed"
+                                        }`}
                                     >
                                         Save
                                     </button>
                                 </td>
 
-                                <td className="border p-2">{p.remarks || ""}</td>
+                                <td className="border p-2">
+                                    {p.remarks || ""}
+                                </td>
                             </tr>
                         ))}
                     </tbody>
