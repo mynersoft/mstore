@@ -17,7 +17,7 @@ export default function DashboardPage() {
 		(state) => state.saleprofit
 	);
 
-	const { list, stats,totalBill lastMonth } = useSelector((s) => s.service);
+	const { list, stats,totalBill, lastMonth } = useSelector((s) => s.service);
 	const { toolsAmount } = useSelector((state) => state.invest);
 	const { totalAmount } = useSelector((state) => state.products);
 
