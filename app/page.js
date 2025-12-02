@@ -18,7 +18,7 @@ export default function DashboardPage() {
 	);
 
 	const { list, stats,totalBill, lastMonth } = useSelector((s) => s.service);
-	const { toolsAmount } = useSelector((state) => state.invest);
+	const { toolsAmount, finalTotalInvest} = useSelector((state) => state.invest);
 	const { totalAmount } = useSelector((state) => state.products);
 
 	const stockOutProducts = products.filter((p) => p.stock == 0);
@@ -120,6 +120,11 @@ export default function DashboardPage() {
 					<StatCard
 						title="Invest for tools"
 						value={`${toolsAmount || 0} tk`}
+						color="green"
+					/>
+<StatCard
+						title="Total investment"
+						value={`${finalTotalInvest || 0} tk`}
 						color="green"
 					/>
 				</div>
