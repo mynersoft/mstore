@@ -17,7 +17,7 @@ export default function DashboardPage() {
 		(state) => state.saleprofit
 	);
 
-	const { list, stats, lastMonth } = useSelector((s) => s.service);
+	const { list, stats,totalBill lastMonth } = useSelector((s) => s.service);
 	const { toolsAmount } = useSelector((state) => state.invest);
 	const { totalAmount } = useSelector((state) => state.products);
 
@@ -28,8 +28,7 @@ export default function DashboardPage() {
 	const [totalDue, setTotalDue] = useState(0);
 	const [totalAmountProducts, setTotalAmountProducts] = useState(0);
 
-	// services bills
-	const totalBill = stats?.totalBills ?? 0;
+	
 
 	const [salesData] = useState([
 		{ date: "2025-10-01", sales: 300, profit: 100 },
