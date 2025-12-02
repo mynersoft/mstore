@@ -2,32 +2,63 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/dbConnect";
 import Invest from "@/models/Invest";
 
+import { NextResponse } from "next/server";
+import { connectDB } from "@/lib/dbConnect";
+import Invest from "@/models/Invest";
+import Bill from "@/models/Bill";
+
 export async function GET() {
-	try {
-		await connectDB();
+  try {
+    await connectDB();
 
-		const all = await Invest.find().sort({ createdAt: -1 });
+    // Fetch all invest records
+    const allInvests = await Invest.find().sort({ createdAt: -1 });
 
-		// Calculate total amount for tools
-		const totalToolsInvest = all
-			.filter((item) => item.investType === "tools")
-			.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    // Total invest (sum of all amounts)
+    const totalInvest = allInvests.reduce(
+      (sum, item) => sum + Number(item.amount || 0),
+      0
+    );
 
-		// Calculate total amount for malamal
-		const totalMalamalInvest = all
-			.filter((item) => item.investType === "malamal")
-			.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    // Filter tools amount
+    const totalToolsInvest = allInvests
+      .filter((item) => item.investType === "tools")
+      .reduce((sum, item) => sum + Number(item.amount || 0), 0);
 
-		return NextResponse.json({ 
-			success: true,
-			items: all,
-			toolsAmount:totalToolsInvest,
-			malamalsAmount:totalMalamalInvest,
-		});
-	} catch (e) {
-		return NextResponse.json({ error: e.message }, { status: 500 });
-	}
+    // Filter malamal amount
+    const totalMalamalInvest = allInvests
+      .filter((item) => item.investType === "malamal")
+      .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+    // Fetch all Bills
+    const allBills = await Bill.find();
+
+    // Total Bill amount
+    const totalBill = allBills.reduce(
+      (sum, b) => sum + Number(b.amount || 0),
+      0
+    );
+
+    // Final Total = totalBill + totalInvest
+    const finalTotalInvest = totalBill + totalInvest;
+
+    return NextResponse.json({
+      success: true,
+      items: allInvests,
+      toolsAmount: totalToolsInvest,
+      malamalsAmount: totalMalamalInvest,
+      totalInvest,
+     
+      finalTotalInvest,
+    });
+  } catch (e) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
 }
+
+
+
+
 
 export async function POST(request) {
 	try {
