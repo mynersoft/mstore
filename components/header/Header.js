@@ -22,7 +22,7 @@ export default function Header() {
 	];
 
 	return (
-		<header className="w-full bg-gray-900 text-white shadow-md sticky top-0 z-50">
+		<header className="w-full hide-on-print bg-gray-900 text-white shadow-md sticky top-0 z-50">
 			<div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-3">
 				{/* Logo */}
 				<Link href="/" className="text-2xl font-bold text-green-400">
