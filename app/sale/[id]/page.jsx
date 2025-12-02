@@ -18,51 +18,45 @@ export default function SaleInvoice() {
 
     return (
         <>
-            <style jsx global>{`
-                @media print {
-                    @page {
-                        size: A4; /* Set page size to A4 */
-                        margin: 20mm; /* Adjust margins */
-                    }
+           <style jsx global>{`
+  @media print {
+    /* Hide buttons, navigation, headers, and any UI not part of invoice */
+    .hide-on-print {
+      display: none !important;
+    }
 
-                    body {
-                        -webkit-print-color-adjust: exact; /* Chrome/Safari */
-                        color-adjust: exact; /* Firefox */
-                        background: #fff;
-                        color: #000;
-                        font-family: Arial, sans-serif;
-                    }
+    body {
+      -webkit-print-color-adjust: exact;
+      color-adjust: exact;
+      background: #fff;
+      color: #000;
+    }
 
-                    .hide-on-print {
-                        display: none !important;
-                    }
+    .print-invoice {
+      background: #fff !important;
+      color: #000 !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      margin: 0 auto !important;
+      max-width: 100% !important;
+    }
 
-                    .print-invoice {
-                        background: #fff !important;
-                        color: #000 !important;
-                        width: 100%;
-                        max-width: 100% !important;
-                        box-shadow: none !important;
-                        padding: 0 !important;
-                        margin: 0 auto !important;
-                    }
+    table, th, td {
+      border: 1px solid #000 !important;
+      border-collapse: collapse !important;
+    }
 
-                    table, th, td {
-                        border: 1px solid #000 !important;
-                        border-collapse: collapse !important;
-                    }
+    th, td {
+      color: #000 !important;
+      padding: 6px !important;
+      font-size: 12pt !important;
+    }
 
-                    th, td {
-                        color: #000 !important;
-                        padding: 6px !important;
-                        font-size: 12pt !important;
-                    }
-
-                    h1, h2, h3, h4, h5, h6, p {
-                        color: #000 !important;
-                    }
-                }
-            `}</style>
+    h1, h2, h3, p, span {
+      color: #000 !important;
+    }
+  }
+`}</style>
 
             <div className="print-invoice max-w-4xl mx-auto bg-gray-950 text-gray-500 p-10 rounded-lg mt-10 shadow-lg">
                 {/* Header Section */}
