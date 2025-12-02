@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/dbConnect";
 import Invest from "@/models/Invest";
 
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/dbConnect";
-import Invest from "@/models/Invest";
 import Bill from "@/models/Bill";
 
 export async function GET() {
