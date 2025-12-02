@@ -25,7 +25,6 @@ export const updateInvest = createAsyncThunk("invest/update", async (data) => {
 });
 
 // Delete
-
 export const deleteInvest = createAsyncThunk(
   "invest/delete",
   async (id, { rejectWithValue }) => {
@@ -37,7 +36,7 @@ export const deleteInvest = createAsyncThunk(
       if (!res.ok) {
         return rejectWithValue(data.error || "Delete failed");
       }
-      return id; // return the deleted id to remove from state
+      return id;
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -46,75 +45,78 @@ export const deleteInvest = createAsyncThunk(
 
 
 const investSlice = createSlice({
-	name: "invest",
-	initialState: {
-			list: [],
-			loading: false,
-			actionLoading: false,
-			filterType: "all",
-			toolsAmount: 0,
-			malamalAmount: 0,
-		
-	},
-	reducers: {
-		setFilterType: (state, action) => {
-			state.filterType = action.payload;
-		},
-	},
+  name: "invest",
+  initialState: {
+    list: [],
+    loading: false,
+    actionLoading: false,
+    filterType: "all",
 
-	extraReducers: (builder) => {
-		// Load List
-		builder
-			.addCase(fetchInvests.pending, (state) => {
-				state.loading = true;
-			})
-			.addCase(fetchInvests.fulfilled, (state, action) => {
-				state.loading = false;
+    // API TOTALS
+    toolsAmount: 0,
+    malamalAmount: 0,
+    totalInvest: 0,
+    finalTotalInvest: 0,
+  },
 
-				const payload = action.payload;
+  reducers: {
+    setFilterType: (state, action) => {
+      state.filterType = action.payload;
+    },
+  },
 
-				state.list = payload.items || [];
+  extraReducers: (builder) => {
+    // LOAD LIST
+    builder
+      .addCase(fetchInvests.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchInvests.fulfilled, (state, action) => {
+        state.loading = false;
 
-				// Optional: Tools/Malamal totals save করতে চাইলে:
-				state.toolsAmount = payload.toolsAmount || 0;
-				state.malamalAmount = payload.malamalsAmount || 0;
-			});
+        const p = action.payload;
 
-		// Add
-		builder
-			.addCase(addInvest.pending, (state) => {
-				state.actionLoading = true;
-			})
-			.addCase(addInvest.fulfilled, (state, action) => {
-				state.actionLoading = false;
-				state.list.unshift(action.payload.data);
-			});
+        state.list = p.items || [];
 
-		// Update
-		builder
-			.addCase(updateInvest.pending, (state) => {
-				state.actionLoading = true;
-			})
-			.addCase(updateInvest.fulfilled, (state, action) => {
-				state.actionLoading = false;
-				const updated = action.payload.updated;
-				state.list = state.list.map((i) =>
-					i._id === updated._id ? updated : i
-				);
-			});
+        // Save totals
+        state.toolsAmount = p.toolsAmount || 0;
+        state.malamalAmount = p.malamalsAmount || 0;
+        state.totalInvest = p.totalInvest || 0;
+        state.finalTotalInvest = p.finalTotalInvest || 0;
+      });
 
-		// Delete
-		builder
-			.addCase(deleteInvest.pending, (state) => {
-				state.actionLoading = true;
-			})
-			.addCase(deleteInvest.fulfilled, (state, action) => {
-				state.actionLoading = false;
-				state.list = state.list.filter(
-					(i) => i._id !== action.meta.arg
-				);
-			});
-	},
+    // ADD
+    builder
+      .addCase(addInvest.pending, (state) => {
+        state.actionLoading = true;
+      })
+      .addCase(addInvest.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        state.list.unshift(action.payload); // API returns created object directly
+      });
+
+    // UPDATE
+    builder
+      .addCase(updateInvest.pending, (state) => {
+        state.actionLoading = true;
+      })
+      .addCase(updateInvest.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        const updated = action.payload;
+        state.list = state.list.map((i) => (i._id === updated._id ? updated : i));
+      });
+
+    // DELETE
+    builder
+      .addCase(deleteInvest.pending, (state) => {
+        state.actionLoading = true;
+      })
+      .addCase(deleteInvest.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        const deletedId = action.payload;
+        state.list = state.list.filter((i) => i._id !== deletedId);
+      });
+  },
 });
 
 export const { setFilterType } = investSlice.actions;
