@@ -139,6 +139,26 @@ function ProductListPage() {
         }
     };
 
+
+
+
+
+const downloadNamesAsTxt = () => {
+    const names = shownProducts.map((p) => p.name).join("\n");
+
+    const blob = new Blob([names], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "product-names.txt";
+    link.click();
+
+    URL.revokeObjectURL(url);
+};
+
+
+
     // Excel Export
     const exportToExcel = () => {
         const excelData = shownProducts.map((p, i) => ({
@@ -277,6 +297,14 @@ function ProductListPage() {
                     >
                         Print
                     </button>
+
+<button
+    onClick={downloadNamesAsTxt}
+    className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded shadow"
+>
+    Download Names (.txt)
+</button>
+
                 </div>
 
                 {loading && <p>Loading...</p>}
