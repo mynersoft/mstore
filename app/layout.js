@@ -39,10 +39,10 @@ export default function RootLayout({ children }) {
 					name="viewport"
 					content="width=device-width, initial-scale=1"
 				/>
-				<title>Bismillah Telecom & Servicing</title>
+				<title>Tomart | Everything to Your Doorstrp</title>
 				<meta
 					name="description"
-					content="Admin dashboard for managing products and sales"
+					content="Electrical - Hardware - Accessories - Telecom"
 				/>
 			</head>
 
