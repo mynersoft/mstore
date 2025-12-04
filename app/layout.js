@@ -5,6 +5,7 @@ import InternetStatus from "@/components/InternetStatus";
 import ReduxProvider from "@/app/providers/ReduxProvider";
 import { GlobalInitializer } from "@/components/fetch/GlobalInitializer";
 import Header from "@/components/header/Header";
+import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "react-hot-toast";
 
 import { useEffect, useState } from "react";
@@ -54,6 +55,7 @@ export default function RootLayout({ children }) {
 						
 						<Toaster position="top-right" reverseOrder={false} />
 						<Header />
+<Analytics/>
 						<ReduxProvider>
 							<GlobalInitializer />
 							{children}
