@@ -22,7 +22,7 @@ export const store = configureStore({
 bills: billReducer,
 		saleprofit: saleprofitReducer,
 invest: investReducer,
-transaction: transactionSlice
+transactions: transactionSlice
 	},
 });
 
