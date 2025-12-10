@@ -1,5 +1,5 @@
-import AddTransactionForm from "@/components/TransactionForm";
-import TransactionTable from "@/components/TransactionTable";
+import AddTransactionForm from "@/components/TransectionForm";
+import TransactionTable from "@/components/TransectionTable";
 
 export default function Home() {
   return (
