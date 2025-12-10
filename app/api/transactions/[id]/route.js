@@ -1,4 +1,4 @@
-import { connectDB } from "@/lib/mongodb";
+import { connectDB } from "@/lib/db";
 import Transaction from "@/models/Transaction";
 
 export default async function handler(req, res) {
