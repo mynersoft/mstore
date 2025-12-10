@@ -7,6 +7,7 @@ import serviceReducer from "./serviceSlice";
 import categoryReducer from "./categorySlice";
 import brandReducer from "./brandsSlice";
 import saleprofitReducer from "./saleprofitSlice";
+import tansactionReducer "./transactionSlice.
 
 import billReducer from "./billSlice";
 
@@ -21,6 +22,7 @@ export const store = configureStore({
 bills: billReducer,
 		saleprofit: saleprofitReducer,
 invest: investReducer,
+transaction: transactionSlice
 	},
 });
 
