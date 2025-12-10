@@ -7,7 +7,7 @@ import {
   deleteTransaction,
   updateTransaction,
   setFilterType,
-} from "@/redux/transectionsSlice";
+} from "@/redux/transactionSlice";
 
 export default function TransactionTable() {
   const dispatch = useDispatch();
