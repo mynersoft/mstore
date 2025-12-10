@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
 import Product from "@/models/Product";
-import { connectDB } from "@/lib/dbConnect";
+import { connectDB } from "../../../lib/dbConnect";
 
 export async function POST(req) {
   try {
