@@ -4,12 +4,12 @@ import { addTransaction  } from " @/redux/transactionsSlice";
 
 export default function AddTransactionForm() {
   const dispatch = useDispatch();
-  const [form, setForm] = useState({ name: "", amount: "", type: "ay" });
+  const [form, setForm] = useState({ name: "", amount: "", type: "invest" });
 
   const submit = async (e) => {
     e.preventDefault();
     await dispatch(addTransaction(form));
-    setForm({ name: "", amount: "", type: "ay" });
+    setForm({ name: "", amount: "", type: "invest" });
   };
 
   return (
@@ -31,7 +31,7 @@ export default function AddTransactionForm() {
         value={form.type}
         onChange={(e) => setForm({ ...form, type: e.target.value })}
       >
-        <option value="ay">Ay (Income)</option>
+        <option value="income">Income</option>
         <option value="invest">Invest</option>
       </select>
 
