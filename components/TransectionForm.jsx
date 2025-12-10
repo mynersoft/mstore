@@ -2,7 +2,7 @@
 "use client";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { addTransaction  } from " @/redux/transactionsSlice";
+import { addTransaction  } from " @/redux/transectionsSlice";
 
 export default function AddTransactionForm() {
   const dispatch = useDispatch();
