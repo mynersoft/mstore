@@ -7,7 +7,7 @@ import serviceReducer from "./serviceSlice";
 import categoryReducer from "./categorySlice";
 import brandReducer from "./brandsSlice";
 import saleprofitReducer from "./saleprofitSlice";
-import tansactionReducer "./transactionSlice.
+import tansactionReducer "./transactionSlice";
 
 import billReducer from "./billSlice";
 
