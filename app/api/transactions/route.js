@@ -1,5 +1,5 @@
-import { connectDB } from "../../../lib/dbConnect";
-import Transaction from "../../../models/Transaction";
+import { connectDB } from "@/lib/dbConnect";
+import Transaction from "@/models/Transaction";
 
 export default async function handler(req, res) {
   await connectDB();
