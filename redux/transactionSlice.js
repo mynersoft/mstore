@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-const API = "/api/transactions";
+const API = "/transactions";
 
 // GET All
 export const fetchTransactions = createAsyncThunk(
