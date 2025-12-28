@@ -8,7 +8,7 @@ import categoryReducer from "./categorySlice";
 import brandReducer from "./brandsSlice";
 import saleprofitReducer from "./saleprofitSlice";
 import transactionReducer from "./transactionSlice";
-import aybayReducer from "./slices/aybaySlice";
+import aybayReducer from "./aybaySlice";
 
 import billReducer from "./billSlice";
 
