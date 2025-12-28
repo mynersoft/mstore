@@ -36,8 +36,8 @@ export async function PUT(req, { params }) {
 
 
 
-import connectDB from "@/lib/connectDB";
-import AyBay from "@/models/AyBay";
+
+
 
 // DELETE by ID
 export async function DELETE(req, { params }) {
