@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAyBay, addAyBay } from "@/redux/aybaySlice";
+import toast from "react-hot-toast";
 
 export default function Home() {
   const dispatch = useDispatch();
@@ -13,13 +14,27 @@ export default function Home() {
   const [type, setType] = useState("income");
 
   useEffect(() => {
-    dispatch(fetchAyBay());
+    dispatch(fetchAyBay())
+      .unwrap()
+      .catch(() => toast.error("ডাটা লোড হয়নি"));
   }, [dispatch]);
 
-  const handleSubmit = () => {
-    dispatch(addAyBay({ title, amount, type }));
-    setTitle("");
-    setAmount("");
+  const handleSubmit = async () => {
+    if (!title || !amount) {
+      toast.error("Title এবং Amount দিন");
+      return;
+    }
+
+    try {
+      await dispatch(addAyBay({ title, amount, type })).unwrap();
+      toast.success("সফলভাবে যোগ হয়েছে ✅");
+
+      setTitle("");
+      setAmount("");
+      setType("income");
+    } catch (err) {
+      toast.error("কিছু একটা সমস্যা হয়েছে ❌");
+    }
   };
 
   const income = aybay
@@ -43,6 +58,7 @@ export default function Home() {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
+
       <input
         type="number"
         placeholder="Amount"
@@ -59,7 +75,7 @@ export default function Home() {
 
       <ul>
         {aybay.map((item) => (
-          <li key={item.id}>
+          <li key={item._id}>
             {item.title} - {item.amount} ৳ ({item.type})
           </li>
         ))}
