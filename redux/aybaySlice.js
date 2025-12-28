@@ -1,15 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-// fetch আয়-ব্যয়
 export const fetchAyBay = createAsyncThunk(
   "aybay/fetch",
   async () => {
     const res = await fetch("/api/aybay");
-    return res.json();
+    const json = await res.json();
+    return json.data; // ✅ array
   }
 );
 
-// add আয়-ব্যয়
 export const addAyBay = createAsyncThunk(
   "aybay/add",
   async (data) => {
@@ -18,14 +17,15 @@ export const addAyBay = createAsyncThunk(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return res.json();
+    const json = await res.json();
+    return json.data; // ✅ single object
   }
 );
 
 const aybaySlice = createSlice({
   name: "aybay",
   initialState: {
-    list: [],
+    list: [], // ✅ always array
   },
   extraReducers: (builder) => {
     builder
@@ -33,7 +33,7 @@ const aybaySlice = createSlice({
         state.list = action.payload;
       })
       .addCase(addAyBay.fulfilled, (state, action) => {
-        state.list.push(action.payload);
+        state.list.unshift(action.payload);
       });
   },
 });
