@@ -22,6 +22,28 @@ export const addAyBay = createAsyncThunk(
   }
 );
 
+
+export const updateAyBay = createAsyncThunk(
+  "aybay/update",
+  async ({ id, data }) => {
+    const res = await fetch(`/api/aybay/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const json = await res.json();
+    return json.data;
+  }
+);
+
+export const deleteAyBay = createAsyncThunk(
+  "aybay/delete",
+  async (id) => {
+    await fetch(`/api/aybay/${id}`, { method: "DELETE" });
+    return id;
+  }
+);
+
 const aybaySlice = createSlice({
   name: "aybay",
   initialState: {
@@ -31,7 +53,18 @@ const aybaySlice = createSlice({
     builder
       .addCase(fetchAyBay.fulfilled, (state, action) => {
         state.list = action.payload;
-      })
+      }).addCase(updateAyBay.fulfilled, (state, action) => {
+  const index = state.list.findIndex(
+    (i) => i._id === action.payload._id
+  );
+  if (index !== -1) state.list[index] = action.payload;
+})
+
+.addCase(deleteAyBay.fulfilled, (state, action) => {
+  state.list = state.list.filter(
+    (i) => i._id !== action.payload
+  );
+})
       .addCase(addAyBay.fulfilled, (state, action) => {
         state.list.unshift(action.payload);
       });
