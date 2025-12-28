@@ -1,4 +1,4 @@
-import connectDB from "@/lib/connectDB";
+import {connectDB} from "@/lib/connectDB";
 import AyBay from "@/models/Aybay";
 
 export async function GET() {
