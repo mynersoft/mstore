@@ -1,5 +1,5 @@
 import connectDB from "@/lib/connectDB";
-import AyBay from "@/models/AyBay";
+import AyBay from "@/models/Aybay";
 
 // UPDATE ay-bay by ID
 export async function PUT(req, { params }) {
