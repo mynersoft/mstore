@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAyBay, addAyBay } from "@/store/slices/aybaySlice";
+import { fetchAyBay, addAyBay } from "@/redux/slices/aybaySlice";
 
 export default function Home() {
   const dispatch = useDispatch();
