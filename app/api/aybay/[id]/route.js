@@ -47,7 +47,7 @@ export async function DELETE(req, { params }) {
 
   if (!id) {
     return Response.json(
-      { success: false, message: "ID প্রয়োজন" },
+      { success: false, message: "ID প্রয়োজন", id: params},
       { status: 400 }
     );
   }
