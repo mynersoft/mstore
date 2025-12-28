@@ -4,7 +4,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 export const fetchAyBay = createAsyncThunk(
   "aybay/fetch",
   async () => {
-    const res = await fetch("/api/transactions");
+    const res = await fetch("/api/aybay");
     return res.json();
   }
 );
@@ -13,7 +13,7 @@ export const fetchAyBay = createAsyncThunk(
 export const addAyBay = createAsyncThunk(
   "aybay/add",
   async (data) => {
-    const res = await fetch("/api/transactions", {
+    const res = await fetch("/api/aybay", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
