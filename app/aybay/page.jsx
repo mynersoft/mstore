@@ -24,7 +24,7 @@ export default function Home() {
   // fetch data
   useEffect(() => {
     dispatch(fetchAyBay()).unwrap().catch(() => {
-      toast.error("ডাটা লোড হয়নি");
+      toast.error("ডাটা লোড হয়নি");
     });
   }, [dispatch]);
 
@@ -37,17 +37,23 @@ export default function Home() {
 
     try {
       await dispatch(
-        addAyBay({ title, amount, type, category })
+        addAyBay({ 
+          title, 
+          amount: Number(amount), // Convert to number
+          type, 
+          category 
+        })
       ).unwrap();
 
-      toast.success("সফলভাবে যোগ হয়েছে");
+      toast.success("সফলভাবে যোগ হয়েছে");
 
       setTitle("");
       setAmount("");
       setType("income");
       setCategory("general");
-    } catch {
-      toast.error("সমস্যা হয়েছে");
+    } catch (error) {
+      console.error("Add error:", error);
+      toast.error(error?.message || "সমস্যা হয়েছে");
     }
   };
 
@@ -64,17 +70,18 @@ export default function Home() {
           id: editItem._id,
           data: {
             title: editItem.title,
-            amount: editItem.amount,
+            amount: Number(editItem.amount), // Convert to number
             type: editItem.type,
             category: editItem.category,
           },
         })
       ).unwrap();
 
-      toast.success("Update সফল হয়েছে");
+      toast.success("Update সফল হয়েছে");
       setEditItem(null);
-    } catch {
-      toast.error("Update হয়নি");
+    } catch (error) {
+      console.error("Update error:", error);
+      toast.error(error?.message || "Update হয়নি");
     }
   };
 
@@ -84,39 +91,40 @@ export default function Home() {
 
     try {
       await dispatch(deleteAyBay(id)).unwrap();
-      toast.success("ডিলিট হয়েছে");
-    } catch {
-      toast.error("ডিলিট হয়নি");
+      toast.success("ডিলিট হয়েছে");
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error(error?.message || "ডিলিট হয়নি");
     }
   };
 
   // calculations
   const income = aybay
     .filter((i) => i.type === "income")
-    .reduce((a, b) => a + b.amount, 0);
+    .reduce((a, b) => a + Number(b.amount), 0);
 
   const expense = aybay
     .filter((i) => i.type === "expense")
-    .reduce((a, b) => a + b.amount, 0);
+    .reduce((a, b) => a + Number(b.amount), 0);
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Header */}
         <h1 className="text-2xl font-bold text-center">
-          💰 আয় ব্যয় হিসাব
+          💰 আয় ব্যয় হিসাব
         </h1>
 
         {/* Summary */}
         <div className="grid grid-cols-3 gap-4 text-center">
           <div className="bg-green-100 p-4 rounded-xl">
-            <p className="text-sm">মোট আয়</p>
+            <p className="text-sm">মোট আয়</p>
             <p className="text-xl font-bold text-green-600">
               {income} ৳
             </p>
           </div>
           <div className="bg-red-100 p-4 rounded-xl">
-            <p className="text-sm">মোট ব্যয়</p>
+            <p className="text-sm">মোট ব্যয়</p>
             <p className="text-xl font-bold text-red-600">
               {expense} ৳
             </p>
@@ -151,11 +159,10 @@ export default function Home() {
             value={type}
             onChange={(e) => setType(e.target.value)}
           >
-            <option value="income">আয়</option>
-            <option value="expense">ব্যয়</option>
+            <option value="income">আয়</option>
+            <option value="expense">ব্যয়</option>
           </select>
 
-          {/* Category (UI unchanged style) */}
           <select
             className="w-full border p-2 rounded"
             value={category}
@@ -169,7 +176,7 @@ export default function Home() {
 
           <button
             onClick={handleSubmit}
-            className="w-full bg-black text-white py-2 rounded"
+            className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
           >
             Add
           </button>
@@ -207,15 +214,15 @@ export default function Home() {
                 </span>
 
                 <button
-                  onClick={() => setEditItem(item)}
-                  className="text-blue-600 text-sm"
+                  onClick={() => setEditItem({...item})} // Create a copy
+                  className="text-blue-600 text-sm hover:underline"
                 >
                   Edit
                 </button>
 
                 <button
                   onClick={() => handleDelete(item._id)}
-                  className="text-red-600 text-sm"
+                  className="text-red-600 text-sm hover:underline"
                 >
                   Delete
                 </button>
@@ -227,14 +234,15 @@ export default function Home() {
 
       {/* Edit Modal */}
       {editItem && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-xl w-80 space-y-3">
             <h3 className="font-bold text-center">
-              Edit আয় / ব্যয়
+              Edit আয় / ব্যয়
             </h3>
 
             <input
               className="border p-2 w-full rounded"
+              placeholder="Title"
               value={editItem.title}
               onChange={(e) =>
                 setEditItem({
@@ -247,6 +255,7 @@ export default function Home() {
             <input
               type="number"
               className="border p-2 w-full rounded"
+              placeholder="Amount"
               value={editItem.amount}
               onChange={(e) =>
                 setEditItem({
@@ -266,8 +275,8 @@ export default function Home() {
                 })
               }
             >
-              <option value="income">আয়</option>
-              <option value="expense">ব্যয়</option>
+              <option value="income">আয়</option>
+              <option value="expense">ব্যয়</option>
             </select>
 
             <select
@@ -286,16 +295,16 @@ export default function Home() {
               <option value="salary">Salary</option>
             </select>
 
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-2">
               <button
                 onClick={() => setEditItem(null)}
-                className="text-gray-500"
+                className="text-gray-500 px-4 py-2 border rounded hover:bg-gray-100"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdate}
-                className="bg-black text-white px-4 py-1 rounded"
+                className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
               >
                 Update
               </button>
