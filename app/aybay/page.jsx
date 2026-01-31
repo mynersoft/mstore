@@ -17,6 +17,7 @@ export default function Home() {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("income");
+  const [category, setCategory] = useState("general");
 
   const [editItem, setEditItem] = useState(null);
 
@@ -35,12 +36,16 @@ export default function Home() {
     }
 
     try {
-      await dispatch(addAyBay({ title, amount, type })).unwrap();
+      await dispatch(
+        addAyBay({ title, amount, type, category })
+      ).unwrap();
+
       toast.success("সফলভাবে যোগ হয়েছে");
 
       setTitle("");
       setAmount("");
       setType("income");
+      setCategory("general");
     } catch {
       toast.error("সমস্যা হয়েছে");
     }
@@ -61,6 +66,7 @@ export default function Home() {
             title: editItem.title,
             amount: editItem.amount,
             type: editItem.type,
+            category: editItem.category,
           },
         })
       ).unwrap();
@@ -149,6 +155,18 @@ export default function Home() {
             <option value="expense">ব্যয়</option>
           </select>
 
+          {/* Category (UI unchanged style) */}
+          <select
+            className="w-full border p-2 rounded"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="general">General</option>
+            <option value="bagan">Bagan</option>
+            <option value="poultry">Poultry</option>
+            <option value="salary">Salary</option>
+          </select>
+
           <button
             onClick={handleSubmit}
             className="w-full bg-black text-white py-2 rounded"
@@ -173,7 +191,7 @@ export default function Home() {
               <div>
                 <p className="font-medium">{item.title}</p>
                 <p className="text-sm text-gray-500">
-                  {item.type}
+                  {item.type} • {item.category}
                 </p>
               </div>
 
@@ -250,6 +268,22 @@ export default function Home() {
             >
               <option value="income">আয়</option>
               <option value="expense">ব্যয়</option>
+            </select>
+
+            <select
+              className="border p-2 w-full rounded"
+              value={editItem.category}
+              onChange={(e) =>
+                setEditItem({
+                  ...editItem,
+                  category: e.target.value,
+                })
+              }
+            >
+              <option value="general">General</option>
+              <option value="bagan">Bagan</option>
+              <option value="poultry">Poultry</option>
+              <option value="salary">Salary</option>
             </select>
 
             <div className="flex justify-between">
