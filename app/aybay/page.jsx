@@ -19,6 +19,7 @@ export default function Home() {
   const [type, setType] = useState("income");
   const [category, setCategory] = useState("general");
 
+  const [filterCategory, setFilterCategory] = useState("all"); // filter state
   const [editItem, setEditItem] = useState(null);
 
   // fetch data
@@ -108,12 +109,17 @@ export default function Home() {
     }
   };
 
+  // filtered list
+  const filteredList = aybay.filter(
+    (item) => filterCategory === "all" || item.category === filterCategory
+  );
+
   // calculations
-  const income = aybay
+  const income = filteredList
     .filter((i) => i.type === "income")
     .reduce((a, b) => a + Number(b.amount), 0);
 
-  const expense = aybay
+  const expense = filteredList
     .filter((i) => i.type === "expense")
     .reduce((a, b) => a + Number(b.amount), 0);
 
@@ -124,6 +130,21 @@ export default function Home() {
         <h1 className="text-2xl font-bold text-center">
           💰 আয় ব্যয় হিসাব
         </h1>
+
+        {/* Filter by category */}
+        <div className="flex justify-end">
+          <select
+            className="border p-2 rounded"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            <option value="all">All Categories</option>
+            <option value="general">General</option>
+            <option value="bagan">Bagan</option>
+            <option value="poultry">Poultry</option>
+            <option value="salary">Salary</option>
+          </select>
+        </div>
 
         {/* Summary */}
         <div className="grid grid-cols-3 gap-4 text-center">
@@ -194,13 +215,13 @@ export default function Home() {
 
         {/* List */}
         <div className="bg-white rounded-xl shadow divide-y">
-          {aybay.length === 0 && (
+          {filteredList.length === 0 && (
             <p className="p-4 text-center text-gray-500">
               কোন ডাটা নেই
             </p>
           )}
 
-          {aybay.map((item) => (
+          {filteredList.map((item) => (
             <div
               key={item._id}
               className="flex justify-between items-center p-3"
