@@ -38,10 +38,10 @@ export default function Home() {
     try {
       await dispatch(
         addAyBay({ 
-          title, 
-          amount: Number(amount), // Convert to number
-          type, 
-          category 
+          title: title.trim(), 
+          amount: Number(amount),
+          type: type.toLowerCase(), 
+          category: category.toLowerCase()
         })
       ).unwrap();
 
@@ -53,7 +53,11 @@ export default function Home() {
       setCategory("general");
     } catch (error) {
       console.error("Add error:", error);
-      toast.error(error?.message || "সমস্যা হয়েছে");
+      if (error?.errors) {
+        toast.error(error.errors.join(", "));
+      } else {
+        toast.error(error?.message || "সমস্যা হয়েছে");
+      }
     }
   };
 
@@ -69,10 +73,10 @@ export default function Home() {
         updateAyBay({
           id: editItem._id,
           data: {
-            title: editItem.title,
-            amount: Number(editItem.amount), // Convert to number
-            type: editItem.type,
-            category: editItem.category,
+            title: editItem.title.trim(),
+            amount: Number(editItem.amount),
+            type: editItem.type.toLowerCase(),
+            category: editItem.category.toLowerCase(),
           },
         })
       ).unwrap();
@@ -81,7 +85,13 @@ export default function Home() {
       setEditItem(null);
     } catch (error) {
       console.error("Update error:", error);
-      toast.error(error?.message || "Update হয়নি");
+      if (error?.errors) {
+        toast.error(error.errors.join(", "));
+      } else if (error?.message) {
+        toast.error(error.message);
+      } else {
+        toast.error("Update হয়নি");
+      }
     }
   };
 
@@ -214,7 +224,7 @@ export default function Home() {
                 </span>
 
                 <button
-                  onClick={() => setEditItem({...item})} // Create a copy
+                  onClick={() => setEditItem({ ...item })}
                   className="text-blue-600 text-sm hover:underline"
                 >
                   Edit
@@ -245,10 +255,7 @@ export default function Home() {
               placeholder="Title"
               value={editItem.title}
               onChange={(e) =>
-                setEditItem({
-                  ...editItem,
-                  title: e.target.value,
-                })
+                setEditItem({ ...editItem, title: e.target.value })
               }
             />
 
@@ -258,10 +265,7 @@ export default function Home() {
               placeholder="Amount"
               value={editItem.amount}
               onChange={(e) =>
-                setEditItem({
-                  ...editItem,
-                  amount: e.target.value,
-                })
+                setEditItem({ ...editItem, amount: e.target.value })
               }
             />
 
@@ -269,10 +273,7 @@ export default function Home() {
               className="border p-2 w-full rounded"
               value={editItem.type}
               onChange={(e) =>
-                setEditItem({
-                  ...editItem,
-                  type: e.target.value,
-                })
+                setEditItem({ ...editItem, type: e.target.value })
               }
             >
               <option value="income">আয়</option>
@@ -283,10 +284,7 @@ export default function Home() {
               className="border p-2 w-full rounded"
               value={editItem.category}
               onChange={(e) =>
-                setEditItem({
-                  ...editItem,
-                  category: e.target.value,
-                })
+                setEditItem({ ...editItem, category: e.target.value })
               }
             >
               <option value="general">General</option>
