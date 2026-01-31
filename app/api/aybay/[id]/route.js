@@ -1,10 +1,11 @@
 import connectDB from "@/lib/connectDB";
 import AyBay from "@/models/AyBay";
+import  {} from "@/lib/getIdFromReq";
 
 // UPDATE ay-bay by ID
 export async function PUT(req, { params }) {
   await connectDB();
-  const { id } = params;
+  const id = await getIdFromReq (req);
 
   if (!id)
     return Response.json({ success: false, message: "ID প্রয়োজন" }, { status: 400 });
@@ -25,7 +26,7 @@ export async function PUT(req, { params }) {
 // DELETE by ID
 export async function DELETE(req, { params }) {
   await connectDB();
-  const { id } = params;
+  const id = await getIdFromReq (req);
 
   if (!id)
     return Response.json({ success: false, message: "ID প্রয়োজন" }, { status: 400 });
