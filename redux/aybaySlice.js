@@ -31,11 +31,15 @@ export const updateAyBay = createAsyncThunk(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    const json = await res.json();
-    return json.data;
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || "Update failed");
+    }
+
+    return await res.json();
   }
 );
-
 export const deleteAyBay = createAsyncThunk(
   "aybay/delete",
   async (id) => {
