@@ -1,4 +1,4 @@
-import connectDB from "@/lib/connectDB";
+import {connectDB} from "@/lib/dbConnect";
 import AyBay from "@/models/AyBay";
 import  {getIdFromReq} from "@/lib/getIdFromReq";
 
