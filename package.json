@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
 	"name": "mstore",
 	"version": "0.1.0",
 	"private": true,
@@ -91,5 +90,5 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.14"
   }
->>>>>>> 42c33ebc52b9b953d0f3359e8dac5d8222c25a97
+
 }
