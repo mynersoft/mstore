@@ -188,7 +188,7 @@ export default function RootLayout({ children }) {
 
 				<meta
 					name="google-site-verification"
-					content="OlqGBlfLEkJDmZZ3SppeQU1MDwI_CL6SEFXYSLv_DmA"
+					content="gJQMxjw8mMiztrmpVMv1SEi5hXqSI3LhvyGr5dFb9pY"
 				/>
 
 				{/* Organization Schema */}
