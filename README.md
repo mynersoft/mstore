@@ -1,36 +1,155 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+```markdown
+# ShalbanFood
 
-## Getting Started
+ShalbanFood is a online honey, ghee selling platform.
 
-First, run the development server:
+## Features
+
+- User registration and login
+- Browse restaurants and food items
+- Search and filter food products
+- View food details and prices
+- Add items to the cart
+- Place food orders
+- Order history
+- Order status tracking
+- Restaurant and food management
+- Responsive design for mobile and desktop devices
+
+## Technologies Used
+
+- HTML5
+- CSS3
+- JavaScript
+- [Add your frontend framework, such as React or Vue]
+- [Add your backend technology, such as Node.js, Express, PHP, or Laravel]
+- [Add your database, such as MongoDB, MySQL, or PostgreSQL]
+
+## Project Structure
+
+```text
+shalbanfood/
+├── public/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   ├── assets/
+│   └── App.js
+├── package.json
+└── README.md
+```
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/mynersoft/mstore.git
+```
+
+Move into the project directory:
+
+```bash
+cd mstore
+```
+
+Install the dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application will be available at:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```text
+http://localhost:5173
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Variables
 
-## Learn More
+Create a `.env` file in the root directory and add the required environment variables:
 
-To learn more about Next.js, take a look at the following resources:
+```env
+API_URL=your_api_url
+DATABASE_URL=your_database_url
+JWT_SECRET=your_jwt_secret
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Do not commit your `.env` file to the repository.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Usage
 
-## Deploy on Vercel
+1. Open the application in your browser.
+2. Create an account or log in.
+3. Browse available restaurants and food items.
+4. Add food items to your cart.
+5. Confirm your delivery information.
+6. Place and track your order.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Screenshots
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Add screenshots of the project here.
+
+```markdown
+![Home Page](screenshots/home-page.png)
+![Food Details](screenshots/food-details.png)
+![Cart Page](screenshots/cart.png)
+```
+
+## Future Improvements
+
+- Online payment integration
+- Live delivery tracking
+- Restaurant reviews and ratings
+- Discount coupons
+- Push notifications
+- Admin dashboard
+- Multiple language support
+- Order cancellation and refund management
+
+## Contributing
+
+Contributions are welcome and appreciated.
+
+1. Fork the repository.
+2. Create a new branch:
+
+   ```bash
+   git checkout -b feature/new-feature
+   ```
+
+3. Make your changes.
+4. Commit your changes:
+
+   ```bash
+   git commit -m "Add new feature"
+   ```
+
+5. Push the branch:
+
+   ```bash
+   git push origin feature/new-feature
+   ```
+
+6. Open a pull request.
+
+## License
+
+This project is licensed under the MIT License.
+
+## Author
+
+Developed by **Mynersoft**.
+
+GitHub: [https://github.com/mynersoft](https://github.com/mynersoft)
+
+## Contact
+
+For questions, suggestions, or support, please open an issue in this repository.
+```
