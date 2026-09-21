@@ -1,7 +1,7 @@
 'use client';
 
 import { useSelector } from 'react-redux';
-import { useProducts } from '../hooks/useProducts';
+import { useProducts } from '@/hooks/useDashboard';
 import ProductCard from '@/components/products/ProductCard';
 
 export default function HomePage() {

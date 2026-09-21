@@ -10,7 +10,8 @@ import { getTopProducts, getStockOutProducts } from "@/lib/dashboardUtils";
 export default function DashboardPage() {
 	const router = useRouter();
 
-	const bestSelling = useSelector((state) => state.products.bestSelling);
+	const bestSelling = useSelector((state) => state.dashboard.bestSelling);
+
 	const products = useSelector((state) => state?.products?.items || []);
 	const dues = useSelector((state) => state?.dues?.items || []);
 	const { daily, monthly, prevMonthly } = useSelector(

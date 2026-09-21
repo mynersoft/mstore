@@ -6,6 +6,7 @@ import Header from '@/components/header/HeaderNew';
 import InitialLoader from '@/components/InitialLoader';
 import { Toaster } from 'react-hot-toast';
 import Providers from './providers';
+import Footer from '@/components/footer/Footer';
 
 
 /* Site Configuration */
@@ -210,6 +211,7 @@ export default function RootLayout({ children }) {
 						<Header />
 						<GlobalInitializer />
 						{children}
+						<Footer/>
 					</Providers>
 				</InitialLoader>
 			</body>

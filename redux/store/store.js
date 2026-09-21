@@ -20,6 +20,7 @@ import uiReducer from './slices/uiSlice';
 import categoryReducer from './slices/categorySlice';
 import brandReducer from './slices/brandsSlice';
 import shippingReducer from './slices/shippingSlice';
+import dashboardReducer from './slices/dashboardSlice';
 
 export const store = configureStore({
 	reducer: {
@@ -48,6 +49,7 @@ export const store = configureStore({
 		blog: blogReducer,
 		combo: comboReducer,
 		shipping: shippingReducer,
+		dashboard: dashboardReducer,
 	},
 
 	middleware: (getDefaultMiddleware) =>

@@ -8,9 +8,9 @@ import {
   addOrder,
   removeOrder,
   setSingleOrder,
-} from '@/store/slices/orderSlice';
+} from '@/redux/store/slices/orderSlice';
 import toast from 'react-hot-toast';
-import { clearCart } from '@/store/slices/cartSlice';
+import { clearCart } from '@/redux/store/slices/cartSlice';
 
 export function useOrders() {
   const dispatch = useDispatch();

@@ -143,7 +143,12 @@ const MobileMenu = ({ isOpen, onClose }) => {
 
 /* ---------------- HEADER ---------------- */
 export default function Header() {
-	const { items: cartItems } = useSelector((state) => state.cart);
+	const { items: cartItems, initCartFromStorage } = useSelector(
+		(state) => state.cart
+	);
+
+	console.log(initCartFromStorage);
+	
 
 	const totalCartItems = cartItems.reduce((sum, i) => i.quantity, 0);
 

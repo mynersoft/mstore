@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
-import { setUser, clearUser } from '@/store/slices/userSlice';
+import { setUser, clearUser } from '@/redux/store/slices/userSlice';
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 
