@@ -18,7 +18,9 @@ const AyBaySchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      default: "General",
+      enum: ["bagan", "poultry", "salary", "general"],
+      default: "general",
+      required: true,
     },
     date: {
       type: Date,
