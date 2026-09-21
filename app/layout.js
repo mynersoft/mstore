@@ -1,5 +1,6 @@
 import './globals.css';
 
+<<<<<<< HEAD
 import InternetStatus from '@/components/InternetStatus';
 import { GlobalInitializer } from '@/components/fetch/GlobalInitializer';
 import Header from '@/components/header/HeaderNew';
@@ -7,6 +8,15 @@ import InitialLoader from '@/components/InitialLoader';
 import { Toaster } from 'react-hot-toast';
 import Providers from './providers';
 import Footer from '@/components/footer/Footer';
+=======
+import "./globals.css";
+import InternetStatus from "@/components/InternetStatus";
+import ReduxProvider from "@/app/providers/ReduxProvider";
+import { GlobalInitializer } from "@/components/fetch/GlobalInitializer";
+import Header from "@/components/header/Header";
+import { Analytics } from "@vercel/analytics/next"
+import { Toaster } from "react-hot-toast";
+>>>>>>> 42c33ebc52b9b953d0f3359e8dac5d8222c25a97
 
 
 /* Site Configuration */
@@ -191,6 +201,7 @@ export default function RootLayout({ children }) {
 						__html: JSON.stringify(organizationSchema),
 					}}
 				/>
+<<<<<<< HEAD
 
 				{/* Website Schema */}
 
@@ -199,6 +210,12 @@ export default function RootLayout({ children }) {
 					dangerouslySetInnerHTML={{
 						__html: JSON.stringify(websiteSchema),
 					}}
+=======
+				<title>Tomart | Everything to Your Doorstrp</title>
+				<meta
+					name="description"
+					content="Electrical - Hardware - Accessories - Telecom"
+>>>>>>> 42c33ebc52b9b953d0f3359e8dac5d8222c25a97
 				/>
 			</head>
 
@@ -209,11 +226,21 @@ export default function RootLayout({ children }) {
 				
 					<Providers>
 						<Header />
+<<<<<<< HEAD
 						<GlobalInitializer />
 						{children}
 						<Footer/>
 					</Providers>
 				</InitialLoader>
+=======
+<Analytics/>
+						<ReduxProvider>
+							<GlobalInitializer />
+							{children}
+						</ReduxProvider>
+					</>
+				)}
+>>>>>>> 42c33ebc52b9b953d0f3359e8dac5d8222c25a97
 			</body>
 		</html>
 	);
